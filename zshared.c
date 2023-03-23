@@ -590,6 +590,10 @@ bool xDetachDatabaseBlock(int id = 0, int index = -1) {
 	return(success);
 }
 
+int xGetCacheCount(int id = 0) {
+	return(aiPlanGetUserVariableInt(id,xMetadata,mCacheCount));
+}
+
 bool xRestoreDatabaseBlock(int id = 0, int index = -1) {
 	bool success = false;
 	if (index == -1) {

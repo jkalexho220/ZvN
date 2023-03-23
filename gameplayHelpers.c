@@ -13,6 +13,19 @@ void reselectMyself() {
 	trackPlay(1,EVENT_REMOVE_CAM_TRACKS);
 }
 
+void damagePlayer(int p = 0, float amt = 0) {
+	trUnitSelectClear();
+	trUnitSelectByID(xGetInt(dPlayerData, xPlayerUnitID, p));
+	trDamageUnit(amt);
+	vector pos = xGetVector(dPlayerData, xPlayerPos, p);
+	trArmyDispatch("0,0","Dwarf",1,xsVectorGetX(pos), 0, xsVectorGetZ(pos),0,true);
+	trArmySelect("0,0");
+	//trDamageUnitPercent(100);
+	trUnitChangeProtoUnit("Lightning Sparks");
+	trQuestVarSetFromRand("sound", 1, 5, true);
+	trSoundPlayFN("ui\lightning"+1*trQuestVarGet("sound")+".wav");
+}
+
 /*
 Assumes that the target unit is already selected
 */
@@ -61,6 +74,10 @@ vector vectorSetAsTargetVector(vector from = vector(0,0,0), vector dir = vector(
 	return(target);
 }
 
+bool vectorInMap(vector pos = vector(0,0,0)) {
+	return((xsVectorGetX(pos) > 0) && (xsVectorGetZ(pos) > 0) && (xsVectorGetX(pos) < (2.0 * mapSize)) && (xsVectorGetZ(pos) < (2.0 * mapSize)));
+}
+
 void spawnPlayer(int p = 0, vector pos = vector(0,0,0)) {
 	xSetPointer(dPlayerData, p);
 	xSetInt(dPlayerData, xPlayerUnit, trGetNextUnitScenarioNameNumber());
@@ -77,7 +94,6 @@ void spawnPlayer(int p = 0, vector pos = vector(0,0,0)) {
 }
 
 void shootLaser(int p = 0, int spawner = 0, vector dir = vector(0,0,0), int delay = 1500) {
-	trSoundPlayFN("skypassagein.wav");
 	int next = trGetNextUnitScenarioNameNumber();
 	trArmyDispatch("0,0","Dwarf",1,1,0,1,0,true);
 	// change spawner into transport ship
@@ -109,8 +125,27 @@ void shootLaser(int p = 0, int spawner = 0, vector dir = vector(0,0,0), int dela
 	xSetInt(dLasers, xLaserTimeout, trTimeMS() + delay);
 }
 
-void shootMissile(int p = 0, vector pos = vector(0,0,0), vector dir = vector(0,0,0), bool homing = false) {
+void shootMissile(int p = 0, vector pos = vector(0,0,0), vector dir = vector(0,0,0), float velocity = 15.0, bool homing = false) {
+	int next = trGetNextUnitScenarioNameNumber();
+	trArmyDispatch("0,0", "Dwarf", 1, 31, 0, 31, 0, true);
+	// change the dwarf into a spy eye
+	trUnitSelectClear();
+	trUnitSelect(""+next, true);
+	trUnitChangeProtoUnit("Spy Eye");
 
+	trUnitSelectClear();
+	trUnitSelect(""+next, true);
+	trMutateSelected(kbGetProtoUnitID("Outpost"));
+	trSetSelectedScale(0,0,0);
+
+	xAddDatabaseBlock(dMissiles, true);
+	xSetInt(dMissiles, xOwner, p);
+	xSetInt(dMissiles, xUnitName, next);
+	xSetInt(dMissiles, xUnitID, kbGetBlockID(""+next, true));
+	xSetVector(dMissiles, xMissilePos, pos);
+	xSetVector(dMissiles, xMissilePrev, pos);
+	xSetVector(dMissiles, xMissileDir, dir * velocity);
+	xSetBool(dMissiles, xMissileHoming, homing);
 }
 
 

@@ -80,6 +80,8 @@ highFrequency
 	xsDisableSelf();
 	trCameraCut(vector(-15.519794,70.710701,-15.519794), vector(0.5,-0.707107,0.5), vector(0.5,0.707107,0.5), vector(0.707107,0,-0.707107));
 
+	trPlayerSetDiplomacy(1, 2, "Enemy");
+	trPlayerSetDiplomacy(2, 1, "Enemy");
 
 	updateAbilities(1, true);
 	updateAbilities(2, true);
@@ -101,6 +103,7 @@ highFrequency
 	int target = 0;
 	int action = 0;
 	float scale = 0;
+	float dist = 0;
 	vector pos = vector(0,0,0);
 	vector dir = vector(0,0,0);
 	for(p=1; <= 2) {
@@ -205,9 +208,7 @@ highFrequency
 					trSoundPlayFN("sky passage.wav");
 					if (rayCollision(xGetVector(dPlayerData, xPlayerPos, 3 - p), xGetVector(dLasers, xLaserPos), 
 						xGetVector(dLasers, xLaserDir), xGetFloat(dLasers, xLaserLength), 1.0)) {
-						trUnitSelectClear();
-						trUnitSelectByID(xGetInt(dPlayerData, xPlayerUnitID));
-						trDamageUnit(xGetInt(dLasers, xLaserDamage));
+						damagePlayer(3 - p, xGetInt(dLasers, xLaserDamage));
 					}
 					xSetInt(dLasers, xLaserTimeout, trTimeMS() + 500 + 100 * xGetInt(dLasers, xLaserDamage));
 					xSetInt(dLasers, xLaserStep, LASER_FIRED);
@@ -225,6 +226,35 @@ highFrequency
 					xFreeDatabaseBlock(dLasers);
 				} else {
 					trSetSelectedScale(scale, scale, xGetFloat(dLasers, xLaserLength) * 1.3);
+				}
+			}
+		}
+	}
+
+	// missiles
+	for(i=xGetDatabaseCount(dMissiles); >0) {
+		xDatabaseNext(dMissiles);
+		p = xGetInt(dMissiles, xOwner);
+		pos = xGetVector(dMissiles, xMissilePos) + xGetVector(dMissiles, xMissileDir) * timediff;
+		dir = (pos - vector(31, 0, 31)) * 3.33;
+		xUnitSelectByID(dMissiles, xUnitID);
+		trSetSelectedUpVector(xsVectorGetX(dir),0.2,xsVectorGetZ(dir));
+		xSetVector(dMissiles, xMissilePos, pos);
+		dist = distanceBetweenVectors(pos, xGetVector(dMissiles, xMissilePrev));
+		if (dist > 2.0) {
+			pos = xGetVector(dMissiles, xMissilePrev);
+			dist = xsSqrt(dist);
+			if (rayCollision(xGetVector(dPlayerData, xPlayerPos, 3 - p), pos, xsVectorNormalize(xGetVector(dMissiles, xMissileDir)), dist + 1.0, 1.0)) {
+				damagePlayer(3 - p, 3);
+				xUnitSelectByID(dMissiles, xUnitID);
+				trUnitDestroy();
+				xFreeDatabaseBlock(dMissiles);
+			} else {
+				xSetVector(dMissiles, xMissilePrev, xGetVector(dMissiles, xMissilePos));
+				if (vectorInMap(pos) == false) {
+					xUnitSelectByID(dMissiles, xUnitID);
+					trUnitDestroy();
+					xFreeDatabaseBlock(dMissiles);
 				}
 			}
 		}

@@ -1,4 +1,6 @@
 int mapSize = 32;
+float timediff = 0;
+int prevTime = 0;
 
 void modifyPlayableProto(string proto = "", int p = 0) {
 	// HP
@@ -67,8 +69,8 @@ runImmediately
 	gadgetUnreal("tributedlg-clearButton");
 	configUndef("ErodeBuildingFoundations");
 
-	trPlayerSetDiplomacy(1, 2, "Enemy");
-	trPlayerSetDiplomacy(2, 1, "Enemy");
+	trPlayerSetDiplomacy(1, 2, "Neutral");
+	trPlayerSetDiplomacy(2, 1, "Neutral");
 
 	trTechSetStatus(0, 304, 4);
 
@@ -103,4 +105,12 @@ runImmediately
 			}
 		}
 	}
+}
+
+rule time_keeper
+active
+highFrequency
+{
+	timediff = 0.001 * (trTimeMS() - prevTime);
+	prevTime = trTimeMS();
 }
