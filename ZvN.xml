@@ -1,0 +1,1870 @@
+<?xml version = "1.0"?>
+<trigger version="2">
+
+<Conditions>
+	<Condition name="$$22289$$Always">
+		<Expression>true</Expression>
+	</Condition>
+
+</Conditions>
+
+<Effects>
+	<Effect name="$$22355$$SetIdleProcessing">
+    	<Param name="IdleProc" dispName="$$22356$$Process Idle:" varType="bool">true</Param>
+    	<Command>trSetUnitIdleProcessing(%IdleProc%);</Command>
+	</Effect>
+
+<Effect name=" Zeno vs Nickonhawk">
+<Command>xsDisableSelf();}}</Command>
+<Command>const float PI = 3.141592;</Command>
+<Command>/*</Command>
+<Command>NOTE: In order for the database functionality to work, any database functions can only be called</Command>
+<Command>while the context player is 0. If you need to switch context players (such as for getting a unit's current health or current attack target)</Command>
+<Command>make sure to immediately switch back to context player 0 once you are done acquiring the information you need.</Command>
+<Command>*/</Command>
+
+<Command>rule context_change_always</Command>
+<Command>active</Command>
+<Command>highFrequency</Command>
+<Command>{</Command>
+<Command>	/*</Command>
+<Command>	For whatever reason, the context player is set to -1 at the start of</Command>
+<Command>	every trigger loop, but only in random map scripts. So here we are.</Command>
+<Command>	*/</Command>
+<Command>	xsSetContextPlayer(0);</Command>
+<Command>	xsDisableSelf();</Command>
+<Command>}</Command>
+
+<Command>const int mInt = 0;</Command>
+<Command>const int mFloat = 1;</Command>
+<Command>const int mString = 2;</Command>
+<Command>const int mVector = 3;</Command>
+<Command>const int mBool = 4;</Command>
+
+<Command>const int xMetadata = 0; // contains current pointer and database size and numVariables. However, malloc doesn't have metadata so they have to shift down 1</Command>
+<Command>const int xDirtyBit = 1;</Command>
+<Command>const int xNextBlock = 2;</Command>
+<Command>const int xPrevBlock = 3; // for databases, xData is unused and xPrevBlock takes its place</Command>
+<Command>const int xData = 3;</Command>
+<Command>const int xVarNames = 4; // list of variable names</Command>
+<Command>const int xVariables = 5;</Command>
+
+<Command>/*</Command>
+<Command>Metadata information</Command>
+<Command>*/</Command>
+<Command>const int mPointer = 0;</Command>
+<Command>const int mCount = 1;</Command>
+<Command>const int mNextFree = 2;</Command>
+<Command>const int mNewestBlock = 3;</Command>
+<Command>const int mCacheHead = 4; // the cache stores items that you want to temporarily remove</Command>
+<Command>const int mCacheCount = 5;</Command>
+<Command>const int mVariableTypes = 5;</Command>
+<Command>/*</Command>
+<Command>subsequent items in the metadata will determine the datatypes of extra variables for the database</Command>
+<Command>*/</Command>
+
+<Command>const int NEXTFREE = 0; // the very first block contains the next free pointer and nothing else</Command>
+
+<Command>int MALLOC = 0;</Command>
+<Command>int ARRAYS = 0;</Command>
+<Command>int mNumArrays = 0;</Command>
+
+<Command>bool debugIsOn = true;</Command>
+
+<Command>void debugLog(string msg = "") {</Command>
+<Command>	if (debugIsOn) {</Command>
+<Command><![CDATA[		trChatSend(0, "<color=1,0,0>" + msg);]]></Command>
+<Command>	}</Command>
+<Command>}</Command>
+
+
+<Command>string datatypeName(int data = 0) {</Command>
+<Command>	string name = "void";</Command>
+<Command><![CDATA[	if (data >= 0 && data <= 4) {]]></Command>
+<Command>		name = aiPlanGetUserVariableString(MALLOC,15,data);</Command>
+<Command>	}</Command>
+<Command>	return(name);</Command>
+<Command>}</Command>
+
+<Command>int zNewArray(int type = 0, int size = 1, string name = "") {</Command>
+<Command>	int index = mNumArrays;</Command>
+<Command>	mNumArrays = mNumArrays + 1;</Command>
+<Command>	switch(type)</Command>
+<Command>	{</Command>
+<Command>		case mInt:</Command>
+<Command>		{</Command>
+<Command>			aiPlanAddUserVariableInt(ARRAYS,index,name,size);</Command>
+<Command>		}</Command>
+<Command>		case mFloat:</Command>
+<Command>		{</Command>
+<Command>			aiPlanAddUserVariableFloat(ARRAYS,index,name,size);</Command>
+<Command>		}</Command>
+<Command>		case mString:</Command>
+<Command>		{</Command>
+<Command>			aiPlanAddUserVariableString(ARRAYS,index,name,size);</Command>
+<Command>		}</Command>
+<Command>		case mVector:</Command>
+<Command>		{</Command>
+<Command>			aiPlanAddUserVariableVector(ARRAYS,index,name,size);</Command>
+<Command>		}</Command>
+<Command>		case mBool:</Command>
+<Command>		{</Command>
+<Command>			aiPlanAddUserVariableBool(ARRAYS,index,name,size);</Command>
+<Command>		}</Command>
+<Command>	}</Command>
+<Command>	return(index);</Command>
+<Command>}</Command>
+
+<Command>void zSetInt(int arr = 0, int index = 0, int val = 0) {</Command>
+<Command>	aiPlanSetUserVariableInt(ARRAYS, arr, index, val);</Command>
+<Command>}</Command>
+
+<Command>void zSetFloat(int arr = 0, int index = 0, float val = 0) {</Command>
+<Command>	aiPlanSetUserVariableFloat(ARRAYS, arr, index, val);</Command>
+<Command>}</Command>
+
+<Command>void zSetBool(int arr = 0, int index = 0, bool val = false) {</Command>
+<Command>	aiPlanSetUserVariableBool(ARRAYS, arr, index, val);</Command>
+<Command>}</Command>
+
+<Command>void zSetString(int arr = 0, int index = 0, string val = "") {</Command>
+<Command>	aiPlanSetUserVariableString(ARRAYS, arr, index, val);</Command>
+<Command>}</Command>
+
+<Command>void zSetVector(int arr = 0, int index = 0, vector val = vector(0,0,0)) {</Command>
+<Command>	aiPlanSetUserVariableVector(ARRAYS, arr, index, val);</Command>
+<Command>}</Command>
+
+<Command>int zGetInt(int arr = 0, int index = 0) {</Command>
+<Command>	return(aiPlanGetUserVariableInt(ARRAYS, arr, index));</Command>
+<Command>}</Command>
+
+<Command>float zGetFloat(int arr = 0, int index = 0) {</Command>
+<Command>	return(aiPlanGetUserVariableFloat(ARRAYS, arr, index));</Command>
+<Command>}</Command>
+
+<Command>bool zGetBool(int arr = 0, int index = 0) {</Command>
+<Command>	return(aiPlanGetUserVariableBool(ARRAYS, arr, index));</Command>
+<Command>}</Command>
+
+<Command>string zGetString(int arr = 0, int index = 0) {</Command>
+<Command>	return(aiPlanGetUserVariableString(ARRAYS, arr, index));</Command>
+<Command>}</Command>
+
+<Command>vector zGetVector(int arr = 0, int index = 0) {</Command>
+<Command>	return(aiPlanGetUserVariableVector(ARRAYS, arr, index));</Command>
+<Command>}</Command>
+
+<Command>/*</Command>
+<Command>*/</Command>
+<Command>bool free(int type = -1, int index = -1) {</Command>
+<Command>	bool success = false;</Command>
+<Command>	if (aiPlanGetUserVariableBool(MALLOC, type * 3 + xDirtyBit - 1, index)) {</Command>
+<Command>		aiPlanSetUserVariableInt(MALLOC, type * 3 + xNextBlock - 1, index,</Command>
+<Command>			aiPlanGetUserVariableInt(MALLOC, type * 3 + xNextBlock - 1, NEXTFREE));</Command>
+<Command>		aiPlanSetUserVariableBool(MALLOC, type * 3 + xDirtyBit - 1, index, false);</Command>
+<Command>		aiPlanSetUserVariableInt(MALLOC, type * 3 + xNextBlock - 1, NEXTFREE, index); // set next free to be the newly added block</Command>
+<Command>		success = true;</Command>
+<Command>	}</Command>
+<Command>	return(success);</Command>
+<Command>}</Command>
+
+<Command>/*</Command>
+<Command>*/</Command>
+<Command>int malloc(int type = -1) {</Command>
+<Command>	/*</Command>
+<Command>	get next free User variable</Command>
+<Command>	*/</Command>
+<Command>	int next = aiPlanGetUserVariableInt(MALLOC, type * 3 + xNextBlock - 1, NEXTFREE);</Command>
+<Command>	if (next == 0) {</Command>
+<Command>		/*</Command>
+<Command>		if no free buffers, create a new one</Command>
+<Command>		*/</Command>
+<Command>		next = aiPlanGetNumberUserVariableValues(MALLOC,type * 3 + xNextBlock - 1);</Command>
+<Command><![CDATA[		for(i=type * 3; < type * 3 + 3) {]]></Command>
+<Command>			aiPlanSetNumberUserVariableValues(MALLOC,i,next + 1, false); // resizing seems to be a little expensive?</Command>
+<Command>		}</Command>
+<Command>		aiPlanSetUserVariableInt(MALLOC,type * 3 + xNextBlock - 1, next, 0); // next free block is 0 for a newly created block</Command>
+<Command>	} else {</Command>
+<Command>		/*</Command>
+<Command>		if a free buffer exists, we set our nextFree pointer to the next free buffer</Command>
+<Command>		*/</Command>
+<Command>		aiPlanSetUserVariableInt(MALLOC,type * 3 + xNextBlock - 1,NEXTFREE,</Command>
+<Command>			aiPlanGetUserVariableInt(MALLOC,type * 3 + xNextBlock - 1,next));</Command>
+<Command>	}</Command>
+<Command>	aiPlanSetUserVariableBool(MALLOC,type * 3 + xDirtyBit - 1, next, true); // set dirty bit</Command>
+
+<Command>	return(next);</Command>
+<Command>}</Command>
+
+<Command>bool mGetBool(int index = 0) {</Command>
+<Command>	bool val = false;</Command>
+<Command>	if (aiPlanGetUserVariableBool(MALLOC, mBool * 3 + xDirtyBit - 1, index)) {</Command>
+<Command>		val = aiPlanGetUserVariableBool(MALLOC, mBool * 3 + xData - 1, index);</Command>
+<Command>	}</Command>
+<Command>	return(val);</Command>
+<Command>}</Command>
+
+<Command>bool mSetBool(int index = 0, bool val = false) {</Command>
+<Command>	bool success = false;</Command>
+<Command>	if (aiPlanGetUserVariableBool(MALLOC, mBool * 3 + xDirtyBit - 1, index)) {</Command>
+<Command>		success = aiPlanSetUserVariableBool(MALLOC, mBool * 3 + xData - 1, index, val);</Command>
+<Command>	}</Command>
+<Command>	return(success);</Command>
+<Command>}</Command>
+
+<Command>int mNewBool(bool val = false) {</Command>
+<Command>	int index = malloc(mBool);</Command>
+<Command>	mSetBool(index, val);</Command>
+<Command>	return(index);</Command>
+<Command>}</Command>
+
+<Command>bool mFreeBool(int index = 0) {</Command>
+<Command>	return(free(mBool, index));</Command>
+<Command>}</Command>
+
+
+<Command>string mGetString(int index = 0) {</Command>
+<Command>	string val = "";</Command>
+<Command>	if (aiPlanGetUserVariableBool(MALLOC, mString * 3 + xDirtyBit - 1, index)) {</Command>
+<Command>		val = aiPlanGetUserVariableString(MALLOC, mString * 3 + xData - 1, index);</Command>
+<Command>	}</Command>
+<Command>	return(val);</Command>
+<Command>}</Command>
+
+<Command>bool mSetString(int index = 0, string val = "") {</Command>
+<Command>	bool success = false;</Command>
+<Command>	if (aiPlanGetUserVariableBool(MALLOC, mString * 3 + xDirtyBit - 1, index)) {</Command>
+<Command>		success = aiPlanSetUserVariableString(MALLOC, mString * 3 + xData - 1, index, val);</Command>
+<Command>	}</Command>
+<Command>	return(success);</Command>
+<Command>}</Command>
+
+<Command>int mNewString(string val = "") {</Command>
+<Command>	int index = malloc(mString);</Command>
+<Command>	mSetString(index, val);</Command>
+<Command>	return(index);</Command>
+<Command>}</Command>
+
+<Command>bool mFreeString(int index = 0) {</Command>
+<Command>	return(free(mString, index));</Command>
+<Command>}</Command>
+
+<Command>int mGetInt(int index = 0) {</Command>
+<Command>	int val = -1;</Command>
+<Command>	if (aiPlanGetUserVariableBool(MALLOC, mInt * 3 + xDirtyBit - 1, index)) {</Command>
+<Command>		val = aiPlanGetUserVariableInt(MALLOC, mInt * 3 + xData - 1, index);</Command>
+<Command>	}</Command>
+<Command>	return(val);</Command>
+<Command>}</Command>
+
+<Command>bool mSetInt(int index = 0, int val = 0) {</Command>
+<Command>	bool success = false;</Command>
+<Command>	if (aiPlanGetUserVariableBool(MALLOC, mInt * 3 + xDirtyBit - 1, index)) {</Command>
+<Command>		success = aiPlanSetUserVariableInt(MALLOC, mInt * 3 + xData - 1, index, val);</Command>
+<Command>	}</Command>
+<Command>	return(success);</Command>
+<Command>}</Command>
+
+<Command>int mNewInt(int val = 0) {</Command>
+<Command>	int index = malloc(mInt);</Command>
+<Command>	mSetInt(index, val);</Command>
+<Command>	return(index);</Command>
+<Command>}</Command>
+
+<Command>bool mFreeInt(int index = 0) {</Command>
+<Command>	return(free(mInt, index));</Command>
+<Command>}</Command>
+
+<Command>float mGetFloat(int index = 0) {</Command>
+<Command>	float val = -1;</Command>
+<Command>	if (aiPlanGetUserVariableBool(MALLOC, mFloat * 3 + xDirtyBit - 1, index)) {</Command>
+<Command>		val = aiPlanGetUserVariableFloat(MALLOC, mFloat * 3 + xData - 1, index);</Command>
+<Command>	}</Command>
+<Command>	return(val);</Command>
+<Command>}</Command>
+
+<Command>bool mSetFloat(int index = 0, float val = 0) {</Command>
+<Command>	bool success = false;</Command>
+<Command>	if (aiPlanGetUserVariableBool(MALLOC, mFloat * 3 + xDirtyBit - 1, index)) {</Command>
+<Command>		success = aiPlanSetUserVariableFloat(MALLOC, mFloat * 3 + xData - 1, index, val);</Command>
+<Command>	}</Command>
+<Command>	return(success);</Command>
+<Command>}</Command>
+
+<Command>int mNewFloat(float val = 0) {</Command>
+<Command>	int index = malloc(mFloat);</Command>
+<Command>	mSetFloat(index, val);</Command>
+<Command>	return(index);</Command>
+<Command>}</Command>
+
+<Command>bool mFreeFloat(int index = 0) {</Command>
+<Command>	return(free(mFloat, index));</Command>
+<Command>}</Command>
+
+<Command>vector mGetVector(int index = 0) {</Command>
+<Command>	vector val = vector(-1,-1,-1);</Command>
+<Command>	if (aiPlanGetUserVariableBool(MALLOC, mVector * 3 + xDirtyBit - 1, index)) {</Command>
+<Command>		val = aiPlanGetUserVariableVector(MALLOC, mVector * 3 + xData - 1, index);</Command>
+<Command>	}</Command>
+<Command>	return(val);</Command>
+<Command>}</Command>
+
+<Command>bool mSetVector(int index = 0, vector val = vector(0,0,0)) {</Command>
+<Command>	bool success = false;</Command>
+<Command>	if (aiPlanGetUserVariableBool(MALLOC, mVector * 3 + xDirtyBit - 1, index)) {</Command>
+<Command>		success = aiPlanSetUserVariableVector(MALLOC, mVector * 3 + xData - 1, index, val);</Command>
+<Command>	}</Command>
+<Command>	return(success);</Command>
+<Command>}</Command>
+
+<Command>int mNewVector(vector val = vector(0,0,0)) {</Command>
+<Command>	int index = malloc(mVector);</Command>
+<Command>	mSetVector(index, val);</Command>
+<Command>	return(index);</Command>
+<Command>}</Command>
+
+<Command>bool mFreeVector(int index = 0) {</Command>
+<Command>	return(free(mVector, index));</Command>
+<Command>}</Command>
+
+<Command>/*</Command>
+<Command>Size is the starting size of the database, but databases can grow indefinitely</Command>
+<Command>returns the identifier of the database. Use this identifier in other xDatabase triggers</Command>
+<Command>*/</Command>
+<Command>int xInitDatabase(string name = "", int size = 0) {</Command>
+<Command>	int id = aiPlanCreate(name, 8);</Command>
+<Command>	aiPlanAddUserVariableBool(id,xDirtyBit,"DirtyBit",size+1);</Command>
+<Command>	aiPlanAddUserVariableInt(id,xNextBlock,"NextBlock",size+1);</Command>
+<Command>	aiPlanAddUserVariableInt(id,xPrevBlock,"PrevBlock",size+1);</Command>
+<Command>	aiPlanAddUserVariableInt(id,xMetadata,"Metadata",6);</Command>
+<Command>	aiPlanSetUserVariableInt(id,xMetadata,mPointer,0);</Command>
+<Command>	aiPlanSetUserVariableInt(id,xMetadata,mCount,0);</Command>
+<Command>	aiPlanSetUserVariableInt(id,xMetadata,mCacheHead,0);</Command>
+<Command>	aiPlanSetUserVariableInt(id,xMetadata,mCacheCount,0);</Command>
+
+<Command>	aiPlanSetUserVariableInt(id,xMetadata,mNextFree,size);</Command>
+<Command>	aiPlanSetUserVariableInt(id,xNextBlock,0,0);</Command>
+<Command><![CDATA[	for(i=1; <= size) { // connect all the free buffers together]]></Command>
+<Command>		aiPlanSetUserVariableBool(id,xDirtyBit,i,false);</Command>
+<Command>		aiPlanSetUserVariableInt(id,xNextBlock,i,i-1);</Command>
+<Command>	}</Command>
+<Command>	aiPlanAddUserVariableString(id,xVarNames,"VarNames",1);</Command>
+<Command>	aiPlanSetUserVariableString(id,xVarNames,0,"none");</Command>
+<Command>	return(id);</Command>
+<Command>}</Command>
+
+<Command>/*</Command>
+<Command>returns the index of the newly added variable</Command>
+<Command>*/</Command>
+<Command>int xInitAddVar(int id = 0, string name = "", int type = 0) {</Command>
+<Command>	int count = aiPlanGetNumberUserVariableValues(id,xDirtyBit);</Command>
+<Command>	/*</Command>
+<Command>	first, add the type to our list of types in this struct</Command>
+<Command>	*/</Command>
+<Command>	int index = aiPlanGetNumberUserVariableValues(id,xMetadata);</Command>
+<Command>	aiPlanSetNumberUserVariableValues(id,xMetadata,index + 1,false);</Command>
+<Command>	aiPlanSetUserVariableInt(id,xMetadata,index,type);</Command>
+
+<Command>	index = aiPlanGetNumberUserVariableValues(id,xVarNames);</Command>
+<Command>	aiPlanSetNumberUserVariableValues(id,xVarNames,index+1,false);</Command>
+<Command>	aiPlanSetUserVariableString(id,xVarNames,index,name);</Command>
+<Command>	/*</Command>
+<Command>	next, add a new array of the specified datatype to hold values</Command>
+<Command>	*/</Command>
+<Command>	index = xVarNames + index;</Command>
+<Command>	switch(type)</Command>
+<Command>	{</Command>
+<Command>		case mInt:</Command>
+<Command>		{</Command>
+<Command>			aiPlanAddUserVariableInt(id,index,name,count);</Command>
+<Command>		}</Command>
+<Command>		case mFloat:</Command>
+<Command>		{</Command>
+<Command>			aiPlanAddUserVariableFloat(id,index,name,count);</Command>
+<Command>		}</Command>
+<Command>		case mString:</Command>
+<Command>		{</Command>
+<Command>			aiPlanAddUserVariableString(id,index,name,count);</Command>
+<Command>		}</Command>
+<Command>		case mVector:</Command>
+<Command>		{</Command>
+<Command>			aiPlanAddUserVariableVector(id,index,name,count);</Command>
+<Command>		}</Command>
+<Command>		case mBool:</Command>
+<Command>		{</Command>
+<Command>			aiPlanAddUserVariableBool(id,index,name,count);</Command>
+<Command>		}</Command>
+<Command>	}</Command>
+<Command>	return(index);</Command>
+<Command>}</Command>
+
+<Command>/*</Command>
+<Command>id is the integer name of the database</Command>
+<Command>name is unused but required</Command>
+<Command>defVal = default value for newly created database entries</Command>
+<Command>*/</Command>
+<Command>int xInitAddInt(int id = 0, string name = "", int defVal = 0) {</Command>
+<Command>	int index = xInitAddVar(id,name,mInt);</Command>
+<Command>	aiPlanSetUserVariableInt(id, index, 0, defVal);</Command>
+<Command>	return(index);</Command>
+<Command>}</Command>
+
+<Command>int xInitAddFloat(int id = 0, string name = "", float defVal = 0) {</Command>
+<Command>	int index = xInitAddVar(id, name, mFloat);</Command>
+<Command>	aiPlanSetUserVariableFloat(id, index, 0, defVal);</Command>
+<Command>	return(index);</Command>
+<Command>}</Command>
+
+<Command>int xInitAddString(int id = 0, string name = "", string defVal = "") {</Command>
+<Command>	int index = xInitAddVar(id, name, mString);</Command>
+<Command>	aiPlanSetUserVariableString(id, index, 0, defVal);</Command>
+<Command>	return(index);</Command>
+<Command>}</Command>
+
+<Command>int xInitAddVector(int id = 0, string name = "", vector defVal = vector(0,0,0)) {</Command>
+<Command>	int index = xInitAddVar(id, name, mVector);</Command>
+<Command>	aiPlanSetUserVariableVector(id, index, 0, defVal);</Command>
+<Command>	return(index);</Command>
+<Command>}</Command>
+
+<Command>int xInitAddBool(int id = 0, string name = "", bool defVal = false) {</Command>
+<Command>	int index = xInitAddVar(id,name,mBool);</Command>
+<Command>	aiPlanSetUserVariableBool(id, index, 0, defVal);</Command>
+<Command>	return(index);</Command>
+<Command>}</Command>
+
+<Command>void xResetValues(int id = 0, int index = -1, int stopAt = -1) {</Command>
+<Command>	if (index == -1) {</Command>
+<Command>		index = aiPlanGetUserVariableInt(id,xMetadata,mPointer);</Command>
+<Command>	}</Command>
+<Command>	if (stopAt == -1) {</Command>
+<Command>		stopAt = aiPlanGetNumberUserVariableValues(id, xVarNames);</Command>
+<Command>	} else {</Command>
+<Command>		stopAt = stopAt - mVariableTypes;</Command>
+<Command>	}</Command>
+<Command><![CDATA[	for(i = 1; < stopAt) {]]></Command>
+<Command>		switch(aiPlanGetUserVariableInt(id,xMetadata,mVariableTypes + i))</Command>
+<Command>		{</Command>
+<Command>			case mInt:</Command>
+<Command>			{</Command>
+<Command>				aiPlanSetUserVariableInt(id,xVarNames + i,index,aiPlanGetUserVariableInt(id,xVarNames + i,0));</Command>
+<Command>			}</Command>
+<Command>			case mFloat:</Command>
+<Command>			{</Command>
+<Command>				aiPlanSetUserVariableFloat(id,xVarNames + i,index,aiPlanGetUserVariableFloat(id,xVarNames + i,0));</Command>
+<Command>			}</Command>
+<Command>			case mString:</Command>
+<Command>			{</Command>
+<Command>				aiPlanSetUserVariableString(id,xVarNames + i,index,aiPlanGetUserVariableString(id,xVarNames + i,0));</Command>
+<Command>			}</Command>
+<Command>			case mVector:</Command>
+<Command>			{</Command>
+<Command>				aiPlanSetUserVariableVector(id,xVarNames + i,index,aiPlanGetUserVariableVector(id,xVarNames + i,0));</Command>
+<Command>			}</Command>
+<Command>			case mBool:</Command>
+<Command>			{</Command>
+<Command>				aiPlanSetUserVariableBool(id,xVarNames + i,index,aiPlanGetUserVariableBool(id,xVarNames + i,0));</Command>
+<Command>			}</Command>
+<Command>		}</Command>
+<Command>	}</Command>
+<Command>}</Command>
+
+<Command>bool xSetPointer(int id = 0, int index = 0) {</Command>
+<Command>	bool success = false;</Command>
+<Command>	if (aiPlanGetUserVariableBool(id,xDirtyBit,index)) {</Command>
+<Command>		aiPlanSetUserVariableInt(id,xMetadata,mPointer,index);</Command>
+<Command>		success = true;</Command>
+<Command>	}</Command>
+<Command>	return(success);</Command>
+<Command>}</Command>
+
+<Command>int xAddDatabaseBlock(int id = 0, bool setPointer = false) {</Command>
+<Command>	int next = aiPlanGetUserVariableInt(id,xMetadata,mNextFree);</Command>
+<Command>	if (next == 0) {</Command>
+<Command>		/*</Command>
+<Command>		if no available buffers, we extend the total sizes of the arrays</Command>
+<Command>		*/</Command>
+<Command>		next = aiPlanGetNumberUserVariableValues(id,xDirtyBit);</Command>
+<Command>		/* increase lengths of variable arrays */</Command>
+<Command>		for(i=aiPlanGetNumberUserVariableValues(id,xVarNames) - 1; > 0) {</Command>
+<Command>			aiPlanSetNumberUserVariableValues(id,i + xVarNames,next+1,false);</Command>
+<Command>		}</Command>
+<Command>		/* increase lengths of metadata arrays */</Command>
+<Command>		for(i=xPrevBlock; > xMetadata) {</Command>
+<Command>			aiPlanSetNumberUserVariableValues(id,i,next+1,false);</Command>
+<Command>		}</Command>
+<Command>	} else {</Command>
+<Command>		/*</Command>
+<Command>		if a free buffer is available, we grab it and set next free to be the next of the buffer we grabbed</Command>
+<Command>		*/</Command>
+<Command>		aiPlanSetUserVariableInt(id,xMetadata,mNextFree,aiPlanGetUserVariableInt(id,xNextBlock,next));</Command>
+<Command>	}</Command>
+<Command>	aiPlanSetUserVariableBool(id,xDirtyBit,next,true);</Command>
+
+<Command>	if (aiPlanGetUserVariableInt(id,xMetadata,mCount) == 0) {</Command>
+<Command>		/*</Command>
+<Command>		If it's the only thing in the db, point it to itself and also set the database pointer to the new thing</Command>
+<Command>		*/</Command>
+<Command>		aiPlanSetUserVariableInt(id,xNextBlock,next,next);</Command>
+<Command>		aiPlanSetUserVariableInt(id,xPrevBlock,next,next);</Command>
+<Command>		aiPlanSetUserVariableInt(id,xMetadata,mPointer,next);</Command>
+<Command>	} else {</Command>
+<Command>		/*</Command>
+<Command>		otherwise, slide in between two links in the list at mPointer</Command>
+<Command>		*/</Command>
+<Command>		int before = aiPlanGetUserVariableInt(id,xMetadata,mPointer);</Command>
+<Command>		int after = aiPlanGetUserVariableInt(id,xNextBlock,before);</Command>
+
+<Command>		aiPlanSetUserVariableInt(id,xNextBlock,next,after); // next of me is after</Command>
+<Command>		aiPlanSetUserVariableInt(id,xPrevBlock,next,before); // prev of me is before</Command>
+<Command>		aiPlanSetUserVariableInt(id,xNextBlock,before,next); // next of before is me</Command>
+<Command>		aiPlanSetUserVariableInt(id,xPrevBlock,after,next); // prev of after is me</Command>
+<Command>	}</Command>
+<Command>	aiPlanSetUserVariableInt(id,xMetadata,mNewestBlock,next);</Command>
+<Command>	aiPlanSetUserVariableInt(id,xMetadata,mCount, 1 + aiPlanGetUserVariableInt(id,xMetadata,mCount));</Command>
+<Command>	/*</Command>
+<Command>	finally, initialize all the variables of the struct to their default values (whatever's in index 0 of the array)</Command>
+<Command>	*/</Command>
+<Command>	xResetValues(id,next);</Command>
+<Command>	if (setPointer) {</Command>
+<Command>		xSetPointer(id, next);</Command>
+<Command>	}</Command>
+<Command>	return(next);</Command>
+<Command>}</Command>
+
+
+<Command>bool xFreeDatabaseBlock(int id = 0, int index = -1) {</Command>
+<Command>	bool success = false;</Command>
+<Command>	if (index == -1) {</Command>
+<Command>		index = aiPlanGetUserVariableInt(id,xMetadata,mPointer);</Command>
+<Command>	}</Command>
+<Command>	if (aiPlanGetUserVariableBool(id,xDirtyBit,index)) {</Command>
+<Command>		/* connect next with prev */</Command>
+<Command>		int after = aiPlanGetUserVariableInt(id,xNextBlock,index);</Command>
+<Command>		int before = aiPlanGetUserVariableInt(id,xPrevBlock,index);</Command>
+<Command>		aiPlanSetUserVariableInt(id,xNextBlock,before,after); // next block of before is after</Command>
+<Command>		aiPlanSetUserVariableInt(id,xPrevBlock,after,before); // prev block of after is before</Command>
+
+<Command>		/* add myself to the top of the free stack */</Command>
+<Command>		aiPlanSetUserVariableInt(id,xNextBlock,index,aiPlanGetUserVariableInt(id,xMetadata,mNextFree));</Command>
+<Command>		aiPlanSetUserVariableInt(id,xMetadata,mNextFree,index);</Command>
+<Command>		aiPlanSetUserVariableBool(id,xDirtyBit,index,false);</Command>
+
+<Command>		/* set mPointer to my previous block and decrement count */</Command>
+<Command>		if (index == aiPlanGetUserVariableInt(id,xMetadata,mPointer)) {</Command>
+<Command>			aiPlanSetUserVariableInt(id,xMetadata,mPointer,aiPlanGetUserVariableInt(id,xPrevBlock,index));</Command>
+<Command>		}</Command>
+<Command>		aiPlanSetUserVariableInt(id,xMetadata,mCount, aiPlanGetUserVariableInt(id,xMetadata,mCount) - 1);</Command>
+<Command>		success = true;</Command>
+<Command>	}</Command>
+<Command>	return(success);</Command>
+<Command>}</Command>
+
+<Command>// Detaches the block and saves it in the cache.</Command>
+<Command>bool xDetachDatabaseBlock(int id = 0, int index = -1) {</Command>
+<Command>	bool success = false;</Command>
+<Command>	if (index == -1) {</Command>
+<Command>		index = aiPlanGetUserVariableInt(id,xMetadata,mPointer);</Command>
+<Command>	}</Command>
+<Command>	if (aiPlanGetUserVariableBool(id,xDirtyBit,index)) {</Command>
+<Command>		/* connect next with prev */</Command>
+<Command>		int after = aiPlanGetUserVariableInt(id,xNextBlock,index);</Command>
+<Command>		int before = aiPlanGetUserVariableInt(id,xPrevBlock,index);</Command>
+<Command>		aiPlanSetUserVariableInt(id,xNextBlock,before,after); // next block of before is after</Command>
+<Command>		aiPlanSetUserVariableInt(id,xPrevBlock,after,before); // prev block of after is before</Command>
+
+<Command>		aiPlanSetUserVariableBool(id,xDirtyBit,index,false);</Command>
+
+<Command>		/* set mPointer to my previous block and decrement count */</Command>
+<Command>		if (index == aiPlanGetUserVariableInt(id,xMetadata,mPointer)) {</Command>
+<Command>			aiPlanSetUserVariableInt(id,xMetadata,mPointer,before);</Command>
+<Command>		}</Command>
+
+<Command>		/* insert myself into the detach cache */</Command>
+<Command>		if (aiPlanGetUserVariableInt(id,xMetadata,mCacheCount) == 0) {</Command>
+<Command>			/*</Command>
+<Command>			If it's the only thing in the db, point it to itself and also set the database pointer to the new thing</Command>
+<Command>			*/</Command>
+<Command>			aiPlanSetUserVariableInt(id,xNextBlock,index,index);</Command>
+<Command>			aiPlanSetUserVariableInt(id,xPrevBlock,index,index);</Command>
+<Command>			aiPlanSetUserVariableInt(id,xMetadata,mCacheHead,index);</Command>
+<Command>		} else {</Command>
+<Command>			/*</Command>
+<Command>			otherwise, slide in between two links in the list at mCacheHead</Command>
+<Command>			*/</Command>
+<Command>			before = aiPlanGetUserVariableInt(id,xMetadata,mCacheHead);</Command>
+<Command>			after = aiPlanGetUserVariableInt(id,xNextBlock,before);</Command>
+
+<Command>			aiPlanSetUserVariableInt(id,xNextBlock,index,after); // next of me is after</Command>
+<Command>			aiPlanSetUserVariableInt(id,xPrevBlock,index,before); // prev of me is before</Command>
+<Command>			aiPlanSetUserVariableInt(id,xNextBlock,before,index); // next of before is me</Command>
+<Command>			aiPlanSetUserVariableInt(id,xPrevBlock,after,index); // prev of after is me</Command>
+<Command>		}</Command>
+
+<Command>		aiPlanSetUserVariableInt(id,xMetadata,mCount, aiPlanGetUserVariableInt(id,xMetadata,mCount) - 1);</Command>
+<Command>		aiPlanSetUserVariableInt(id,xMetadata,mCacheCount, aiPlanGetUserVariableInt(id,xMetadata,mCacheCount) + 1);</Command>
+<Command>		success = true;</Command>
+<Command>	}</Command>
+<Command>	return(success);</Command>
+<Command>}</Command>
+
+<Command>bool xRestoreDatabaseBlock(int id = 0, int index = -1) {</Command>
+<Command>	bool success = false;</Command>
+<Command>	if (index == -1) {</Command>
+<Command>		index = aiPlanGetUserVariableInt(id,xMetadata,mCacheHead);</Command>
+<Command>	}</Command>
+<Command>	if (aiPlanGetUserVariableBool(id,xDirtyBit,index) == false) {</Command>
+<Command>		/* connect next with prev */</Command>
+<Command>		int after = aiPlanGetUserVariableInt(id,xNextBlock,index);</Command>
+<Command>		int before = aiPlanGetUserVariableInt(id,xPrevBlock,index);</Command>
+<Command>		aiPlanSetUserVariableInt(id,xNextBlock,before,after); // next block of before is after</Command>
+<Command>		aiPlanSetUserVariableInt(id,xPrevBlock,after,before); // prev block of after is before</Command>
+
+<Command>		aiPlanSetUserVariableBool(id,xDirtyBit,index,true);</Command>
+
+<Command>		/* set mCacheHead to my previous block and decrement count */</Command>
+<Command>		if (index == aiPlanGetUserVariableInt(id,xMetadata,mCacheHead)) {</Command>
+<Command>			aiPlanSetUserVariableInt(id,xMetadata,mCacheHead,aiPlanGetUserVariableInt(id,xPrevBlock,index));</Command>
+<Command>		}</Command>
+
+<Command>		/* insert myself into the database */</Command>
+<Command>		if (aiPlanGetUserVariableInt(id,xMetadata,mCount) == 0) {</Command>
+<Command>			/*</Command>
+<Command>			If it's the only thing in the db, point it to itself and also set the database pointer to the new thing</Command>
+<Command>			*/</Command>
+<Command>			aiPlanSetUserVariableInt(id,xNextBlock,index,index);</Command>
+<Command>			aiPlanSetUserVariableInt(id,xPrevBlock,index,index);</Command>
+<Command>			aiPlanSetUserVariableInt(id,xMetadata,mPointer,index);</Command>
+<Command>		} else {</Command>
+<Command>			/*</Command>
+<Command>			otherwise, slide in between two links in the list at mPointer</Command>
+<Command>			*/</Command>
+<Command>			before = aiPlanGetUserVariableInt(id,xMetadata,mPointer);</Command>
+<Command>			after = aiPlanGetUserVariableInt(id,xNextBlock,before);</Command>
+
+<Command>			aiPlanSetUserVariableInt(id,xNextBlock,index,after); // next of me is after</Command>
+<Command>			aiPlanSetUserVariableInt(id,xPrevBlock,index,before); // prev of me is before</Command>
+<Command>			aiPlanSetUserVariableInt(id,xNextBlock,before,index); // next of before is me</Command>
+<Command>			aiPlanSetUserVariableInt(id,xPrevBlock,after,index); // prev of after is me</Command>
+<Command>		}</Command>
+
+<Command>		aiPlanSetUserVariableInt(id,xMetadata,mCount, aiPlanGetUserVariableInt(id,xMetadata,mCount) + 1);</Command>
+<Command>		aiPlanSetUserVariableInt(id,xMetadata,mCacheCount, aiPlanGetUserVariableInt(id,xMetadata,mCacheCount) - 1);</Command>
+<Command>		success = true;</Command>
+<Command>	}</Command>
+
+<Command>	return(success);</Command>
+<Command>}</Command>
+
+<Command>bool xRestoreCache(int id = 0) {</Command>
+<Command>	bool success = false;</Command>
+<Command>	if (aiPlanGetUserVariableInt(id,xMetadata,mCacheCount) > 0) {</Command>
+<Command>		int pointer = aiPlanGetUserVariableInt(id,xMetadata,mCacheHead);</Command>
+<Command>		for(i=aiPlanGetUserVariableInt(id,xMetadata,mCacheCount); >0) {</Command>
+<Command>			aiPlanSetUserVariableBool(id,xDirtyBit,pointer,true);</Command>
+<Command>			pointer = aiPlanGetUserVariableInt(id,xNextBlock,pointer);</Command>
+<Command>		}</Command>
+<Command>		/* insert the ends of the chain into the database */</Command>
+<Command>		if (aiPlanGetUserVariableInt(id,xMetadata,mCount) == 0) {</Command>
+<Command>			/*</Command>
+<Command>			If it's the only thing in the db, pointer now points to the cacheHead</Command>
+<Command>			*/</Command>
+<Command>			aiPlanSetUserVariableInt(id,xMetadata,mPointer,aiPlanGetUserVariableInt(id,xMetadata,mCacheHead));</Command>
+<Command>		} else {</Command>
+<Command>			/*</Command>
+<Command>			otherwise, slide in between two links in the list at mPointer</Command>
+<Command>			*/</Command>
+<Command>			int before = aiPlanGetUserVariableInt(id,xMetadata,mPointer);</Command>
+<Command>			int after = aiPlanGetUserVariableInt(id,xNextBlock,before);</Command>
+<Command>			int index = aiPlanGetUserVariableInt(id,xMetadata,mCacheHead);</Command>
+<Command>			int next = aiPlanGetUserVariableInt(id,xPrevBlock,index); // the next of this block will be the after block</Command>
+
+<Command>			aiPlanSetUserVariableInt(id,xNextBlock,next,after); // next of next is after</Command>
+<Command>			aiPlanSetUserVariableInt(id,xPrevBlock,after,next); // prev of after is next</Command>
+
+<Command>			aiPlanSetUserVariableInt(id,xNextBlock,before,index); // next of before is me</Command>
+<Command>			aiPlanSetUserVariableInt(id,xPrevBlock,index,before); // prev of me is before</Command>
+<Command>		}</Command>
+<Command>		aiPlanSetUserVariableInt(id,xMetadata,mCount,</Command>
+<Command>			aiPlanGetUserVariableInt(id,xMetadata,mCount) + aiPlanGetUserVariableInt(id,xMetadata,mCacheCount));</Command>
+<Command>		aiPlanSetUserVariableInt(id,xMetadata,mCacheHead,0);</Command>
+<Command>		aiPlanSetUserVariableInt(id,xMetadata,mCacheCount,0);</Command>
+<Command>		success = true;</Command>
+<Command>	}</Command>
+<Command>	return(success);</Command>
+<Command>}</Command>
+
+<Command>int xGetNewestPointer(int id = 0) {</Command>
+<Command>	return(aiPlanGetUserVariableInt(id,xMetadata,mNewestBlock));</Command>
+<Command>}</Command>
+
+<Command>int xDatabaseNext(int id = 0, bool reverse = false) {</Command>
+<Command>	int pointer = aiPlanGetUserVariableInt(id,xMetadata,mPointer);</Command>
+<Command>	if (reverse) {</Command>
+<Command>		pointer = aiPlanGetUserVariableInt(id,xPrevBlock,pointer);</Command>
+<Command>	} else {</Command>
+<Command>		pointer = aiPlanGetUserVariableInt(id,xNextBlock,pointer);</Command>
+<Command>	}</Command>
+<Command><![CDATA[	if (aiPlanGetUserVariableBool(id,xDirtyBit,pointer) && (aiPlanGetUserVariableInt(id,xMetadata,mCount) > 0)) {]]></Command>
+<Command>		aiPlanSetUserVariableInt(id,xMetadata,mPointer,pointer);</Command>
+<Command>	} else {</Command>
+<Command>		pointer = aiPlanGetUserVariableInt(id,xMetadata,mPointer);</Command>
+<Command>		debugLog("xDatabaseNext: " + aiPlanGetName(id) + " pointer is incorrect!");</Command>
+<Command>		debugLog("xNextBlock: " + aiPlanGetUserVariableInt(id,xNextBlock,pointer));</Command>
+<Command>		debugLog("Me: " + pointer);</Command>
+<Command>		debugLog("xPrevblock: " + aiPlanGetUserVariableInt(id,xPrevBlock,pointer));</Command>
+<Command>	}</Command>
+<Command>	return(pointer);</Command>
+<Command>}</Command>
+
+<Command>void xClearDatabase(int id = 0) {</Command>
+<Command>	int next = aiPlanGetUserVariableInt(id,xMetadata,mNextFree);</Command>
+<Command>	int pointer = aiPlanGetUserVariableInt(id,xMetadata,mPointer);</Command>
+<Command>	aiPlanSetUserVariableInt(id,xMetadata,mNextFree,aiPlanGetUserVariableInt(id,xNextBlock,pointer));</Command>
+<Command>	aiPlanSetUserVariableInt(id,xNextBlock,pointer,next);</Command>
+
+<Command><![CDATA[	for(i=0; < aiPlanGetNumberUserVariableValues(id,xDirtyBit)) {]]></Command>
+<Command>		aiPlanSetUserVariableBool(id,xDirtyBit,i,false);</Command>
+<Command>	}</Command>
+
+<Command>	aiPlanSetUserVariableInt(id,xMetadata,mCount,0);</Command>
+<Command>	aiPlanSetUserVariableInt(id,xMetadata,mPointer,0);</Command>
+<Command>}</Command>
+
+<Command>void xResetDatabase(int id = 0) {</Command>
+<Command>	int size = aiPlanGetNumberUserVariableValues(id,xDirtyBit);</Command>
+<Command>	aiPlanSetUserVariableInt(id,xMetadata,mPointer,0);</Command>
+<Command>	aiPlanSetUserVariableInt(id,xMetadata,mCount,0);</Command>
+<Command>	aiPlanSetUserVariableInt(id,xMetadata,mCacheHead,0);</Command>
+<Command>	aiPlanSetUserVariableInt(id,xMetadata,mCacheCount,0);</Command>
+
+<Command>	aiPlanSetUserVariableInt(id,xMetadata,mNextFree,size - 1);</Command>
+<Command>	aiPlanSetUserVariableInt(id,xNextBlock,0,0);</Command>
+<Command><![CDATA[	for(i=1; < size) { // connect all the free buffers together]]></Command>
+<Command>		aiPlanSetUserVariableBool(id,xDirtyBit,i,false);</Command>
+<Command>		aiPlanSetUserVariableInt(id,xNextBlock,i,i-1);</Command>
+<Command>	}</Command>
+<Command>}</Command>
+
+<Command>int xGetInt(int id = 0, int data = 0, int index = -1) {</Command>
+<Command>	if (aiPlanGetUserVariableInt(id,xMetadata,data - xVarNames + mVariableTypes) != mInt) {</Command>
+<Command>		string type = datatypeName(aiPlanGetUserVariableInt(id,xMetadata,data - xVarNames + mVariableTypes));</Command>
+<Command>		string name = aiPlanGetUserVariableString(id,xVarNames,data - xVarNames);</Command>
+<Command>		debugLog("xGetInt: " + aiPlanGetName(id) + " variable " + name + " is not an int! Type: " + type);</Command>
+<Command>		return(-1); // if we are trying to get an int from the wrong datatype, stop</Command>
+<Command>	}</Command>
+<Command>	if (index == -1) {</Command>
+<Command>		index = aiPlanGetUserVariableInt(id,xMetadata,mPointer);</Command>
+<Command>	}</Command>
+<Command>	return(aiPlanGetUserVariableInt(id,data,index));</Command>
+<Command>}</Command>
+
+<Command>bool xSetInt(int id = 0, int data = 0, int val = 0, int index = -1) {</Command>
+<Command>	if (aiPlanGetUserVariableInt(id,xMetadata,data - xVarNames + mVariableTypes) != mInt) {</Command>
+<Command>		string type = datatypeName(aiPlanGetUserVariableInt(id,xMetadata,data - xVarNames + mVariableTypes));</Command>
+<Command>		string name = aiPlanGetUserVariableString(id,xVarNames,data - xVarNames);</Command>
+<Command>		debugLog("xSetInt: " + aiPlanGetName(id) + " variable " + name + " is not an int! Type: " + type);</Command>
+<Command>		return(false); // if we are trying to set the wrong datatype, stop</Command>
+<Command>	}</Command>
+<Command>	if (index == -1) {</Command>
+<Command>		index = aiPlanGetUserVariableInt(id,xMetadata,mPointer);</Command>
+<Command>	}</Command>
+<Command>	bool success = aiPlanSetUserVariableInt(id,data,index,val);</Command>
+<Command>	if (success == false) {</Command>
+<Command>		string err = ": Could not assign value: " + val;</Command>
+<Command>		debugLog("xSetInt: " + aiPlanGetName(id) + aiPlanGetUserVariableString(id,xVarNames,data - xVarNames) + err);</Command>
+<Command>	}</Command>
+<Command>	return(success);</Command>
+<Command>}</Command>
+
+
+<Command>float xGetFloat(int id = 0, int data = 0, int index = -1) {</Command>
+<Command>	if (aiPlanGetUserVariableInt(id,xMetadata,data - xVarNames + mVariableTypes) != mFloat) {</Command>
+<Command>		string type = datatypeName(aiPlanGetUserVariableInt(id,xMetadata,data - xVarNames + mVariableTypes));</Command>
+<Command>		string name = aiPlanGetUserVariableString(id,xVarNames,data - xVarNames);</Command>
+<Command>		debugLog("xGetFloat: " + aiPlanGetName(id) + " variable " + name + " is not a float! Type: " + type);</Command>
+<Command>		return(-1.0); // if we are trying to get an int from the wrong datatype, stop</Command>
+<Command>	}</Command>
+<Command>	if (index == -1) {</Command>
+<Command>		index = aiPlanGetUserVariableInt(id,xMetadata,mPointer);</Command>
+<Command>	}</Command>
+<Command>	return(aiPlanGetUserVariableFloat(id,data,index));</Command>
+<Command>}</Command>
+
+<Command>bool xSetFloat(int id = 0, int data = 0, float val = 0, int index = -1) {</Command>
+<Command>	if (aiPlanGetUserVariableInt(id,xMetadata,data - xVarNames + mVariableTypes) != mFloat) {</Command>
+<Command>		string type = datatypeName(aiPlanGetUserVariableInt(id,xMetadata,data - xVarNames + mVariableTypes));</Command>
+<Command>		string name = aiPlanGetUserVariableString(id,xVarNames,data - xVarNames);</Command>
+<Command>		debugLog("xSetFloat: " + aiPlanGetName(id) + " variable " + name + " is not a float! Type: " + type);</Command>
+<Command>		return(false); // if we are trying to set the wrong datatype, stop</Command>
+<Command>	}</Command>
+<Command>	if (index == -1) {</Command>
+<Command>		index = aiPlanGetUserVariableInt(id,xMetadata,mPointer);</Command>
+<Command>	}</Command>
+<Command>	bool success = aiPlanSetUserVariableFloat(id,data,index,val);</Command>
+<Command>	if (success == false) {</Command>
+<Command>		string err = ": Could not assign value: " + val;</Command>
+<Command>		debugLog("xSetFloat: " + aiPlanGetName(id) + aiPlanGetUserVariableString(id,xVarNames,data - xVarNames) + err);</Command>
+<Command>	}</Command>
+<Command>	return(success);</Command>
+<Command>}</Command>
+
+
+<Command>string xGetString(int id = 0, int data = 0, int index = -1) {</Command>
+<Command>	if (aiPlanGetUserVariableInt(id,xMetadata,data - xVarNames + mVariableTypes) != mString) {</Command>
+<Command>		string type = datatypeName(aiPlanGetUserVariableInt(id,xMetadata,data - xVarNames + mVariableTypes));</Command>
+<Command>		string name = aiPlanGetUserVariableString(id,xVarNames,data - xVarNames);</Command>
+<Command>		debugLog("xGetString: " + aiPlanGetName(id) + " variable " + name + " is not a string! Type: " + type);</Command>
+<Command>		return(""); // if we are trying to get an int from the wrong datatype, stop</Command>
+<Command>	}</Command>
+<Command>	if (index == -1) {</Command>
+<Command>		index = aiPlanGetUserVariableInt(id,xMetadata,mPointer);</Command>
+<Command>	}</Command>
+<Command>	return(aiPlanGetUserVariableString(id,data,index));</Command>
+<Command>}</Command>
+
+<Command>bool xSetString(int id = 0, int data = 0, string val = "", int index = -1) {</Command>
+<Command>	if (aiPlanGetUserVariableInt(id,xMetadata,data - xVarNames + mVariableTypes) != mString) {</Command>
+<Command>		string type = datatypeName(aiPlanGetUserVariableInt(id,xMetadata,data - xVarNames + mVariableTypes));</Command>
+<Command>		string name = aiPlanGetUserVariableString(id,xVarNames,data - xVarNames);</Command>
+<Command>		debugLog("xSetString: " + aiPlanGetName(id) + " variable " + name + " is not a string! Type: " + type);</Command>
+<Command>		return(false); // if we are trying to set the wrong datatype, stop</Command>
+<Command>	}</Command>
+<Command>	if (index == -1) {</Command>
+<Command>		index = aiPlanGetUserVariableInt(id,xMetadata,mPointer);</Command>
+<Command>	}</Command>
+<Command>	return(aiPlanSetUserVariableString(id,data,index,val));</Command>
+<Command>}</Command>
+
+
+<Command>vector xGetVector(int id = 0, int data = 0, int index = -1) {</Command>
+<Command>	if (aiPlanGetUserVariableInt(id,xMetadata,data - xVarNames + mVariableTypes) != mVector) {</Command>
+<Command>		string type = datatypeName(aiPlanGetUserVariableInt(id,xMetadata,data - xVarNames + mVariableTypes));</Command>
+<Command>		string name = aiPlanGetUserVariableString(id,xVarNames,data - xVarNames);</Command>
+<Command>		debugLog("xGetVector: " + aiPlanGetName(id) + " variable " + name + " is not a vector! Type: " + type);</Command>
+<Command>		return(vector(0,0,0)); // if we are trying to get an int from the wrong datatype, stop</Command>
+<Command>	}</Command>
+<Command>	if (index == -1) {</Command>
+<Command>		index = aiPlanGetUserVariableInt(id,xMetadata,mPointer);</Command>
+<Command>	}</Command>
+<Command>	return(aiPlanGetUserVariableVector(id,data,index));</Command>
+<Command>}</Command>
+
+<Command>bool xSetVector(int id = 0, int data = 0, vector val = vector(0,0,0), int index = -1) {</Command>
+<Command>	if (aiPlanGetUserVariableInt(id,xMetadata,data - xVarNames + mVariableTypes) != mVector) {</Command>
+<Command>		string type = datatypeName(aiPlanGetUserVariableInt(id,xMetadata,data - xVarNames + mVariableTypes));</Command>
+<Command>		string name = aiPlanGetUserVariableString(id,xVarNames,data - xVarNames);</Command>
+<Command>		debugLog("xSetVector: " + aiPlanGetName(id) + " variable " + name + " is not a vector! Type: " + type);</Command>
+<Command>		return(false); // if we are trying to set the wrong datatype, stop</Command>
+<Command>	}</Command>
+<Command>	if (index == -1) {</Command>
+<Command>		index = aiPlanGetUserVariableInt(id,xMetadata,mPointer);</Command>
+<Command>	}</Command>
+<Command>	return(aiPlanSetUserVariableVector(id,data,index,val));</Command>
+<Command>}</Command>
+
+
+<Command>bool xGetBool(int id = 0, int data = 0, int index = -1) {</Command>
+<Command>	if (aiPlanGetUserVariableInt(id,xMetadata,data - xVarNames + mVariableTypes) != mBool) {</Command>
+<Command>		string type = datatypeName(aiPlanGetUserVariableInt(id,xMetadata,data - xVarNames + mVariableTypes));</Command>
+<Command>		string name = aiPlanGetUserVariableString(id,xVarNames,data - xVarNames);</Command>
+<Command>		debugLog("xGetBool: " + aiPlanGetName(id) + " variable " + name + " is not a bool! Type: " + type);</Command>
+<Command>		return(false); // if we are trying to get an int from the wrong datatype, stop</Command>
+<Command>	}</Command>
+<Command>	if (index == -1) {</Command>
+<Command>		index = aiPlanGetUserVariableInt(id,xMetadata,mPointer);</Command>
+<Command>	}</Command>
+<Command>	return(aiPlanGetUserVariableBool(id,data,index));</Command>
+<Command>}</Command>
+
+<Command>bool xSetBool(int id = 0, int data = 0, bool val = false, int index = -1) {</Command>
+<Command>	if (aiPlanGetUserVariableInt(id,xMetadata,data - xVarNames + mVariableTypes) != mBool) {</Command>
+<Command>		string type = datatypeName(aiPlanGetUserVariableInt(id,xMetadata,data - xVarNames + mVariableTypes));</Command>
+<Command>		string name = aiPlanGetUserVariableString(id,xVarNames,data - xVarNames);</Command>
+<Command>		debugLog("xGetBool: " + aiPlanGetName(id) + " variable " + name + " is not a bool! Type: " + type);</Command>
+<Command>		return(false); // if we are trying to set the wrong datatype, stop</Command>
+<Command>	}</Command>
+<Command>	if (index == -1) {</Command>
+<Command>		index = aiPlanGetUserVariableInt(id,xMetadata,mPointer);</Command>
+<Command>	}</Command>
+<Command>	return(aiPlanSetUserVariableBool(id,data,index,val));</Command>
+<Command>}</Command>
+
+<Command>int xGetDatabaseCount(int id = 0) {</Command>
+<Command>	return(aiPlanGetUserVariableInt(id,xMetadata,mCount));</Command>
+<Command>}</Command>
+
+<Command>int xGetPointer(int id = 0) {</Command>
+<Command>	return(aiPlanGetUserVariableInt(id,xMetadata,mPointer));</Command>
+<Command>}</Command>
+
+<Command>void xPrintAll(int id = 0, int index = 0) {</Command>
+<Command><![CDATA[	trChatSend(0, "<u>" + aiPlanGetName(id) + "</u>");]]></Command>
+<Command>	trChatSend(0, "size: " + xGetDatabaseCount(id));</Command>
+<Command>	trChatSend(0, "pointer: " + index);</Command>
+<Command><![CDATA[	for(i=1; < aiPlanGetNumberUserVariableValues(id,xVarNames)) {]]></Command>
+<Command>		string name = aiPlanGetUserVariableString(id,xVarNames,i);</Command>
+<Command>		int type = aiPlanGetUserVariableInt(id,xMetadata,mVariableTypes + i);</Command>
+<Command>		switch(type)</Command>
+<Command>		{</Command>
+<Command>			case mInt:</Command>
+<Command>			{</Command>
+<Command>				trChatSend(0, name + ": " + aiPlanGetUserVariableInt(id,xVarNames + i,index));</Command>
+<Command>			}</Command>
+<Command>			case mFloat:</Command>
+<Command>			{</Command>
+<Command>				trChatSend(0, name + ": " + aiPlanGetUserVariableFloat(id,xVarNames + i,index));</Command>
+<Command>			}</Command>
+<Command>			case mString:</Command>
+<Command>			{</Command>
+<Command>				trChatSend(0, name + ": " + aiPlanGetUserVariableString(id,xVarNames + i,index));</Command>
+<Command>			}</Command>
+<Command>			case mVector:</Command>
+<Command>			{</Command>
+<Command>				trChatSend(0, name + ": " + aiPlanGetUserVariableVector(id,xVarNames + i,index));</Command>
+<Command>			}</Command>
+<Command>			case mBool:</Command>
+<Command>			{</Command>
+<Command>				if (aiPlanGetUserVariableBool(id,xVarNames + i,index)) {</Command>
+<Command>					trChatSend(0, name + ": true");</Command>
+<Command>				} else {</Command>
+<Command>					trChatSend(0, name + ": false");</Command>
+<Command>				}</Command>
+<Command>			}</Command>
+<Command>		}</Command>
+<Command>	}</Command>
+<Command>}</Command>
+
+<Command>void xUnitSelect(int id = 0, int varn = 0, bool reverse = true) {</Command>
+<Command>	trUnitSelectClear();</Command>
+<Command>	trUnitSelect(""+xGetInt(id,varn), reverse);</Command>
+<Command>}</Command>
+
+<Command>void xUnitSelectByID(int db = 0, int varn = 0) {</Command>
+<Command>	trUnitSelectClear();</Command>
+<Command>	trUnitSelectByID(xGetInt(db,varn));</Command>
+<Command>}</Command>
+
+<Command>rule mInitializeMemory</Command>
+<Command>active</Command>
+<Command>highFrequency</Command>
+<Command>{</Command>
+<Command>	xsDisableSelf();</Command>
+<Command>	aiSet("NoAI", 0);</Command>
+<Command>	MALLOC = aiPlanCreate("memory",8);</Command>
+<Command>	ARRAYS = aiPlanCreate("arrays",8);</Command>
+<Command><![CDATA[	for(i=0; < 5) {]]></Command>
+<Command>		aiPlanAddUserVariableBool(MALLOC,i * 3 + xDirtyBit - 1,"DirtyBit"+i,1);</Command>
+<Command>		aiPlanAddUserVariableInt(MALLOC,i * 3 + xNextBlock - 1,"NextBlock"+i,1);</Command>
+<Command>		aiPlanSetUserVariableBool(MALLOC,i * 3 + xDirtyBit - 1, NEXTFREE, true);</Command>
+<Command>		aiPlanSetUserVariableInt(MALLOC,i * 3 + xNextBlock - 1, NEXTFREE, 0);</Command>
+<Command>	}</Command>
+<Command>	aiPlanAddUserVariableInt(MALLOC,mInt * 3 + xData - 1, "intData",1);</Command>
+<Command>	aiPlanAddUserVariableFloat(MALLOC,mFloat * 3 + xData - 1, "floatData",1);</Command>
+<Command>	aiPlanAddUserVariableString(MALLOC,mString * 3 + xData - 1, "stringData",1);</Command>
+<Command>	aiPlanAddUserVariableVector(MALLOC,mVector * 3 + xData - 1, "vectorData",1);</Command>
+<Command>	aiPlanAddUserVariableBool(MALLOC,mBool * 3 + xData - 1, "boolData",1);</Command>
+
+<Command>	aiPlanAddUserVariableString(MALLOC,15,"datatypes",5);</Command>
+<Command>	aiPlanSetUserVariableString(MALLOC,15,mInt,"Integer");</Command>
+<Command>	aiPlanSetUserVariableString(MALLOC,15,mFloat,"Float");</Command>
+<Command>	aiPlanSetUserVariableString(MALLOC,15,mString,"String");</Command>
+<Command>	aiPlanSetUserVariableString(MALLOC,15,mVector,"Vector");</Command>
+<Command>	aiPlanSetUserVariableString(MALLOC,15,mBool,"Bool");</Command>
+<Command>}</Command>
+
+<Command>void trVectorQuestVarSet(string name = "", vector QVv = vector(-1,-1,-1)) {</Command>
+<Command>	if (name == "") return;</Command>
+<Command>	if (trQuestVarGet("vector"+name) == 0) {</Command>
+<Command>		trQuestVarSet("vector"+name, mNewVector(QVv));</Command>
+<Command>	} else {</Command>
+<Command>		mSetVector(1*trQuestVarGet("vector"+name),QVv);</Command>
+<Command>	}</Command>
+<Command>}</Command>
+
+<Command>vector trVectorQuestVarGet(string name = "") {</Command>
+<Command>	return(mGetVector(1*trQuestVarGet("vector"+name)));</Command>
+<Command>}</Command>
+
+<Command>float trVectorQuestVarGetX(string name = "") {</Command>
+<Command>	return(xsVectorGetX(trVectorQuestVarGet(name)));</Command>
+<Command>}</Command>
+
+<Command>float trVectorQuestVarGetY(string name = "") {</Command>
+<Command>	return(xsVectorGetY(trVectorQuestVarGet(name)));</Command>
+<Command>}</Command>
+
+<Command>float trVectorQuestVarGetZ(string name = "") {</Command>
+<Command>	return(xsVectorGetZ(trVectorQuestVarGet(name)));</Command>
+<Command>}</Command>
+
+<Command>void trVectorQuestVarEcho(string name = "") {</Command>
+<Command>	if (name == "") return;</Command>
+<Command>	trChatSend(0, ""+name+": "+trVectorQuestVarGet(name));</Command>
+<Command>}</Command>
+
+
+<Command>void trStringQuestVarSet(string name = "", string value = "") {</Command>
+<Command>	if (trQuestVarGet("string"+name) > 0) {</Command>
+<Command>		mSetString(1*trQuestVarGet("string"+name), value);</Command>
+<Command>	} else {</Command>
+<Command>		trQuestVarSet("string"+name, mNewString(value));</Command>
+<Command>	}</Command>
+<Command>}</Command>
+
+<Command>string trStringQuestVarGet(string name="") {</Command>
+<Command>	string val = mGetString(1*trQuestVarGet("string"+name));</Command>
+<Command>	return(val);</Command>
+<Command>}</Command>
+
+
+<Command>bool playerIsPlaying(int p = 0) {</Command>
+<Command><![CDATA[	return(kbIsPlayerHuman(p) == true && kbIsPlayerResigned(p) == false && trPlayerDefeated(p) == false);]]></Command>
+<Command>}</Command>
+
+
+<Command>void trUnitTeleportToVector(string v = "") {</Command>
+<Command>	vector pos = trVectorQuestVarGet(v);</Command>
+<Command>	trUnitTeleport(xsVectorGetX(pos),xsVectorGetY(pos),xsVectorGetZ(pos));</Command>
+<Command>}</Command>
+
+<Command>void trUnitSelectByQV(string s = "", bool reverse = true) {</Command>
+<Command>	trUnitSelectClear();</Command>
+<Command>	trUnitSelect(""+1*trQuestVarGet(""+s), reverse);</Command>
+<Command>}</Command>
+
+<Command>/*</Command>
+<Command>Given a quest var that stores a unit name, store</Command>
+<Command>the unit's position in the vector.</Command>
+<Command>*/</Command>
+<Command>void trVectorSetUnitPos(string v = "", string db = "", bool reverse = true) {</Command>
+<Command>	trVectorQuestVarSet(v, kbGetBlockPosition(""+1*trQuestVarGet(db), reverse));</Command>
+<Command>}</Command>
+
+<Command>void trVectorSetUnitPosInt(string v = "", int val = 0, bool reverse = true) {</Command>
+<Command>	trVectorQuestVarSet(v, kbGetBlockPosition(""+val, reverse));</Command>
+<Command>}</Command>
+
+
+<Command>void trUnitMoveToVector(string v = "", bool attack = false) {</Command>
+<Command>	trUnitMoveToPoint(trVectorQuestVarGetX(v),0,trVectorQuestVarGetZ(v),-1,attack);</Command>
+<Command>}</Command>
+
+<Command>void trVectorScale(string db = "", float s = 1.0) {</Command>
+<Command>	trVectorQuestVarSet(db, trVectorQuestVarGet(db) * s);</Command>
+<Command>}</Command>
+
+<Command>vector vectorSnapToGrid(vector v = vector(0,0,0)) {</Command>
+<Command>	int x = xsVectorGetX(v) / 2;</Command>
+<Command>	int z = xsVectorGetZ(v) / 2;</Command>
+<Command>	return(xsVectorSet(x * 2 + 1,xsVectorGetY(v),z * 2 + 1));</Command>
+<Command>}</Command>
+
+<Command>void trVectorSnapToGrid(string qv = "") {</Command>
+<Command>	trVectorQuestVarSet(qv, vectorSnapToGrid(trVectorQuestVarGet(qv)));</Command>
+<Command>}</Command>
+
+<Command>int iModulo(int mod = 10, int val = 0) {</Command>
+<Command>	return(val - val / mod * mod);</Command>
+<Command>}</Command>
+
+<Command>float fModulo(float mod = 0, float val = 0) {</Command>
+<Command>	int c = 0;</Command>
+<Command>	if (val > 0) {</Command>
+<Command>		c = val / mod;</Command>
+<Command>	} else {</Command>
+<Command>		c = val / mod - 1;</Command>
+<Command>	}</Command>
+<Command>	return(0.0 + val - mod * c);</Command>
+<Command>}</Command>
+
+<Command>bool getBit(int bit = 0, int val = 0) {</Command>
+<Command>	val = val / xsPow(2, bit);</Command>
+<Command>	return((iModulo(2, val) == 1));</Command>
+<Command>}</Command>
+
+<Command>void zUnitHeading(float a = 0) {</Command>
+<Command>	trSetUnitOrientation(xsVectorSet(xsSin(a),0,xsCos(a)), xsVectorSet(0,1,0), true);</Command>
+<Command>}</Command>
+
+<Command>void zInitProtoUnitStat(string r = "", int p = 0, int f = 0, float v = 0.0) {</Command>
+<Command>	trQuestVarSet("p"+p+"pf"+kbGetProtoUnitID(r)+"f"+f, v);</Command>
+<Command>}</Command>
+
+<Command>void mSetProtoUnitStat(string r = "", int p = 0, int f = 0, float v = 0.0) {</Command>
+<Command>for(zsps=0; >1){}</Command>
+<Command>	zsps = kbGetProtoUnitID(r);</Command>
+<Command>	trModifyProtounit(r, p, f, 0.0 + v - trQuestVarGet("p"+p+"pf"+zsps+"f"+f));</Command>
+<Command>	trQuestVarSet("p"+p+"pf"+zsps+"f"+f, 0.0 + v);</Command>
+<Command>}</Command>
+
+<Command>vector vectorToGrid(vector v = vector(0,0,0)) {</Command>
+<Command>	return(xsVectorSet(0 + xsVectorGetX(v) / 2,xsVectorGetY(v),0 + xsVectorGetZ(v) / 2));</Command>
+<Command>}</Command>
+
+<Command>void trVectorToGrid(string from = "", string to = ""){</Command>
+<Command>	trVectorQuestVarSet(to, vectorToGrid(trVectorQuestVarGet(from)));</Command>
+<Command>}</Command>
+
+<Command>vector gridToVector(vector g = vector(0,0,0)) {</Command>
+<Command>	return(xsVectorSet(xsVectorGetX(g) * 2 + 1,xsVectorGetY(g),xsVectorGetZ(g) * 2 + 1));</Command>
+<Command>}</Command>
+
+<Command>void trGridToVector(string from = "", string to = "") {</Command>
+<Command>	trVectorQuestVarSet(to, gridToVector(trVectorQuestVarGet(from)));</Command>
+<Command>}</Command>
+
+<Command>void trSquareVar(string qv = "") {</Command>
+<Command>	trQuestVarSet(qv, xsPow(trQuestVarGet(qv), 2));</Command>
+<Command>}</Command>
+
+<Command>float distanceBetweenVectors(vector start = vector(0,0,0), vector end = vector(0,0,0), bool squared = true) {</Command>
+<Command>	float xDiff = xsVectorGetX(end) - xsVectorGetX(start);</Command>
+<Command>	float zDiff = xsVectorGetZ(end) - xsVectorGetZ(start);</Command>
+<Command>	float dist = xDiff * xDiff + zDiff * zDiff;</Command>
+<Command>	if (squared == false) {</Command>
+<Command>		dist = xsSqrt(dist);</Command>
+<Command>	}</Command>
+<Command>	return(dist);</Command>
+<Command>}</Command>
+
+<Command>float trDistanceBetweenVectorsSquared(string start = "", string end = "") {</Command>
+<Command>	return(distanceBetweenVectors(trVectorQuestVarGet(start),trVectorQuestVarGet(end)));</Command>
+<Command>}</Command>
+
+<Command>bool vectorInRectangle(vector pos = vector(0,0,0), vector bot = vector(0,0,0), vector top = vector(0,0,0)) {</Command>
+<Command><![CDATA[	if (xsVectorGetX(pos) < xsVectorGetX(bot)) {]]></Command>
+<Command>		return(false);</Command>
+<Command>	}</Command>
+<Command>	if (xsVectorGetX(pos) > xsVectorGetX(top)) {</Command>
+<Command>		return(false);</Command>
+<Command>	}</Command>
+<Command><![CDATA[	if (xsVectorGetZ(pos) < xsVectorGetZ(bot)) {]]></Command>
+<Command>		return(false);</Command>
+<Command>	}</Command>
+<Command>	if (xsVectorGetZ(pos) > xsVectorGetZ(top)) {</Command>
+<Command>		return(false);</Command>
+<Command>	}</Command>
+<Command>	return(true);</Command>
+<Command>}</Command>
+
+<Command>bool trVectorInRectangle(string pos = "", string bot = "", string top = "") {</Command>
+<Command>	vector tempPos = mGetVector(1*trQuestVarGet(pos));</Command>
+<Command>	vector tempBot = mGetVector(1*trQuestVarGet(bot));</Command>
+<Command>	vector tempTop = mGetVector(1*trQuestVarGet(top));</Command>
+<Command>	return(vectorInRectangle(tempPos,tempBot,tempTop));</Command>
+<Command>}</Command>
+
+<Command>vector rotationMatrix(vector v = vector(0,0,0), float cosT = 0, float sinT = 0) {</Command>
+<Command>	float x = xsVectorGetX(v);</Command>
+<Command>	float z = xsVectorGetZ(v);</Command>
+<Command>	vector ret = xsVectorSet(x * cosT - z * sinT, 0, x * sinT + z * cosT);</Command>
+<Command>	return(ret);</Command>
+<Command>}</Command>
+
+<Command>float trDistanceBetweenVectors(string start = "", string end = "") {</Command>
+<Command>	return(distanceBetweenVectors(trVectorQuestVarGet(start),trVectorQuestVarGet(end),false));</Command>
+<Command>}</Command>
+
+<Command>float distanceBetweenVectors3d(vector start = vector(0,0,0), vector end = vector(0,0,0), bool squared = true) {</Command>
+<Command>	float xdiff = xsVectorGetX(start) - xsVectorGetX(end);</Command>
+<Command>	float ydiff = xsVectorGetY(start) - xsVectorGetY(end);</Command>
+<Command>	float zdiff = xsVectorGetZ(start) - xsVectorGetZ(end);</Command>
+<Command>	float dist = xdiff * xdiff + ydiff * ydiff + zdiff * zdiff;</Command>
+<Command>	if (squared == false) {</Command>
+<Command>		dist = xsSqrt(dist);</Command>
+<Command>	}</Command>
+<Command>	return(dist);</Command>
+<Command>}</Command>
+
+<Command>float trDistanceBetweenVectors3d(string start = "", string end = "") {</Command>
+<Command>	return(distanceBetweenVectors3d(trVectorQuestVarGet(start),trVectorQuestVarGet(end),false));</Command>
+<Command>}</Command>
+
+<Command>float unitDistanceToVector(int name = 0, vector v = vector(0,0,0), bool squared = true) {</Command>
+<Command>	vector temp = kbGetBlockPosition(""+name,true);</Command>
+<Command>	return(distanceBetweenVectors(temp,v,squared));</Command>
+<Command>}</Command>
+
+<Command>float trDistanceToVectorSquared(string qv = "", string v = "") {</Command>
+<Command>	return(unitDistanceToVector(1*trQuestVarGet(qv),trVectorQuestVarGet(v)));</Command>
+<Command>}</Command>
+
+<Command>/* For use in a ySearch */</Command>
+<Command>float trDistanceToVector(string qv = "", string v = "") {</Command>
+<Command>	return(unitDistanceToVector(1*trQuestVarGet(qv),trVectorQuestVarGet(v),false));</Command>
+<Command>}</Command>
+
+<Command>vector vectorSetFromAngle(float angle = 0) {</Command>
+<Command>	return(xsVectorSet(xsSin(angle), 0, xsCos(angle)));</Command>
+<Command>}</Command>
+
+<Command>void trVectorSetFromAngle(string qv = "", float angle = 0) {</Command>
+<Command>	trVectorQuestVarSet(qv,xsVectorSet(xsSin(angle), 0, xsCos(angle)));</Command>
+<Command>}</Command>
+
+<Command>float angleBetweenVectors(vector from = vector(0,0,0), vector to = vector(0,0,0)) {</Command>
+<Command>	float a = xsVectorGetX(to) - xsVectorGetX(from);</Command>
+<Command>	a = a / (xsVectorGetZ(to) - xsVectorGetZ(from));</Command>
+<Command>	a = xsAtan(a);</Command>
+<Command>	if (xsVectorGetZ(from) > xsVectorGetZ(to)) {</Command>
+<Command>		if (xsVectorGetX(from) > xsVectorGetX(to)) {</Command>
+<Command>			a = a - PI;</Command>
+<Command>		} else {</Command>
+<Command>			a = a + PI;</Command>
+<Command>		}</Command>
+<Command>	}</Command>
+<Command>	return(a);</Command>
+<Command>}</Command>
+
+<Command>float trAngleBetweenVectors(string from = "", string to = "") {</Command>
+<Command>	return(angleBetweenVectors(trVectorQuestVarGet(from),trVectorQuestVarGet(to)));</Command>
+<Command>}</Command>
+
+<Command>float angleOfVector(vector dir = vector(0,0,0)) {</Command>
+<Command>	float a = xsVectorGetX(dir) / xsVectorGetZ(dir);</Command>
+<Command>	a = xsAtan(a);</Command>
+<Command>	if (0.0 > xsVectorGetZ(dir)) {</Command>
+<Command>		if (0.0 > xsVectorGetX(dir)) {</Command>
+<Command>			a = a - PI;</Command>
+<Command>		} else {</Command>
+<Command>			a = a + PI;</Command>
+<Command>		}</Command>
+<Command>	}</Command>
+<Command>	return(a);</Command>
+<Command>}</Command>
+
+<Command>float trAngleOfVector(string v = "") {</Command>
+<Command>	return(angleOfVector(trVectorQuestVarGet(v)));</Command>
+<Command>}</Command>
+
+<Command>vector getUnitVector(vector start = vector(0,0,0), vector end = vector(0,0,0), float mod = 1.0) {</Command>
+<Command>	float xdiff = xsVectorGetX(end) - xsVectorGetX(start);</Command>
+<Command>	float zdiff = xsVectorGetZ(end) - xsVectorGetZ(start);</Command>
+<Command>	float dist = xsSqrt(xdiff * xdiff + zdiff * zdiff);</Command>
+<Command>	vector ret = vector(1,0,0);</Command>
+<Command>	if (dist > 0) {</Command>
+<Command>		ret = xsVectorSet(xdiff / dist * mod, 0, zdiff / dist * mod);</Command>
+<Command>	}</Command>
+<Command>	return(ret);</Command>
+<Command>}</Command>
+
+<Command>vector trGetUnitVector(string start = "", string end = "", float mod = 1.0) {</Command>
+<Command>	return(getUnitVector(trVectorQuestVarGet(start),trVectorQuestVarGet(end),mod));</Command>
+<Command>}</Command>
+
+<Command>vector getUnitVector3d(vector start = vector(0,0,0), vector end = vector(0,0,0), float mod = 1.0) {</Command>
+<Command>	float xdiff = xsVectorGetX(end) - xsVectorGetX(start);</Command>
+<Command>	float ydiff = xsVectorGetY(end) - xsVectorGetY(start);</Command>
+<Command>	float zdiff = xsVectorGetZ(end) - xsVectorGetZ(start);</Command>
+<Command>	float dist = xsSqrt(xdiff * xdiff + ydiff * ydiff + zdiff * zdiff);</Command>
+<Command>	vector ret = vector(0,1,0);</Command>
+<Command>	if (dist > 0) {</Command>
+<Command>		ret = xsVectorSet(xdiff / dist * mod, ydiff / dist * mod, zdiff / dist * mod);</Command>
+<Command>	}</Command>
+<Command>	return(ret);</Command>
+<Command>}</Command>
+
+<Command>vector trGetUnitVector3d(string start = "", string end = "", float mod = 1.0) {</Command>
+<Command>	return(getUnitVector3d(trVectorQuestVarGet(start),trVectorQuestVarGet(end),mod));</Command>
+<Command>}</Command>
+
+<Command>vector crossProduct(vector a = vector(0,0,0), vector b = vector(0,0,0)) {</Command>
+<Command>	float x = xsVectorGetY(a) * xsVectorGetZ(b) - xsVectorGetZ(a) * xsVectorGetY(b);</Command>
+<Command>	float y = xsVectorGetZ(a) * xsVectorGetX(b) - xsVectorGetX(a) * xsVectorGetZ(b);</Command>
+<Command>	float z = xsVectorGetX(a) * xsVectorGetY(b) - xsVectorGetY(a) * xsVectorGetX(b);</Command>
+<Command>	vector ret = xsVectorSet(x, y, z);</Command>
+<Command>	return(ret);</Command>
+<Command>}</Command>
+
+<Command>float dotProduct(vector a = vector(0,0,0), vector b = vector(0,0,0)) {</Command>
+<Command>	return(xsVectorGetX(a) * xsVectorGetX(b) + xsVectorGetZ(a) * xsVectorGetZ(b));</Command>
+<Command>}</Command>
+
+<Command>bool terrainIsType(vector v = vector(0,0,0), int type = 0, int subtype = 0) {</Command>
+<Command>	bool isType = trGetTerrainType(xsVectorGetX(v),xsVectorGetZ(v)) == type;</Command>
+<Command><![CDATA[	isType = isType && (trGetTerrainSubType(xsVectorGetX(v),xsVectorGetZ(v)) == subtype);]]></Command>
+<Command>	return(isType);</Command>
+<Command>}</Command>
+
+<Command>bool trTerrainIsType(string qv = "", int type = 0, int subtype = 0) {</Command>
+<Command>	return(terrainIsType(trVectorQuestVarGet(qv),type,subtype));</Command>
+<Command>}</Command>
+
+<Command>/* initializes a modular counter. */</Command>
+<Command>void modularCounterInit(string name = "", int size = 0) {</Command>
+<Command>	trQuestVarSet("counter" + name + "size", size);</Command>
+<Command>	trQuestVarSet("counter" + name + "pointer", 1);</Command>
+<Command>	trQuestVarSet(name, 1);</Command>
+<Command>}</Command>
+
+<Command>/* Progresses the modular counter by 1 and returns the value */</Command>
+<Command>int modularCounterNext(string name = "") {</Command>
+<Command>	trQuestVarSet("counter" + name + "pointer", 1 + trQuestVarGet("counter" + name + "pointer"));</Command>
+<Command>	if (trQuestVarGet("counter" + name + "pointer") > trQuestVarGet("counter" + name + "size")) {</Command>
+<Command>		trQuestVarSet("counter" + name + "pointer", 1);</Command>
+<Command>	}</Command>
+<Command>	trQuestVarSet(name, trQuestVarGet("counter"+name+"pointer"));</Command>
+<Command>	return(0 + trQuestVarGet("counter" + name + "pointer"));</Command>
+<Command>}</Command>
+
+<Command>/* Peeks at the next value of the modular counter */</Command>
+<Command>int peekModularCounterNext(string name = "") {</Command>
+<Command>	trQuestVarSet("counter" + name + "fake", 1 + trQuestVarGet("counter" + name + "pointer"));</Command>
+<Command>	if (trQuestVarGet("counter" + name + "fake") >= trQuestVarGet("counter" + name + "size")) {</Command>
+<Command>		trQuestVarSet("counter" + name + "fake", 1);</Command>
+<Command>	}</Command>
+<Command>	return(0 + trQuestVarGet("counter" + name + "fake"));</Command>
+<Command>}</Command>
+
+<Command>bool yDatabaseCreateIfNull(string dbname = "", int count = 0) {</Command>
+<Command>	bool created = false;</Command>
+<Command>	if (trQuestVarGet("database"+dbname) == 0) {</Command>
+<Command><![CDATA[		if (count < 0) {]]></Command>
+<Command>			count = 0;</Command>
+<Command>		}</Command>
+<Command>		trQuestVarSet("database"+dbname, xInitDatabase(dbname, count));</Command>
+<Command>		created = true;</Command>
+<Command>	}</Command>
+<Command>	return(created);</Command>
+<Command>}</Command>
+
+<Command>bool yVariableExists(string dbname = "", string varname = "") {</Command>
+<Command>	int db = trQuestVarGet("database"+dbname);</Command>
+<Command>	int var = trQuestVarGet("database"+dbname+varname);</Command>
+<Command>	return(db * var > 0);</Command>
+<Command>}</Command>
+
+<Command>float yGetVarAtIndex(string db = "", string var = "", int index = 0) {</Command>
+<Command>	if (yVariableExists(db, var)) {</Command>
+<Command>		return(xGetFloat(1*trQuestVarGet("database"+db),1*trQuestVarGet("database"+db+var),index));</Command>
+<Command>	} else {</Command>
+<Command>		return(0);</Command>
+<Command>	}</Command>
+<Command>}</Command>
+
+<Command>float yGetVar(string db = "", string var = "") {</Command>
+<Command>	return(yGetVarAtIndex(db, var, -1));</Command>
+<Command>}</Command>
+
+<Command>string yGetStringAtIndex(string db = "", string var = "", int index = 0) {</Command>
+<Command>	if (yVariableExists(db, var)) {</Command>
+<Command>		return(xGetString(1*trQuestVarGet("database"+db),1*trQuestVarGet("database"+db+var),index));</Command>
+<Command>	} else {</Command>
+<Command>		return("");</Command>
+<Command>	}</Command>
+<Command>}</Command>
+
+<Command>string yGetString(string db = "", string var = "") {</Command>
+<Command>	return(yGetStringAtIndex(db, var, -1));</Command>
+<Command>}</Command>
+
+<Command>vector yGetVectorAtIndex(string db = "", string var = "", int index = 0) {</Command>
+<Command>	if (yVariableExists(db, var)) {</Command>
+<Command>		return(xGetVector(1*trQuestVarGet("database"+db),1*trQuestVarGet("database"+db+var),index));</Command>
+<Command>	} else {</Command>
+<Command>		return(vector(0,0,0));</Command>
+<Command>	}</Command>
+<Command>}</Command>
+
+<Command>vector yGetVector(string db = "", string var = "") {</Command>
+<Command>	return(yGetVectorAtIndex(db, var, -1));</Command>
+<Command>}</Command>
+
+<Command>void ySetVarAtIndex(string db = "", string var = "", float val = 0, int index = 0) {</Command>
+<Command>	if (yVariableExists(db, var)) {</Command>
+<Command>		xSetFloat(1*trQuestVarGet("database"+db),1*trQuestVarGet("database"+db+var),val,index);</Command>
+<Command>	} else {</Command>
+<Command>		yDatabaseCreateIfNull(db, index);</Command>
+<Command>		trQuestVarSet("database"+db+var, xInitAddFloat(1*trQuestVarGet("database"+db),var));</Command>
+<Command>		xSetFloat(1*trQuestVarGet("database"+db),1*trQuestVarGet("database"+db+var),val,index);</Command>
+<Command>	}</Command>
+<Command>}</Command>
+
+<Command>void ySetVar(string db = "", string var = "", float val = 0) {</Command>
+<Command>	ySetVarAtIndex(db, var, val, -1);</Command>
+<Command>}</Command>
+
+<Command>void ySetStringAtIndex(string db = "", string var = "", string val = "", int index = 0) {</Command>
+<Command>	if (yVariableExists(db, var)) {</Command>
+<Command>		xSetString(1*trQuestVarGet("database"+db),1*trQuestVarGet("database"+db+var),val,index);</Command>
+<Command>	} else {</Command>
+<Command>		yDatabaseCreateIfNull(db, index);</Command>
+<Command>		trQuestVarSet("database"+db+var, xInitAddFloat(1*trQuestVarGet("database"+db),var));</Command>
+<Command>		xSetString(1*trQuestVarGet("database"+db),1*trQuestVarGet("database"+db+var),val,index);</Command>
+<Command>	}</Command>
+<Command>}</Command>
+
+<Command>void ySetString(string db = "", string var = "", string val = "") {</Command>
+<Command>	ySetStringAtIndex(db, var, val, -1);</Command>
+<Command>}</Command>
+
+<Command>void ySetVectorAtIndex(string db = "", string var = "", vector val = vector(0,0,0), int index = 0) {</Command>
+<Command>	if (yVariableExists(db, var)) {</Command>
+<Command>		xSetVector(1*trQuestVarGet("database"+db),1*trQuestVarGet("database"+db+var),val,index);</Command>
+<Command>	} else {</Command>
+<Command>		yDatabaseCreateIfNull(db, index);</Command>
+<Command>		trQuestVarSet("database"+db+var, xInitAddFloat(1*trQuestVarGet("database"+db),var));</Command>
+<Command>		xSetVector(1*trQuestVarGet("database"+db),1*trQuestVarGet("database"+db+var),val,index);</Command>
+<Command>	}</Command>
+<Command>}</Command>
+
+<Command>void ySetVector(string db = "", string var = "", vector val = vector(0,0,0)) {</Command>
+<Command>	ySetVectorAtIndex(db, var, val, -1);</Command>
+<Command>}</Command>
+
+<Command>int yDatabaseNext(string db = "", bool select = false, bool reverse = false) {</Command>
+<Command>	xDatabaseNext(1*trQuestVarGet("database"+db), reverse);</Command>
+<Command>	int u = yGetVar(db, "unitName");</Command>
+<Command>	trQuestVarSet(db, u);</Command>
+<Command>	if (select) {</Command>
+<Command>		trUnitSelectClear();</Command>
+<Command>		trUnitSelect(""+u, true);</Command>
+<Command>		return(kbGetBlockID(""+u, true));</Command>
+<Command>	} else {</Command>
+<Command>		return(u);</Command>
+<Command>	}</Command>
+<Command>}</Command>
+
+<Command>void yRemoveFromDatabase(string db = "") {</Command>
+<Command>	xFreeDatabaseBlock(1*trQuestVarGet("database"+db));</Command>
+<Command>}</Command>
+
+<Command>int yGetNewestPointer(string db = "") {</Command>
+<Command>	return(xGetNewestPointer(1*trQuestVarGet("database"+db)));</Command>
+<Command>}</Command>
+
+<Command>void yAddUpdateVar(string db = "", string var = "", float val = 0) {</Command>
+<Command>	ySetVarAtIndex(db, var, val, yGetNewestPointer(db));</Command>
+<Command>}</Command>
+
+<Command>void yAddUpdateString(string db = "", string var = "", string val = "") {</Command>
+<Command>	ySetStringAtIndex(db, var, val, yGetNewestPointer(db));</Command>
+<Command>}</Command>
+
+<Command>void yAddUpdateVector(string db = "", string var = "", vector val = vector(0,0,0)) {</Command>
+<Command>	ySetVectorAtIndex(db, var, val, yGetNewestPointer(db));</Command>
+<Command>}</Command>
+
+<Command>int yAddToDatabase(string db = "", string val = "") {</Command>
+<Command>	yDatabaseCreateIfNull(db);</Command>
+<Command>	int id = trQuestVarGet("database"+db);</Command>
+<Command>	int next = xAddDatabaseBlock(id);</Command>
+<Command>	yAddUpdateVar(db, "unitName", trQuestVarGet(val));</Command>
+<Command>	return(next);</Command>
+<Command>}</Command>
+
+<Command>int yGetPointer(string db = "") {</Command>
+<Command>	return(xGetPointer(1*trQuestVarGet("database"+db)));</Command>
+<Command>}</Command>
+
+<Command>bool ySetPointer(string db = "", int index = 0) {</Command>
+<Command>	bool safe = xSetPointer(1*trQuestVarGet("database"+db), index);</Command>
+<Command>	if (safe) {</Command>
+<Command>		trQuestVarSet(db, yGetVar(db, "unitName"));</Command>
+<Command>	}</Command>
+<Command>	return(safe);</Command>
+<Command>}</Command>
+
+
+<Command>int yGetDatabaseCount(string db = "") {</Command>
+<Command>	return(xGetDatabaseCount(1*trQuestVarGet("database"+db)));</Command>
+<Command>}</Command>
+
+<Command>int yGetUnitAtIndex(string db = "", int index = 0) {</Command>
+<Command>	return(1*yGetVarAtIndex(db, "unitName", index));</Command>
+<Command>}</Command>
+
+<Command>void ySetUnitAtIndex(string db = "", int index = 0, int value = 0) {</Command>
+<Command>	ySetVarAtIndex(db, "unitName", value, index);</Command>
+<Command>}</Command>
+
+<Command>void ySetUnit(string db = "", int value = 0) {</Command>
+<Command>	ySetVar(db, "unitName", value);</Command>
+<Command>}</Command>
+
+<Command>void yClearDatabase(string db = "") {</Command>
+<Command>	xClearDatabase(1*trQuestVarGet("database"+db));</Command>
+<Command>}</Command>
+
+
+<Command>/*</Command>
+<Command>Starting from NextUnitScenarioNameNumber and going backwards until the quest var 'qv',</Command>
+<Command>looks for the specified protounit. If none found, returns -1. Otherwise, returns the</Command>
+<Command>unit name.</Command>
+<Command>*/</Command>
+<Command>int yFindLatestReverse(string qv = "", string proto = "", int p = 0) {</Command>
+<Command>	int id = kbGetProtoUnitID(proto);</Command>
+<Command>	trUnitSelectClear();</Command>
+<Command>	for(x=trGetNextUnitScenarioNameNumber(); >trQuestVarGet(qv)) {</Command>
+<Command>		int i = kbGetBlockID(""+x, true);</Command>
+<Command>		if (kbGetUnitBaseTypeID(i) == id) {</Command>
+<Command>			trUnitSelectClear();</Command>
+<Command>			trUnitSelectByID(i);</Command>
+<Command>			if (trUnitIsOwnedBy(p)) {</Command>
+<Command>				trQuestVarSet(qv, x);</Command>
+<Command>				return(i);</Command>
+<Command>			}</Command>
+<Command>		}</Command>
+<Command>	}</Command>
+<Command>	return(-1);</Command>
+<Command>}</Command>
+
+<Command>/*</Command>
+<Command>Starting from quest var 'qv' and going up until NextUnitScenarioNameNumber,</Command>
+<Command>looks for the specified protounit. If none found, returns -1. Otherwise, returns the</Command>
+<Command>unit name.</Command>
+<Command>*/</Command>
+<Command>int yFindLatest(string qv = "", string proto = "", int p = 0) {</Command>
+<Command>	int id = kbGetProtoUnitID(proto);</Command>
+<Command>	trUnitSelectClear();</Command>
+<Command>	int next = trGetNextUnitScenarioNameNumber() - 1;</Command>
+<Command>	int current = trQuestVarGet(qv);</Command>
+<Command>	while(next > current) {</Command>
+<Command>		current = current + 1;</Command>
+<Command>		int i = kbGetBlockID(""+current, true);</Command>
+<Command>		if (kbGetUnitBaseTypeID(i) == id) {</Command>
+<Command>			trUnitSelectClear();</Command>
+<Command>			trUnitSelectByID(i);</Command>
+<Command>			if (trUnitIsOwnedBy(p)) {</Command>
+<Command>				trQuestVarSet(qv, current);</Command>
+<Command>				return(i);</Command>
+<Command>			}</Command>
+<Command>		}</Command>
+<Command>	}</Command>
+<Command>	return(-1);</Command>
+<Command>}</Command>
+
+<Command>const int EVENT_BUILD_HOUSE = 0;</Command>
+<Command>const int EVENT_BUILD_GRANARY = 1;</Command>
+<Command>const int EVENT_BUILD_STOREHOUSE = 2;</Command>
+<Command>const int EVENT_REMOVE_CAM_TRACKS = 3;</Command>
+<Command>const int EVENT_BUILD_AT_CURSOR = 4;</Command>
+<Command>int mapSize = 0;</Command>
+
+<Command>void modifyPlayableProto(string proto = "", int p = 0) {</Command>
+<Command>	// HP</Command>
+<Command>	trModifyProtounit(proto, p, 0, 9999999999999999999.0);</Command>
+<Command>	trModifyProtounit(proto, p, 0, -9999999999999999999.0);</Command>
+<Command>	trModifyProtounit(proto, p, 0, 30.0);</Command>
+<Command>	// speed</Command>
+<Command>	trModifyProtounit(proto, p, 1, 9999999999999999999.0);</Command>
+<Command>	trModifyProtounit(proto, p, 1, -9999999999999999999.0);</Command>
+<Command>	trModifyProtounit(proto, p, 1, 5.0);</Command>
+<Command>	// LOS</Command>
+<Command>	trModifyProtounit(proto, p, 2, 9999999999999999999.0);</Command>
+<Command>	trModifyProtounit(proto, p, 2, -9999999999999999999.0);</Command>
+<Command>	trModifyProtounit(proto, p, 2, 3.0);</Command>
+<Command>	// armor</Command>
+<Command>	trModifyProtounit(proto, p, 24, -1);</Command>
+<Command>	trModifyProtounit(proto, p, 25, -1);</Command>
+<Command>	trModifyProtounit(proto, p, 26, -1);</Command>
+
+<Command>}</Command>
+
+<Command>void modifyBuildableProto(string proto = "", int p = 0) {</Command>
+<Command>	trModifyProtounit(proto, p, 55, 4); // flying</Command>
+<Command>	// LOS</Command>
+<Command>	trModifyProtounit(proto, p, 2, 9999999999999999999.0);</Command>
+<Command>	trModifyProtounit(proto, p, 2, -9999999999999999999.0);</Command>
+<Command>	trModifyProtounit(proto, p, 2, 0.0);</Command>
+<Command>	// cost gold/wood/food/favor</Command>
+<Command><![CDATA[	for(i=16; <= 19) {]]></Command>
+<Command>		trModifyProtounit(proto, p, i, 9999999999999999999.0);</Command>
+<Command>		trModifyProtounit(proto, p, i, -9999999999999999999.0);</Command>
+<Command>		trModifyProtounit(proto, p, i, 0.0);</Command>
+<Command>	}</Command>
+<Command>	// build points</Command>
+<Command>	trModifyProtounit(proto, p, 4, -999);</Command>
+<Command>}</Command>
+
+<Command>rule setup</Command>
+<Command>active</Command>
+<Command>highFrequency</Command>
+<Command>runImmediately</Command>
+<Command>{</Command>
+<Command>	xsDisableSelf();</Command>
+<Command>	trSetFogAndBlackmap(false, false);</Command>
+<Command>	trUIFadeToColor(0,0,0,0,0,true);</Command>
+<Command>	if (aiIsMultiplayer() == false) {</Command>
+<Command>		uiMessageBox("This map can only be played in multiplayer.","leaveGame()");</Command>
+<Command>	}</Command>
+
+<Command>	gadgetUnreal("ScoreDisplay");</Command>
+<Command>	gadgetUnreal("GodPowers");</Command>
+<Command>	gadgetUnreal("tributedlg-sendButton");</Command>
+<Command>	gadgetUnreal("tributedlg-clearButton");</Command>
+<Command>	configUndef("ErodeBuildingFoundations");</Command>
+
+<Command>	trPlayerSetDiplomacy(1, 2, "neutral");</Command>
+<Command>	trPlayerSetDiplomacy(2, 1, "neutral");</Command>
+
+<Command><![CDATA[	for(p=1; <= 2) {]]></Command>
+<Command>		trPlayerGrantResources(p, "Food", -999);</Command>
+<Command>		trPlayerGrantResources(p, "Wood", -999);</Command>
+<Command>		trPlayerGrantResources(p, "Gold", -999);</Command>
+<Command>		trPlayerGrantResources(p, "Favor", -999);</Command>
+<Command>		trPlayerSetDiplomacy(p, 0, "neutral");</Command>
+<Command>		trPlayerSetDiplomacy(0, p, "Enemy");</Command>
+<Command>		trPlayerKillAllGodPowers(p);</Command>
+<Command>		trPlayerTechTreeEnabledGodPowers(p, false);</Command>
+<Command>		trSetCivAndCulture(p, 1, 0);</Command>
+
+<Command>		// heavy hoplite and iron all</Command>
+<Command>		trTechSetStatus(p, 7, 4);</Command>
+<Command>		trTechSetStatus(p, 476, 4);</Command>
+
+<Command>		modifyPlayableProto("Hoplite", p);</Command>
+<Command>		modifyPlayableProto("Hero Greek Odysseus", p);</Command>
+<Command>		modifyBuildableProto("House", p);</Command>
+<Command>		modifyBuildableProto("Storehouse", p);</Command>
+<Command>		modifyBuildableProto("Granary", p);</Command>
+<Command>	}</Command>
+<Command>}</Command>
+<Command>int dPlayerData = 0;</Command>
+<Command>int xPlayerUnit = 0;</Command>
+<Command>int xPlayerUnitID = 0;</Command>
+<Command>int xPlayerCastPos = 0;</Command>
+<Command>int xPlayerProto = 0;</Command>
+<Command>int xPlayerCanCast = 0;</Command>
+
+<Command>int dSpyRequests = 0;</Command>
+<Command>int xSpyRequestProto = 0;</Command>
+<Command>int xSpyRequestAnim = 0;</Command>
+<Command>int xSpyRequestDest = 0;</Command>
+<Command>int xSpyRequestScale = 0;</Command>
+
+<Command>rule initialize_databases</Command>
+<Command>active</Command>
+<Command>highFrequency</Command>
+<Command>{</Command>
+<Command>	xsDisableSelf();</Command>
+
+<Command>	dPlayerData = xInitDatabase("Player Data", 2);</Command>
+<Command>	xPlayerUnit = xInitAddInt(dPlayerData, "unit");</Command>
+<Command>	xPlayerUnitID = xInitAddInt(dPlayerData, "unitID");</Command>
+<Command>	xPlayerProto = xInitAddString(dPlayerData, "proto");</Command>
+<Command>	xPlayerCastPos = xInitAddVector(dPlayerData, "Cast Pos");</Command>
+<Command>	xPlayerCanCast = xInitAddBool(dPlayerData, "can cast");</Command>
+
+<Command>	dSpyRequests = xInitDatabase("Spy Requests");</Command>
+<Command>	xSpyRequestProto = xInitAddInt(dSpyRequests, "proto");</Command>
+<Command>	xSpyRequestAnim = xInitAddInt(dSpyRequests, "anim");</Command>
+<Command>	xSpyRequestDest = xInitAddVector(dSpyRequests, "dest");</Command>
+<Command>	xSpyRequestScale = xInitAddVector(dSpyRequests, "scale");</Command>
+<Command>}</Command>
+<Command>int spyreset = 0;</Command>
+<Command>int spysearch = 0;</Command>
+
+<Command>void reselectMyself() {</Command>
+<Command>	uiClearSelection();</Command>
+<Command>	int p = trCurrentPlayer();</Command>
+<Command>	string proto = xGetString(dPlayerData, xPlayerProto, p);</Command>
+<Command>	trackInsert();</Command>
+<Command>	trackAddWaypoint();</Command>
+<Command>	trackAddWaypoint();</Command>
+<Command>	trBlockAllSounds(false);</Command>
+<Command>	uiFindType(proto);</Command>
+<Command>	trackPlay(1,EVENT_REMOVE_CAM_TRACKS);</Command>
+<Command>}</Command>
+
+<Command>/*</Command>
+<Command>Assumes that the target unit is already selected</Command>
+<Command>*/</Command>
+<Command>void spyEffect(int proto = 0, int anim = 0, vector dest = vector(0,0,0), vector scale = vector(1,1,1)) {</Command>
+<Command>	int newest = xAddDatabaseBlock(dSpyRequests);</Command>
+<Command>	xSetInt(dSpyRequests, xSpyRequestProto, proto, newest);</Command>
+<Command>	xSetInt(dSpyRequests, xSpyRequestAnim, anim, newest);</Command>
+<Command>	xSetVector(dSpyRequests, xSpyRequestDest, dest, newest);</Command>
+<Command>	xSetVector(dSpyRequests, xSpyRequestScale, scale, newest);</Command>
+<Command>	trTechInvokeGodPower(0, "spy", vector(0,0,0), vector(0,0,0));</Command>
+<Command>}</Command>
+
+<Command>bool rayCollision(vector pos = vector(0,0,0), vector start = vector(0,0,0), vector dir = vector(0,0,0), float dist = 0, float width = 0) {</Command>
+<Command>	float current = distanceBetweenVectors(pos, start, false);</Command>
+<Command><![CDATA[	if (current < dist) {]]></Command>
+<Command>		vector hitbox = xsVectorSet(xsVectorGetX(start) + current * xsVectorGetX(dir),0,</Command>
+<Command>			xsVectorGetZ(start) + current * xsVectorGetZ(dir));</Command>
+<Command><![CDATA[		if (distanceBetweenVectors(pos, hitbox, true) <= width) {]]></Command>
+<Command>			return(true);</Command>
+<Command>		}</Command>
+<Command>	}</Command>
+<Command>	return(false);</Command>
+<Command>}</Command>
+
+<Command>vector vectorSetAsTargetVector(vector from = vector(0,0,0), vector dir = vector(0,0,0), float dist = 40.0) {</Command>
+<Command>	vector target = xsVectorSet((xsVectorGetX(dir) * dist) + xsVectorGetX(from), 0, (xsVectorGetZ(dir) * dist) + xsVectorGetZ(from));</Command>
+
+<Command>	/*</Command>
+<Command>	No out-of-bounds allowed</Command>
+<Command>	*/</Command>
+<Command>	float scale = 0;</Command>
+<Command><![CDATA[	if (xsVectorGetX(target) < 0) {]]></Command>
+<Command>		scale = xsVectorGetX(target) / (xsVectorGetX(target) - xsVectorGetX(from));</Command>
+<Command>		target = xsVectorSet(0,0, xsVectorGetZ(target) + scale * (xsVectorGetZ(from) - xsVectorGetZ(target)));</Command>
+<Command>	} else if (xsVectorGetX(target) > (mapSize * 2 + 1)) {</Command>
+<Command>		scale = (xsVectorGetX(target) - (mapSize * 2 + 1)) / (xsVectorGetX(target) - xsVectorGetX(from));</Command>
+<Command>		target = xsVectorSet(mapSize * 2 + 1,0,xsVectorGetZ(target) + scale * (xsVectorGetZ(from) - xsVectorGetZ(target)));</Command>
+<Command>	}</Command>
+
+<Command><![CDATA[	if (xsVectorGetZ(target) < 0) {]]></Command>
+<Command>		scale = xsVectorGetZ(target) / (xsVectorGetZ(target) - xsVectorGetZ(from));</Command>
+<Command>		target = xsVectorSet(xsVectorGetX(target) + scale * (xsVectorGetX(from) - xsVectorGetX(target)),0,0);</Command>
+<Command>	} else if (xsVectorGetZ(target) > (mapSize * 2 + 1)) {</Command>
+<Command>		scale = (xsVectorGetZ(target) - (mapSize * 2 + 1)) / (xsVectorGetZ(target) - xsVectorGetZ(from));</Command>
+<Command>		target = xsVectorSet(xsVectorGetX(target) + scale * (xsVectorGetX(from) - xsVectorGetX(target)),0,mapSize * 2 + 1);</Command>
+<Command>	}</Command>
+<Command>	return(target);</Command>
+<Command>}</Command>
+
+
+<Command>rule ysearch</Command>
+<Command>inactive</Command>
+<Command>highFrequency</Command>
+<Command>{</Command>
+<Command>	int id = 0;</Command>
+<Command>	int unittype = 0;</Command>
+<Command>	vector scale = vector(0,0,0);</Command>
+<Command>	vector dest = vector(0,0,0);</Command>
+<Command><![CDATA[	for(i = spysearch; < trGetNextUnitScenarioNameNumber()) {]]></Command>
+<Command>		id = kbGetBlockID(""+i, true);</Command>
+<Command>		unittype = kbGetUnitBaseTypeID(id);</Command>
+<Command>		switch(unittype)</Command>
+<Command>		{</Command>
+<Command>			case kbGetProtoUnitID("Spy Eye"):</Command>
+<Command>			{</Command>
+<Command>				if (xGetDatabaseCount(dSpyRequests) > 0) {</Command>
+<Command>					scale = xGetVector(dSpyRequests, xSpyRequestScale);</Command>
+<Command>					dest = xGetVector(dSpyRequests, xSpyRequestDest);</Command>
+<Command>					trUnitSelectClear();</Command>
+<Command>					trUnitSelectByID(id);</Command>
+<Command>					trMutateSelected(xGetInt(dSpyRequests, xSpyRequestProto));</Command>
+<Command>					trSetSelectedScale(xsVectorGetX(scale),xsVectorGetY(scale),xsVectorGetZ(scale));</Command>
+<Command>					trUnitOverrideAnimation(xGetInt(dSpyRequests, xSpyRequestAnim),0,true,false,-1);</Command>
+<Command>					if (aiPlanSetUserVariableInt(1*xsVectorGetX(dest),1*xsVectorGetY(dest),1*xsVectorGetZ(dest),i) == false) {</Command>
+<Command>						debugLog("spy error N/A: " + 1*xsVectorGetX(dest) + "," + 1*xsVectorGetY(dest) + "," + 1*xsVectorGetZ(dest));</Command>
+<Command>					}</Command>
+<Command>					xFreeDatabaseBlock(dSpyRequests);</Command>
+<Command>					spyreset = 0;</Command>
+<Command>				} else {</Command>
+<Command>					debugLog("Spy Buffer is empty");</Command>
+<Command>				}</Command>
+<Command>				break;</Command>
+<Command>			}</Command>
+<Command>			case kbGetProtoUnitID("House"):</Command>
+<Command>			{</Command>
+<Command>				xSetVector(dPlayerData, xPlayerCastPos, kbGetBlockPosition(""+i, true), kbUnitGetOwner(id));</Command>
+<Command>				trUnitSelectClear();</Command>
+<Command>				trUnitSelectByID(id);</Command>
+<Command>				trUnitDestroy();</Command>
+<Command>				break;</Command>
+<Command>			}</Command>
+<Command>			case kbGetProtoUnitID("Storehouse"):</Command>
+<Command>			{</Command>
+<Command>				xSetVector(dPlayerData, xPlayerCastPos, kbGetBlockPosition(""+i, true), kbUnitGetOwner(id));</Command>
+<Command>				trUnitSelectClear();</Command>
+<Command>				trUnitSelectByID(id);</Command>
+<Command>				trUnitDestroy();</Command>
+<Command>				break;</Command>
+<Command>			}</Command>
+<Command>			case kbGetProtoUnitID("Granary"):</Command>
+<Command>			{</Command>
+<Command>				xSetVector(dPlayerData, xPlayerCastPos, kbGetBlockPosition(""+i, true), kbUnitGetOwner(id));</Command>
+<Command>				trUnitSelectClear();</Command>
+<Command>				trUnitSelectByID(id);</Command>
+<Command>				trUnitDestroy();</Command>
+<Command>				break;</Command>
+<Command>			}</Command>
+<Command>			case kbGetProtoUnitID("Hero Birth"):</Command>
+<Command>			{</Command>
+<Command>				debugLog("spysearch: " + i);</Command>
+<Command>				break;</Command>
+<Command>			}</Command>
+<Command>		}</Command>
+<Command>	}</Command>
+<Command>	if (xGetDatabaseCount(dSpyRequests) > 0) {</Command>
+<Command>		spyreset = spyreset + 1;</Command>
+<Command>		if (spyreset >= 10) {</Command>
+<Command>			debugLog("Spy reset. Failed requests: " + xGetDatabaseCount(dSpyRequests));</Command>
+<Command>			xClearDatabase(dSpyRequests);</Command>
+<Command>			spyreset = 0;</Command>
+<Command>		}</Command>
+<Command>	}</Command>
+<Command>	spysearch = trGetNextUnitScenarioNameNumber();</Command>
+<Command>}</Command>
+<Command>void removeCamTracks(int eventID = -1) {</Command>
+<Command>	trackRemove();</Command>
+<Command>	trUnblockAllSounds();</Command>
+<Command>}</Command>
+
+<Command>void hotkeyAbility(int ability = 0) {</Command>
+<Command>	xsSetContextPlayer(0);</Command>
+<Command>	int old = xGetPointer(dPlayerData);</Command>
+<Command>	xSetPointer(dPlayerData, trCurrentPlayer());</Command>
+<Command>	if (xGetBool(dPlayerData, xPlayerCanCast)) {</Command>
+<Command>		trackInsert();</Command>
+<Command>		trackAddWaypoint();</Command>
+<Command>		trackPlay(1,EVENT_BUILD_AT_CURSOR);</Command>
+<Command>		trBlockAllSounds(false);</Command>
+<Command>		xUnitSelectByID(dPlayerData, xPlayerUnitID);</Command>
+<Command>		if (trUnitIsSelected() == false) {</Command>
+<Command>			uiFindType(xGetString(dPlayerData, xPlayerProto));</Command>
+<Command>		}</Command>
+<Command>		switch(ability)</Command>
+<Command>		{</Command>
+<Command>			case EVENT_BUILD_HOUSE:</Command>
+<Command>			{</Command>
+<Command>				uiSetProtoCursor("House", true);</Command>
+<Command>			}</Command>
+<Command>			case EVENT_BUILD_GRANARY:</Command>
+<Command>			{</Command>
+<Command>				uiSetProtoCursor("Granary", true);</Command>
+<Command>			}</Command>
+<Command>			case EVENT_BUILD_STOREHOUSE:</Command>
+<Command>			{</Command>
+<Command>				uiSetProtoCursor("Storehouse", true);</Command>
+<Command>			}</Command>
+<Command>		}</Command>
+<Command>	}</Command>
+<Command>	xSetPointer(dPlayerData, old);</Command>
+<Command>}</Command>
+
+<Command>void buildAtCursor(int eventID = -1) {</Command>
+<Command>	uiBuildAtPointer();</Command>
+<Command>	uiClearCursor();</Command>
+<Command>	trackInsert();</Command>
+<Command>	trackAddWaypoint();</Command>
+<Command>	trackPlay(1,EVENT_REMOVE_CAM_TRACKS);</Command>
+<Command>}</Command>
+
+<Command>rule gameplay_setup</Command>
+<Command>inactive</Command>
+<Command>highFrequency</Command>
+<Command>{</Command>
+<Command>	xsDisableSelf();</Command>
+
+<Command>	xsEnableRule("ysearch");</Command>
+
+<Command>	//xsEnableRule("gameplay_start");</Command>
+
+<Command>	// spawn the hotkey units</Command>
+<Command><![CDATA[	for(i=EVENT_BUILD_HOUSE; <= EVENT_BUILD_STOREHOUSE) {]]></Command>
+<Command>		trEventSetHandler(i, "hotkeyAbility");</Command>
+<Command>	}</Command>
+<Command>	trEventSetHandler(EVENT_REMOVE_CAM_TRACKS, "removeCamTracks");</Command>
+<Command>	trEventSetHandler(EVENT_BUILD_AT_CURSOR, "buildAtCursor");</Command>
+
+<Command>	map("q", "game", "trackInsert(); trackAddWaypoint();trackPlay(-1,0);");</Command>
+<Command>	map("w", "game", "trackInsert(); trackAddWaypoint();trackPlay(-1,1);");</Command>
+<Command>	map("e", "game", "trackInsert(); trackAddWaypoint();trackPlay(-1,2);");</Command>
+<Command>}</Command>
+<Command>rule zenowashere</Command>
+<Command>inactive</Command>
+<Command>highFrequency</Command>
+<Command>{</Command>
+<Command>if(true) {</Command>
+<Command>xsDisableSelf();</Command>
+</Effect>
+</Effects>
+</trigger>
