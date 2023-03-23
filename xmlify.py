@@ -13,7 +13,8 @@ import sys
 ###############################
 FILENAME = 'C:\\Program Files (x86)\\Steam\\steamapps\\common\\Age of Mythology\\trigger2\\ZvN.xml'
 NAME = ' Zeno vs Nickonhawk'
-files = ['zshared.c', 'events.c', 'abilities.c', 'setup.c', 'database.c', 'abilitiesHelpers.c', 'gameplayHelpers.c', 'gameplay.c']
+files = ['zshared.c', 'events.c', 'abilities.c', 'attackSteps.c',
+ 		'setup.c', 'database.c', 'abilitiesHelpers.c', 'gameplayHelpers.c', 'zenoAbilities.c', 'gameplay.c']
 
 #########################################
 ####### CODE BELOW (DO NOT TOUCH) #######

@@ -12,12 +12,23 @@ void modifyPlayableProto(string proto = "", int p = 0) {
 	// LOS
 	trModifyProtounit(proto, p, 2, 9999999999999999999.0);
 	trModifyProtounit(proto, p, 2, -9999999999999999999.0);
-	trModifyProtounit(proto, p, 2, 3.0);
+	trModifyProtounit(proto, p, 2, 100.0);
 	// armor
 	trModifyProtounit(proto, p, 24, -1);
 	trModifyProtounit(proto, p, 25, -1);
 	trModifyProtounit(proto, p, 26, -1);
-
+	// range
+	trModifyProtounit(proto, p, 11, 9999999999999999999.0);
+	trModifyProtounit(proto, p, 11, -9999999999999999999.0);
+	trModifyProtounit(proto, p, 11, 0.0);
+	// hand attack hack
+	trModifyProtounit(proto, p, 27, 9999999999999999999.0);
+	trModifyProtounit(proto, p, 27, -9999999999999999999.0);
+	trModifyProtounit(proto, p, 27, 0.0);
+	// ranged attack pierce
+	trModifyProtounit(proto, p, 31, 9999999999999999999.0);
+	trModifyProtounit(proto, p, 31, -9999999999999999999.0);
+	trModifyProtounit(proto, p, 31, 0.0);
 }
 
 void modifyBuildableProto(string proto = "", int p = 0) {
@@ -62,6 +73,7 @@ runImmediately
 	trTechSetStatus(0, 304, 4);
 
 	for(p=1; <= 2) {
+		trTechSetStatus(p, 304, 4);
 		trPlayerGrantResources(p, "Food", -999);
 		trPlayerGrantResources(p, "Wood", -999);
 		trPlayerGrantResources(p, "Gold", -999);

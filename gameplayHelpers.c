@@ -77,6 +77,14 @@ void spawnPlayer(int p = 0, vector pos = vector(0,0,0)) {
 	xSetVector(dPlayerData, xPlayerPos, pos);
 }
 
+void shootLaser(int p = 0, int spawner = 0, vector dir = vector(0,0,0), int delay = 1500) {
+	trSoundPlayFN("skypassagein.wav");
+}
+
+void shootMissile(int p = 0, vector pos = vector(0,0,0), vector dir = vector(0,0,0), bool homing = false) {
+
+}
+
 
 rule ysearch
 inactive
