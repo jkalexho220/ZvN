@@ -28,8 +28,7 @@ void spyEffect(int proto = 0, int anim = 0, vector dest = vector(0,0,0), vector 
 bool rayCollision(vector pos = vector(0,0,0), vector start = vector(0,0,0), vector dir = vector(0,0,0), float dist = 0, float width = 0) {
 	float current = distanceBetweenVectors(pos, start, false);
 	if (current < dist) {
-		vector hitbox = xsVectorSet(xsVectorGetX(start) + current * xsVectorGetX(dir),0,
-			xsVectorGetZ(start) + current * xsVectorGetZ(dir));
+		vector hitbox = start + dir * current;
 		if (distanceBetweenVectors(pos, hitbox, true) <= width) {
 			return(true);
 		}
@@ -79,6 +78,35 @@ void spawnPlayer(int p = 0, vector pos = vector(0,0,0)) {
 
 void shootLaser(int p = 0, int spawner = 0, vector dir = vector(0,0,0), int delay = 1500) {
 	trSoundPlayFN("skypassagein.wav");
+	int next = trGetNextUnitScenarioNameNumber();
+	trArmyDispatch("0,0","Dwarf",1,1,0,1,0,true);
+	// change spawner into transport ship
+	trUnitSelectClear();
+	trUnitSelect(""+spawner);
+	trUnitChangeProtoUnit("Transport Ship Greek");
+	// immediate garrison and ungarrison
+	trUnitSelectClear();
+	trUnitSelect(""+next, true);
+	trImmediateUnitGarrison(""+spawner);
+	trUnitChangeProtoUnit("Dwarf");
+	// change spawner back to cinematic block
+	trUnitSelectClear();
+	trUnitSelect(""+spawner);
+	trUnitChangeProtoUnit("Cinematic Block");
+	// change into laser
+	trUnitSelectClear();
+	trUnitSelect(""+next, true);
+	trMutateSelected(kbGetProtoUnitID("Petosuchus Projectile"));
+	trSetSelectedScale(3.0,0.0,80.0);
+	trSetUnitOrientation(vector(0,0,0) - dir, vector(0,1,0), true);
+	// add to database
+	xAddDatabaseBlock(dLasers, true);
+	xSetInt(dLasers, xOwner, p);
+	xSetInt(dLasers, xUnitName, next);
+	xSetInt(dLasers, xUnitID, kbGetBlockID(""+next, true));
+	xSetVector(dLasers, xLaserPos, kbGetBlockPosition(""+next, true));
+	xSetVector(dLasers, xLaserDir, dir);
+	xSetInt(dLasers, xLaserTimeout, trTimeMS() + delay);
 }
 
 void shootMissile(int p = 0, vector pos = vector(0,0,0), vector dir = vector(0,0,0), bool homing = false) {

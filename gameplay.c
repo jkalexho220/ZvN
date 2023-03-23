@@ -67,8 +67,20 @@ highFrequency
 	map("e", "game", "trackInsert(); trackAddWaypoint();trackPlay(-1,2);");
 
 	// spawn players
-	spawnPlayer(1, xsVectorSet(mapSize / 2 + 1, 0, mapSize / 2 + 1));
-	spawnPlayer(2, xsVectorSet(mapSize * 3 / 2 + 1, 0, mapSize * 3 / 2 + 1));
+	spawnPlayer(1, vector(21,9,21));
+	spawnPlayer(2, vector(43,9,43));
+	
+	xsEnableRule("gameplay_start");
+}
+
+rule gameplay_start
+inactive
+highFrequency
+{
+	xsDisableSelf();
+	trCameraCut(vector(-15.519794,70.710701,-15.519794), vector(0.5,-0.707107,0.5), vector(0.5,0.707107,0.5), vector(0.707107,0,-0.707107));
+
+
 	updateAbilities(1, true);
 	updateAbilities(2, true);
 
@@ -83,10 +95,12 @@ inactive
 highFrequency
 {
 	// gameplay goes here
+	int p = 0;
 	int db = 0;
 	int id = 0;
 	int target = 0;
 	int action = 0;
+	float scale = 0;
 	vector pos = vector(0,0,0);
 	vector dir = vector(0,0,0);
 	for(p=1; <= 2) {
@@ -96,7 +110,6 @@ highFrequency
 	}
 	for(p=1; <= 2) {
 		xSetPointer(dPlayerData, p);
-
 		// abilities
 		if (xGetBool(dPlayerData, xPlayerCanCast)) {
 			if (xGetInt(dPlayerData, xPlayerButton) > 0) {
@@ -110,6 +123,8 @@ highFrequency
 							zenoBouncingLaser(p);
 						}
 					}
+					xSetInt(db, xAbilityType, ABILITY_ON_COOLDOWN);
+					xSetInt(db, xAbilityCooldown, trTimeMS() + 5000);
 				} else if (trCurrentPlayer() == p) {
 					trSoundPlayFN("cantdothat.wav");
 					trChatSend(0, "Your " + hotkeyName(xGetInt(dPlayerData, xPlayerButton)) + " is on cooldown!");
@@ -117,6 +132,7 @@ highFrequency
 			}
 		}
 		xSetInt(dPlayerData, xPlayerButton, BUTTON_NONE);
+		updateAbilities(p);
 
 		// basic attacks
 		id = xGetInt(dPlayerData, xPlayerUnitID);
@@ -125,9 +141,6 @@ highFrequency
 		action = kbUnitGetActionType(id);
 		target = kbUnitGetTargetUnitID(id);
 		xsSetContextPlayer(0);
-		if (p == trCurrentPlayer()) {
-			trSetCounterDisplay("Action: " + action + " | Target: " + target);
-		}
 		switch(xGetInt(dPlayerData, xPlayerAttackStep))
 		{
 		case ATTACK_NONE:
@@ -176,6 +189,43 @@ highFrequency
 					trUnitOverrideAnimation(-1, 0, false, true, -1);
 				}
 				break;
+			}
+		}
+	}
+
+	// Lasers
+	for(i=xGetDatabaseCount(dLasers); >0) {
+		xDatabaseNext(dLasers);
+		p = xGetInt(dLasers, xOwner);
+		switch(xGetInt(dLasers, xLaserStep))
+		{
+		case LASER_WARN:
+			{
+				if (trTimeMS() > xGetInt(dLasers, xLaserTimeout)) {
+					trSoundPlayFN("sky passage.wav");
+					if (rayCollision(xGetVector(dPlayerData, xPlayerPos, 3 - p), xGetVector(dLasers, xLaserPos), 
+						xGetVector(dLasers, xLaserDir), xGetFloat(dLasers, xLaserLength), 1.0)) {
+						trUnitSelectClear();
+						trUnitSelectByID(xGetInt(dPlayerData, xPlayerUnitID));
+						trDamageUnit(xGetInt(dLasers, xLaserDamage));
+					}
+					xSetInt(dLasers, xLaserTimeout, trTimeMS() + 500 + 100 * xGetInt(dLasers, xLaserDamage));
+					xSetInt(dLasers, xLaserStep, LASER_FIRED);
+					xUnitSelectByID(dLasers, xUnitID);
+					trUnitHighlight(10.0, false);
+				}
+				break;
+			}
+		case LASER_FIRED:
+			{
+				xUnitSelectByID(dLasers, xUnitID);
+				scale = 0.012 * (xGetInt(dLasers, xLaserTimeout) - trTimeMS());
+				if (scale < 0) {
+					trUnitDestroy();
+					xFreeDatabaseBlock(dLasers);
+				} else {
+					trSetSelectedScale(scale, scale, xGetFloat(dLasers, xLaserLength) * 1.3);
+				}
 			}
 		}
 	}

@@ -26,6 +26,8 @@ int xSpyRequestDest = 0;
 int xSpyRequestScale = 0;
 
 int xOwner = 0;
+int xUnitName = 0;
+int xUnitID = 0;
 
 int dMissiles = 0;
 int xMissilePrev = 0;
@@ -38,6 +40,8 @@ int xLaserPos = 0;
 int xLaserDir = 0;
 int xLaserStep = 0;
 int xLaserTimeout = 0;
+int xLaserLength = 0;
+int xLaserDamage = 0;
 
 void setupZeno(int p = 0) {
 	xSetPointer(dPlayerData, p);
@@ -55,6 +59,12 @@ void setupNick(int p = 0) {
 	xSetInt(dPlayerData, xPlayerAttackAnimation, 12);
 	xSetInt(dPlayerData, xPlayerStartDelay, 480);
 	xSetInt(dPlayerData, xPlayerEndDelay, 1200 - xGetInt(dPlayerData, xPlayerStartDelay));
+}
+
+void OwnerNameID(int db = 0) {
+	xOwner = xInitAddInt(db, "owner");
+	xUnitName = xInitAddInt(db, "name");
+	xUnitID = xInitAddInt(db, "id");
 }
 
 rule initialize_databases
@@ -94,15 +104,17 @@ highFrequency
 
 	// lasers
 	dLasers = xInitDatabase("Lasers");
-	xOwner = xInitAddInt(dLasers, "owner");
+	OwnerNameID(dLasers);
 	xLaserPos = xInitAddVector(dLasers, "pos");
 	xLaserDir = xInitAddVector(dLasers, "dir");
 	xLaserStep = xInitAddInt(dLasers, "step");
 	xLaserTimeout = xInitAddInt(dLasers, "timeout");
+	xLaserLength = xInitAddFloat(dLasers, "length", 30.0);
+	xLaserDamage = xInitAddInt(dLasers, "damage", 2);
 
 	// missiles
 	dMissiles = xInitDatabase("missiles");
-	xOwner = xInitAddInt(dMissiles, "owner");
+	OwnerNameID(dMissiles);
 	xMissilePos = xInitAddVector(dMissiles, "pos");
 	xMissileDir = xInitAddVector(dMissiles, "dir");
 	xMissilePrev = xInitAddVector(dMissiles, "prev");

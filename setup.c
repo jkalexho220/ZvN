@@ -94,4 +94,13 @@ runImmediately
 		modifyBuildableProto("Storehouse", p);
 		modifyBuildableProto("Granary", p);
 	}
+
+	// paint cliff begone
+	for(x=0; <= 32) {
+		for(z=0; <= 32) {
+			if (trGetTerrainSubType(x, z) != 53) {
+				trPaintTerrain(x, z, x, z, 0, 50, false);
+			}
+		}
+	}
 }

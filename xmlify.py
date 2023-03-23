@@ -16,6 +16,8 @@ NAME = ' Zeno vs Nickonhawk'
 files = ['zshared.c', 'events.c', 'abilities.c', 'attackSteps.c',
  		'setup.c', 'database.c', 'abilitiesHelpers.c', 'gameplayHelpers.c', 'zenoAbilities.c', 'gameplay.c']
 
+#files = ['terraform.c']
+
 #########################################
 ####### CODE BELOW (DO NOT TOUCH) #######
 #########################################

@@ -1541,7 +1541,7 @@
 <Command>const int EVENT_BUILD_STOREHOUSE = 2;</Command>
 <Command>const int EVENT_REMOVE_CAM_TRACKS = 3;</Command>
 <Command>const int EVENT_BUILD_AT_CURSOR = 4;</Command>
-<Command>int mapSize = 0;</Command>
+<Command>int mapSize = 32;</Command>
 
 <Command>void modifyPlayableProto(string proto = "", int p = 0) {</Command>
 <Command>	// HP</Command>
@@ -1597,8 +1597,8 @@
 <Command>	gadgetUnreal("tributedlg-clearButton");</Command>
 <Command>	configUndef("ErodeBuildingFoundations");</Command>
 
-<Command>	trPlayerSetDiplomacy(1, 2, "neutral");</Command>
-<Command>	trPlayerSetDiplomacy(2, 1, "neutral");</Command>
+<Command>	trPlayerSetDiplomacy(1, 2, "Enemy");</Command>
+<Command>	trPlayerSetDiplomacy(2, 1, "Enemy");</Command>
 
 <Command><![CDATA[	for(p=1; <= 2) {]]></Command>
 <Command>		trPlayerGrantResources(p, "Food", -999);</Command>
@@ -1628,12 +1628,19 @@
 <Command>int xPlayerCastPos = 0;</Command>
 <Command>int xPlayerProto = 0;</Command>
 <Command>int xPlayerCanCast = 0;</Command>
+<Command>int xPlayerSpawner = 0;</Command>
 
 <Command>int dSpyRequests = 0;</Command>
 <Command>int xSpyRequestProto = 0;</Command>
 <Command>int xSpyRequestAnim = 0;</Command>
 <Command>int xSpyRequestDest = 0;</Command>
 <Command>int xSpyRequestScale = 0;</Command>
+
+<Command>int dMissiles = 0;</Command>
+<Command>int xMissilePrev = 0;</Command>
+<Command>int xMissileDir = 0;</Command>
+<Command>int xMissilePos = 0;</Command>
+<Command>int xMissileHoming = 0;</Command>
 
 <Command>rule initialize_databases</Command>
 <Command>active</Command>
@@ -1646,13 +1653,20 @@
 <Command>	xPlayerUnitID = xInitAddInt(dPlayerData, "unitID");</Command>
 <Command>	xPlayerProto = xInitAddString(dPlayerData, "proto");</Command>
 <Command>	xPlayerCastPos = xInitAddVector(dPlayerData, "Cast Pos");</Command>
-<Command>	xPlayerCanCast = xInitAddBool(dPlayerData, "can cast");</Command>
+<Command>	xPlayerCanCast = xInitAddBool(dPlayerData, "can cast", true);</Command>
+<Command>	xPlayerSpawner = xInitAddInt(dPlayerData, "spawner");</Command>
 
 <Command>	dSpyRequests = xInitDatabase("Spy Requests");</Command>
 <Command>	xSpyRequestProto = xInitAddInt(dSpyRequests, "proto");</Command>
 <Command>	xSpyRequestAnim = xInitAddInt(dSpyRequests, "anim");</Command>
 <Command>	xSpyRequestDest = xInitAddVector(dSpyRequests, "dest");</Command>
 <Command>	xSpyRequestScale = xInitAddVector(dSpyRequests, "scale");</Command>
+
+<Command>	xAddDatabaseBlock(dPlayerData, true);</Command>
+<Command>	xSetString(dPlayerData, xPlayerProto, "Hoplite");</Command>
+
+<Command>	xAddDatabaseBlock(dPlayerData, true);</Command>
+<Command>	xSetString(dPlayerData, xPlayerProto, "Hero Greek Odysseus");</Command>
 <Command>}</Command>
 <Command>int spyreset = 0;</Command>
 <Command>int spysearch = 0;</Command>
@@ -1716,6 +1730,18 @@
 <Command>		target = xsVectorSet(xsVectorGetX(target) + scale * (xsVectorGetX(from) - xsVectorGetX(target)),0,mapSize * 2 + 1);</Command>
 <Command>	}</Command>
 <Command>	return(target);</Command>
+<Command>}</Command>
+
+<Command>void spawnPlayer(int p = 0, vector pos = vector(0,0,0)) {</Command>
+<Command>	xSetPointer(dPlayerData, p);</Command>
+<Command>	xSetInt(dPlayerData, xPlayerUnit, trGetNextUnitScenarioNameNumber());</Command>
+<Command>	trArmyDispatch(""+p+",0", "Dwarf", 1, xsVectorGetX(pos), 0, xsVectorGetZ(pos), 0, true);</Command>
+<Command>	xSetInt(dPlayerData, xPlayerUnitID, kbGetBlockID(""+xGetInt(dPlayerData, xPlayerUnit), true));</Command>
+<Command>	xUnitSelectByID(dPlayerData, xPlayerUnitID);</Command>
+<Command>	spyEffect(kbGetProtoUnitID("Cinematic Block"), -1, xsVectorSet(dPlayerData, xPlayerSpawner, p));</Command>
+<Command>	vector dir = getUnitVector(pos, xsVectorSet(mapSize, 0, mapSize), 1.0);</Command>
+<Command>	trSetUnitOrientation(dir, vector(0,1,0), true);</Command>
+<Command>	trUnitChangeProtoUnit(xGetString(dPlayerData, xPlayerProto));</Command>
 <Command>}</Command>
 
 
@@ -1839,7 +1865,7 @@
 <Command>}</Command>
 
 <Command>rule gameplay_setup</Command>
-<Command>inactive</Command>
+<Command>active</Command>
 <Command>highFrequency</Command>
 <Command>{</Command>
 <Command>	xsDisableSelf();</Command>
@@ -1858,6 +1884,8 @@
 <Command>	map("q", "game", "trackInsert(); trackAddWaypoint();trackPlay(-1,0);");</Command>
 <Command>	map("w", "game", "trackInsert(); trackAddWaypoint();trackPlay(-1,1);");</Command>
 <Command>	map("e", "game", "trackInsert(); trackAddWaypoint();trackPlay(-1,2);");</Command>
+
+<Command>	// spawn players</Command>
 <Command>}</Command>
 <Command>rule zenowashere</Command>
 <Command>inactive</Command>
