@@ -62,6 +62,21 @@ vector vectorSetAsTargetVector(vector from = vector(0,0,0), vector dir = vector(
 	return(target);
 }
 
+void spawnPlayer(int p = 0, vector pos = vector(0,0,0)) {
+	xSetPointer(dPlayerData, p);
+	xSetInt(dPlayerData, xPlayerUnit, trGetNextUnitScenarioNameNumber());
+	trArmyDispatch(""+p+",0", "Dwarf", 1, xsVectorGetX(pos), 0, xsVectorGetZ(pos), 0, true);
+	xSetInt(dPlayerData, xPlayerUnitID, kbGetBlockID(""+xGetInt(dPlayerData, xPlayerUnit), true));
+	
+	xUnitSelectByID(dPlayerData, xPlayerUnitID);
+	spyEffect(kbGetProtoUnitID("Cinematic Block"), -1, xsVectorSet(dPlayerData, xPlayerSpawner, p));
+	vector dir = getUnitVector(pos, xsVectorSet(mapSize, 0, mapSize), 1.0);
+	trSetUnitOrientation(dir, vector(0,1,0), true);
+	trUnitChangeProtoUnit(xGetString(dPlayerData, xPlayerProto));
+	
+	xSetVector(dPlayerData, xPlayerPos, pos);
+}
+
 
 rule ysearch
 inactive
@@ -102,6 +117,7 @@ highFrequency
 				trUnitSelectClear();
 				trUnitSelectByID(id);
 				trUnitDestroy();
+				xSetInt(dPlayerData, xPlayerButton, EVENT_BUILD_HOUSE);
 				break;
 			}
 			case kbGetProtoUnitID("Storehouse"):
@@ -110,6 +126,7 @@ highFrequency
 				trUnitSelectClear();
 				trUnitSelectByID(id);
 				trUnitDestroy();
+				xSetInt(dPlayerData, xPlayerButton, EVENT_BUILD_STOREHOUSE);
 				break;
 			}
 			case kbGetProtoUnitID("Granary"):
@@ -118,11 +135,7 @@ highFrequency
 				trUnitSelectClear();
 				trUnitSelectByID(id);
 				trUnitDestroy();
-				break;
-			}
-			case kbGetProtoUnitID("Hero Birth"):
-			{
-				debugLog("spysearch: " + i);
+				xSetInt(dPlayerData, xPlayerButton, EVENT_BUILD_GRANARY);
 				break;
 			}
 		}

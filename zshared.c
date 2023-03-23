@@ -14,7 +14,6 @@ highFrequency
 	every trigger loop, but only in random map scripts. So here we are.
 	*/
 	xsSetContextPlayer(0);
-	xsDisableSelf();
 }
 
 const int mInt = 0;

@@ -51,6 +51,8 @@ highFrequency
 
 	xsEnableRule("ysearch");
 
+	trUIFadeToColor(0,0,0,1000,0,false);
+
 	//xsEnableRule("gameplay_start");
 
 	// spawn the hotkey units
@@ -63,4 +65,22 @@ highFrequency
 	map("q", "game", "trackInsert(); trackAddWaypoint();trackPlay(-1,0);");
 	map("w", "game", "trackInsert(); trackAddWaypoint();trackPlay(-1,1);");
 	map("e", "game", "trackInsert(); trackAddWaypoint();trackPlay(-1,2);");
+
+	// spawn players
+	spawnPlayer(1, xsVectorSet(mapSize / 2 + 1, 0, mapSize / 2 + 1));
+	spawnPlayer(2, xsVectorSet(mapSize * 3 / 2 + 1, 0, mapSize * 3 / 2 + 1));
+	updateAbilities(1, true);
+	updateAbilities(2, true);
+
+	// select myself
+	uiFindType(xGetString(dPlayerData, xPlayerProto, trCurrentPlayer()));
+
+	xsEnableRule("the_game");
+}
+
+rule the_game
+inactive
+highFrequency
+{
+	// gameplay goes here
 }

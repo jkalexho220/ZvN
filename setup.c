@@ -46,6 +46,8 @@ runImmediately
 	trUIFadeToColor(0,0,0,0,0,true);
 	if (aiIsMultiplayer() == false) {
 		uiMessageBox("This map can only be played in multiplayer.","leaveGame()");
+	} else {
+		xsEnableRule("gameplay_setup");
 	}
 
 	gadgetUnreal("ScoreDisplay");
@@ -56,6 +58,8 @@ runImmediately
 
 	trPlayerSetDiplomacy(1, 2, "Enemy");
 	trPlayerSetDiplomacy(2, 1, "Enemy");
+
+	trTechSetStatus(0, 304, 4);
 
 	for(p=1; <= 2) {
 		trPlayerGrantResources(p, "Food", -999);
