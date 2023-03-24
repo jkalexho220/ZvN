@@ -105,7 +105,11 @@ highFrequency
 	float scale = 0;
 	float dist = 0;
 	vector pos = vector(0,0,0);
+	vector next = vector(0,0,0);
+	vector center = vector(0,0,0);
 	vector dir = vector(0,0,0);
+	vector firstDir = vector(0,0,0);
+	vector nextDir = vector(0,0,0);
 	for(p=1; <= 2) {
 		xDatabaseNext(dPlayerData);
 		// update player pos vector
@@ -128,6 +132,26 @@ highFrequency
 					case ZENO_TURRET:
 						{
 							zenoTurret(p);
+						}
+					case ZENO_SPEED:
+						{
+							zenoSpeed(p);
+						}
+					case ZENO_SHIELD:
+						{
+							zenoShield(p);
+						}
+					case ZENO_BARRAGE:
+						{
+							zenoBarrage(p);
+						}
+					case ZENO_CAROUSEL:
+						{
+							zenoCarousel(p);
+						}
+					case ZENO_WORLD_SPLITTER:
+						{
+							zenoWorldSplitter(p);
 						}
 					}
 					xSetInt(db, xAbilityType, ABILITY_ON_COOLDOWN);
@@ -239,6 +263,79 @@ highFrequency
 					xFreeDatabaseBlock(dLasers);
 				} else {
 					trSetSelectedScale(scale, scale, xGetFloat(dLasers, xLaserLength) * 1.222222);
+				}
+			}
+		}
+	}
+
+	// deflector shields
+	if (xGetDatabaseCount(dDeflectorShields) > 0) {
+		xDatabaseNext(dDeflectorShields);
+		switch(xGetInt(dDeflectorShields, xDeflectorShieldStep))
+		{
+		case 0:
+			{
+				// shield growing
+				scale = 50.0 - 0.1 * (xGetInt(dDeflectorShields, xDeflectorShieldTimeout) - trTimeMS());
+				if (scale >= 50.0) {
+					scale = 50.0;
+					xSetInt(dDeflectorShields, xDeflectorShieldStep, 1);
+					xSetInt(dDeflectorShields, xDeflectorShieldTimeout, trTimeMS() + 6000);
+				}
+				xUnitSelect(dDeflectorShields, xDeflectorShieldLeft);
+				trSetSelectedScale(1, scale, 5);
+				xUnitSelect(dDeflectorShields, xDeflectorShieldRight);
+				trSetSelectedScale(1, scale, 5);
+			}
+		case 1:
+			{
+				if (trTimeMS() > xGetInt(dDeflectorShields, xDeflectorShieldTimeout)) {
+					xSetInt(dDeflectorShields, xDeflectorShieldStep, 2);
+					xSetInt(dDeflectorShields, xDeflectorShieldTimeout, trTimeMS() + 500);
+				} else {
+					// collision detection with bullets
+					center = xGetVector(dDeflectorShields, xDeflectorShieldPos);
+					for(i=xGetDatabaseCount(dMissiles); >0) {
+						xDatabaseNext(dMissiles);
+						pos = xGetVector(dMissiles, xMissilePos);
+						dir = xsVectorNormalize(xGetVector(dMissiles, xMissileDir));
+						next = pos + dir;
+						if (distanceBetweenVectors(pos, center) < 64.0 || distanceBetweenVectors(next, center) < 64.0) {
+							firstDir = getUnitVector(center, pos);
+							nextDir = getUnitVector(center, next);
+
+							scale = dotProduct(firstDir, nextDir); // angle between the two positions
+							dist = dotProduct(firstDir, xGetVector(dDeflectorShields, xDeflectorShieldDir));
+							if (dist > scale) { // first angle is smaller
+								dist = dotProduct(nextDir, xGetVector(dDeflectorShields, xDeflectorShieldDir));
+								if (dist > scale) { // second angle is smaller too. we are in between the two
+									firstDir = xGetVector(dDeflectorShields, xDeflectorShieldDir);
+									nextDir = xGetVector(dMissiles, xMissileDir);
+									dir = xGetVector(dDeflectorShields, xDeflectorShieldDir) * dotProduct(firstDir, nextDir);
+									dir = xGetVector(dMissiles, xMissileDir) * (-1.0) + dir * 2.0;
+									xSetVector(dMissiles, xMissileDir, dir);
+									trQuestVarSetFromRand("sound", 1, 3, true);
+									trSoundPlayFN("mine"+1*trQuestVarGet("sound")+".wav");
+								}
+							}
+						}
+					}
+				}
+			}
+		case 2:
+			{
+				scale = 0.1 * (xGetInt(dDeflectorShields, xDeflectorShieldTimeout) - trTimeMS());
+				if (scale <= 0) {
+					xUnitSelect(dDeflectorShields, xDeflectorShieldLeft);
+					trUnitDestroy();
+					xUnitSelect(dDeflectorShields, xDeflectorShieldRight);
+					trUnitDestroy();
+					xFreeDatabaseBlock(dDeflectorShields);
+				} else {
+					xUnitSelect(dDeflectorShields, xDeflectorShieldLeft);
+					trSetSelectedScale(1, scale, 5);
+					xUnitSelect(dDeflectorShields, xDeflectorShieldRight);
+					trSetSelectedScale(1, scale, 5);
 				}
 			}
 		}

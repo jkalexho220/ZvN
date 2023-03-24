@@ -144,7 +144,7 @@ highFrequency
 	xDeflectorShieldLeft = xInitAddInt(dDeflectorShields, "leftUnit");
 	xDeflectorShieldRight = xInitAddInt(dDeflectorShields, "rightUnit");
 	xDeflectorShieldStep = xInitAddInt(dDeflectorShields, "step", 0);
-	xDeflectorShieldTimeout = xInitAddInt(dDeflectorShields, "timeout", 800);
+	xDeflectorShieldTimeout = xInitAddInt(dDeflectorShields, "timeout", 500);
 	xDeflectorShieldPos = xInitAddVector(dDeflectorShields, "pos");
 	xDeflectorShieldDir = xInitAddVector(dDeflectorShields, "dir");
 

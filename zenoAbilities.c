@@ -49,6 +49,8 @@ void zenoTurret(int p = 0) {
 	xUnitSelectByID(dTurrets, xUnitID);
 	trMutateSelected(kbGetProtoUnitID("Tower Mirror"));
 	trSetSelectedScale(0, 0.15, 0);
+
+	trSoundPlayFN("mirrortower.wav");
 }
 
 void zenoSpeed(int p = 0) {
@@ -76,17 +78,21 @@ void zenoShield(int p = 0) {
 
 	xUnitSelect(dDeflectorShields, xDeflectorShieldLeft);
 	trMutateSelected(kbGetProtoUnitID("Petosuchus Projectile"));
-	trSetUnitOrientation(rotationMatrix(dir, 0.0, 1.0));
+	trSetUnitOrientation(rotationMatrix(dir, 0.0, 1.0), vector(0,1,0), true);
 	trSetSelectedScale(1.0, 1.0, 5.0);
+	trUnitHighlight(10.0, false);
 
-	xUnitSelect(dDeflectorShields, xDeflectorShieldLeft);
+	xUnitSelect(dDeflectorShields, xDeflectorShieldRight);
 	trMutateSelected(kbGetProtoUnitID("Petosuchus Projectile"));
-	trSetUnitOrientation(rotationMatrix(dir, 0.0, -1.0));
+	trSetUnitOrientation(rotationMatrix(dir, 0.0, -1.0), vector(0,1,0), true);
 	trSetSelectedScale(1.0, 1.0, 5.0);
+	trUnitHighlight(10.0, false);
 
 	dir = rotationMatrix(dir, 0.0, 1.0);
 	xSetVector(dDeflectorShields, xDeflectorShieldPos, pos - dir * 4.0);
 	xSetVector(dDeflectorShields, xDeflectorShieldDir, dir);
+
+	trSoundPlayFN("petsuchosattack.wav");
 }
 
 void zenoBarrage(int p = 0) {
