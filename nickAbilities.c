@@ -86,7 +86,27 @@ void nickSplit(int p = 0) {
 }
 
 void nickMirror(int p = 0) {
-
+	trSoundPlayFN("sentinelbirth.wav");
+	int next = 0;
+	vector pos = closestAvailablePos(p, xGetVector(dPlayerData, xPlayerCastPos));
+	vector dir = vector(1,0,0);
+	vector truedir = vector(1,0,0);
+	xAddDatabaseBlock(dBubbles, true);
+	xSetVector(dBubbles, xBubbleCenter, pos);
+	xSetInt(dBubbles, xBubbleStart, trGetNextUnitScenarioNameNumber());
+	for(i=0; < 32) {
+		next = trGetNextUnitScenarioNameNumber();
+		trArmyDispatch("0,0","Dwarf",1,31,0,31,0,true);
+		trUnitSelectClear();
+		trUnitSelect(""+next, true);
+		trMutateSelected(kbGetProtoUnitID("UI Range Indicator Norse SFX"));
+		trSetUnitOrientation(dir, vector(0,1,0), true);
+		truedir = pos - vector(31, 0, 31) + dir * 9.0;
+		trSetSelectedUpVector(xsVectorGetX(truedir), 0, xsVectorGetZ(truedir));
+		dir = rotationMatrix(dir, 0.980785, 0.19509); //11.25 degrees
+	}
+	xSetInt(dBubbles, xBubbleEnd, trGetNextUnitScenarioNameNumber());
+	xSetInt(dBubbles, xBubbleTimeout, trTimeMS() + 9000);
 }
 
 void nickMissiles(int p = 0) {

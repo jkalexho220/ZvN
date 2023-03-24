@@ -67,6 +67,12 @@ int xCarouselDir = 0;
 int xCarouselTimeout = 0;
 int xCarouselStep = 0;
 
+int dBubbles = 0;
+int xBubbleStart = 0;
+int xBubbleEnd = 0;
+int xBubbleCenter = 0;
+int xBubbleTimeout = 0;
+
 void setupZeno(int p = 0) {
 	xSetPointer(dPlayerData, p);
 	xSetString(dPlayerData, xPlayerProto, "Hoplite", p);
@@ -155,6 +161,7 @@ highFrequency
 	xTurretPos = xInitAddVector(dTurrets, "pos");
 
 	dDeflectorShields = xInitDatabase("Deflector Shields");
+	xInitAddInt(dDeflectorShields, "owner");
 	xDeflectorShieldLeft = xInitAddInt(dDeflectorShields, "leftUnit");
 	xDeflectorShieldRight = xInitAddInt(dDeflectorShields, "rightUnit");
 	xDeflectorShieldStep = xInitAddInt(dDeflectorShields, "step", 0);
@@ -170,6 +177,13 @@ highFrequency
 	xCarouselDir = xInitAddVector(dCarousels, "dir", vector(1,0,0));
 	xCarouselTimeout = xInitAddInt(dCarousels, "timeout");
 	xCarouselStep = xInitAddInt(dCarousels, "step", 0);
+
+	dBubbles = xInitDatabase("bubble shields");
+	xInitAddInt(dBubbles, "owner");
+	xBubbleStart = xInitAddInt(dBubbles, "start");
+	xBubbleEnd = xInitAddInt(dBubbles, "end");
+	xBubbleCenter = xInitAddVector(dBubbles, "center");
+	xBubbleTimeout = xInitAddInt(dBubbles, "timeout");
 
 	int db = 0;
 	for(p=1; <= 2) {

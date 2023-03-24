@@ -101,7 +101,8 @@ void zenoBarrage(int p = 0) {
 }
 
 void zenoCarousel(int p = 0) {
-	vector pos = closestAvailablePos(p, xGetVector(dPlayerData, xPlayerCastPos, p));
+	//vector pos = closestAvailablePos(p, xGetVector(dPlayerData, xPlayerCastPos, p));
+	vector pos = xGetVector(dPlayerData, xPlayerPos);
 	xAddDatabaseBlock(dCarousels, true);
 	xSetInt(dCarousels, xOwner, p);
 	xSetVector(dCarousels, xCarouselPos, pos);
