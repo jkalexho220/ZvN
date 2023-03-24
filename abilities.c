@@ -15,5 +15,5 @@ const int NICK_TELEPORT = 9;
 const int NICK_TURRET = 10;
 const int NICK_MISSILES = 11;
 const int NICK_MIRROR = 12;
-const int NICK_PORTAL = 13;
-const int NICK_SPLIT = 14;
+const int NICK_SPLIT = 13;
+const int NICK_ON_HAWK = 14;

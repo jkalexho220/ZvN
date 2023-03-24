@@ -97,6 +97,7 @@ runImmediately
 
 		trModifyProtounit("Hero Greek Achilles", p, 5, 99); // you can fit a lot of things on this horse
 
+		trModifyProtounit("Dwarf", p, 55, 4); // flying dwarves
 		modifyPlayableProto("Hoplite", p);
 		modifyPlayableProto("Hero Greek Odysseus", p);
 		modifyBuildableProto("House", p);

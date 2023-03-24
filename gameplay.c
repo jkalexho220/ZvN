@@ -131,30 +131,72 @@ highFrequency
 					case ZENO_GRID:
 						{
 							zenoLaserGrid(p);
+							break;
 						}
 					case ZENO_TURRET:
 						{
 							zenoTurret(p);
+							break;
 						}
 					case ZENO_SPEED:
 						{
 							zenoSpeed(p);
+							break;
 						}
 					case ZENO_SHIELD:
 						{
 							zenoShield(p);
+							break;
 						}
 					case ZENO_BARRAGE:
 						{
 							zenoBarrage(p);
+							break;
 						}
 					case ZENO_CAROUSEL:
 						{
 							zenoCarousel(p);
+							break;
 						}
 					case ZENO_WORLD_SPLITTER:
 						{
 							zenoWorldSplitter(p);
+							break;
+						}
+					case NICK_VOLLEY:
+						{
+							nickVolley(p);
+							break;
+						}
+					case NICK_TURRET:
+						{
+							nickTurret(p);
+							break;
+						}
+					case NICK_TELEPORT:
+						{
+							nickTeleport(p);
+							break;
+						}
+					case NICK_SPLIT:
+						{
+							nickSplit(p);
+							break;
+						}
+					case NICK_MIRROR:
+						{
+							nickMirror(p);
+							break;
+						}
+					case NICK_MISSILES:
+						{
+							nickMissiles(p);
+							break;
+						}
+					case NICK_ON_HAWK:
+						{
+							nickOnHawk(p);
+							break;
 						}
 					}
 					xSetInt(db, xAbilityType, ABILITY_ON_COOLDOWN);
@@ -488,7 +530,7 @@ highFrequency
 			pos = xGetVector(dMissiles, xMissilePrev);
 			dist = xsSqrt(dist);
 			if (rayCollision(xGetVector(dPlayerData, xPlayerPos, 3 - p), pos, xsVectorNormalize(xGetVector(dMissiles, xMissileDir)), dist + 1.0, 1.0)) {
-				if (damagePlayer(3 - p, 3)) {
+				if (damagePlayer(3 - p, 2)) {
 					xUnitSelectByID(dMissiles, xUnitID);
 					trUnitDestroy();
 					xFreeDatabaseBlock(dMissiles);
@@ -510,12 +552,14 @@ highFrequency
 	if (xGetDatabaseCount(dTurrets) > 0) {
 		xDatabaseNext(dTurrets);
 		p = xGetInt(dTurrets, xOwner);
+		/*
 		if (xGetInt(dTurrets, xTurretType) == NICK_ABILITIES) {
 			pos = xGetVector(dTurrets, xTurretPos);
 			dir = getUnitVector(pos, xGetVector(dPlayerData, xPlayerPos, 3 - p));
 			xUnitSelectByID(dTurrets, xUnitID);
 			trSetSelectedUpVector(xsVectorGetX(dir), -1.0, xsVectorGetZ(dir));
 		}
+		*/
 
 		if (trTimeMS() > xGetInt(dTurrets, xTurretCooldown)) {
 			dir = getUnitVector(xGetVector(dTurrets, xTurretPos), xGetVector(dPlayerData, xPlayerPos, 3 - p));
@@ -526,7 +570,7 @@ highFrequency
 				trUnitChangeProtoUnit("Spy Eye");
 				xUnitSelectByID(dTurrets, xUnitID);
 				trMutateSelected(kbGetProtoUnitID("Tower Mirror"));
-				trSetSelectedScale(0, 0.15, 0);
+				trSetSelectedScale(0, 0.1, 0);
 			} else if (xGetInt(dTurrets, xTurretType) == NICK_ABILITIES) {
 				shootMissile(p, xGetVector(dTurrets, xTurretPos), dir);
 			}

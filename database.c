@@ -184,6 +184,6 @@ highFrequency
 		xSetInt(dPlayerData, xPlayerAbilities, db);
 	}
 
-	setupZeno(1);
-	setupNick(2);
+	setupZeno(2);
+	setupNick(1);
 }

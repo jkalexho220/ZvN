@@ -38,7 +38,7 @@ void zenoTurret(int p = 0) {
 	trUnitChangeProtoUnit("Spy Eye");
 	xUnitSelectByID(dTurrets, xUnitID);
 	trMutateSelected(kbGetProtoUnitID("Tower Mirror"));
-	trSetSelectedScale(0, 0.15, 0);
+	trSetSelectedScale(0, 0.1, 0);
 
 	trSoundPlayFN("mirrortower.wav");
 }

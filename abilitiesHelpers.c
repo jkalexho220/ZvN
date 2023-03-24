@@ -1,6 +1,6 @@
 
 int randomAbility(int p = 0) {
-	trQuestVarSetFromRand("temp", 1, 7, true);
+	trQuestVarSetFromRand("temp", 3, 3, true);
 	trQuestVarSetFromRand("temp2", 1, 15, true);
 	if (trQuestVarGet("temp2") < trQuestVarGet("temp")) {
 		trQuestVarSet("temp", trQuestVarGet("temp2"));
@@ -74,7 +74,7 @@ string abilityName(int ability = 0) {
 		}
 	case NICK_MIRROR:
 		{
-			name = "Mirror Circle";
+			name = "Mirror Bubble";
 			break;
 		}
 	case NICK_MISSILES:
@@ -82,9 +82,9 @@ string abilityName(int ability = 0) {
 			name = "Homing Missiles";
 			break;
 		}
-	case NICK_PORTAL:
+	case NICK_ON_HAWK:
 		{
-			name = "Arrow Portal";
+			name = "Nick on Hawk";
 			break;
 		}
 	}
