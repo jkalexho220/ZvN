@@ -76,6 +76,7 @@ runImmediately
 
 	trModifyProtounit("Dwarf", 0, 55, 4); // flying dwarves
 
+
 	for(p=1; <= 2) {
 		trTechSetStatus(p, 304, 4);
 		trPlayerGrantResources(p, "Food", -999);
@@ -91,6 +92,10 @@ runImmediately
 		// heavy hoplite and iron all
 		trTechSetStatus(p, 7, 4);
 		trTechSetStatus(p, 476, 4);
+
+		zInitProtoUnitStat("Meteorite", p, 1, 100.0); // who knew meteorites were so fast?
+
+		trModifyProtounit("Hero Greek Achilles", p, 5, 99); // you can fit a lot of things on this horse
 
 		modifyPlayableProto("Hoplite", p);
 		modifyPlayableProto("Hero Greek Odysseus", p);

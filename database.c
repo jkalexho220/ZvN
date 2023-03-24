@@ -17,6 +17,7 @@ int xPlayerAttackNext = 0;
 int xPlayerAttackDir = 0;
 
 int xPlayerSphinx = 0;
+int xPlayerWorldSplitterLava = 0;
 
 int xAbilityCooldown = 0;
 int xAbilityType = 0;
@@ -106,6 +107,7 @@ highFrequency
 
 	xPlayerSphinx = xInitAddInt(dPlayerData, "sphinxSFX");
 	xPlayerSpawner = xInitAddInt(dPlayerData, "spawner");
+	xPlayerWorldSplitterLava = xInitAddInt(dPlayerData, "lava");
 
 	// abilities
 	xPlayerButton = xInitAddInt(dPlayerData, "button", BUTTON_NONE);

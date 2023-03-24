@@ -13,20 +13,23 @@ void reselectMyself() {
 	trackPlay(1,EVENT_REMOVE_CAM_TRACKS);
 }
 
-void damagePlayer(int p = 0, float amt = 0) {
-	trUnitSelectClear();
-	trUnitSelectByID(xGetInt(dPlayerData, xPlayerUnitID, p));
-	trDamageUnit(amt);
-	vector pos = xGetVector(dPlayerData, xPlayerPos, p);
-	trArmyDispatch("0,0","Dwarf",1,xsVectorGetX(pos), 0, xsVectorGetZ(pos),0,true);
-	trArmySelect("0,0");
-	//trDamageUnitPercent(100);
-	trUnitChangeProtoUnit("Lightning Sparks");
-	trQuestVarSetFromRand("sound", 1, 5, true);
-	trSoundPlayFN("ui\lightning"+1*trQuestVarGet("sound")+".wav");
-	if (trCurrentPlayer() == p) {
-		trCameraShake(0.16,0.16);
+bool damagePlayer(int p = 0, float amt = 0) {
+	if (xGetBool(dPlayerData, xPlayerCanCast, p)) {
+		trUnitSelectClear();
+		trUnitSelectByID(xGetInt(dPlayerData, xPlayerUnitID, p));
+		trDamageUnit(amt);
+		vector pos = xGetVector(dPlayerData, xPlayerPos, p);
+		trArmyDispatch("0,0","Dwarf",1,xsVectorGetX(pos), 0, xsVectorGetZ(pos),0,true);
+		trArmySelect("0,0");
+		//trDamageUnitPercent(100);
+		trUnitChangeProtoUnit("Lightning Sparks");
+		trQuestVarSetFromRand("sound", 1, 5, true);
+		trSoundPlayFN("ui\lightning"+1*trQuestVarGet("sound")+".wav");
+		if (trCurrentPlayer() == p) {
+			trCameraShake(0.16,0.16);
+		}
 	}
+	return(xGetBool(dPlayerData, xPlayerCanCast, p));
 }
 
 bool positionInArena(vector pos = vector(0,0,0)) {

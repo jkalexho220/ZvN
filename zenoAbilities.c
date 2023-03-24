@@ -120,5 +120,85 @@ void zenoCarousel(int p = 0) {
 }
 
 void zenoWorldSplitter(int p = 0) {
+	xSetBool(dPlayerData, xPlayerCanCast, false, p); // there can only be one
+	vector dir = getUnitVector(xGetVector(dPlayerData, xPlayerPos), xGetVector(dPlayerData, xPlayerCastPos));
+	if (trQuestVarGet("p"+p+"phoenix") == 0) {
+		trQuestVarSet("p"+p+"phoenix", trGetNextUnitScenarioNameNumber());
+		trArmyDispatch(""+p+",0","Phoenix",1,1,0,1,0,true);
+		trQuestVarSet("p"+p+"floater", trGetNextUnitScenarioNameNumber());
+		trArmyDispatch(""+p+",0","Phoenix",1,1,0,1,0,true);
 
+		trQuestVarSet("p"+p+"meteorite", trGetNextUnitScenarioNameNumber());
+		trArmyDispatch(""+p+",0", "Dwarf", 1, 1, 0, 1, 0, true);
+		trUnitSelectClear();
+		trUnitSelectByQV("p"+p+"meteorite");
+		spyEffect(kbGetProtoUnitID("Cinematic Block"), -1, xsVectorSet(dPlayerData, xPlayerWorldSplitterLava, p), vector(0,0,0));
+
+		trQuestVarSet("p"+p+"worldSplitterLaser", trGetNextUnitScenarioNameNumber());
+		trArmyDispatch(""+p+",0", "Dwarf", 1, 1, 0, 1, 0, true);
+	}
+
+	zSetProtoUnitStat("Meteorite", p, 1, 1);
+
+	xUnitSelectByID(dPlayerData, xPlayerUnitID);
+	trMutateSelected(kbGetProtoUnitID("Transport Ship Greek"));
+
+	// garrison floater and meteorite
+	trUnitSelectClear();
+	trUnitSelectByQV("p"+p+"floater", true);
+	trMutateSelected(kbGetProtoUnitID("Dwarf"));
+	trImmediateUnitGarrison(""+xGetInt(dPlayerData, xPlayerUnit));
+	trUnitChangeProtoUnit("Phoenix");
+	trUnitSelectClear();
+	trUnitSelectByQV("p"+p+"meteorite", true);
+	trMutateSelected(kbGetProtoUnitID("Dwarf"));
+	trImmediateUnitGarrison(""+xGetInt(dPlayerData, xPlayerUnit));
+	trUnitChangeProtoUnit("Dwarf");
+
+	trUnitSelectClear();
+	trUnitSelectByQV("p"+p+"meteorite");
+	trSetSelectedScale(0,0,0);
+	trSetUnitOrientation(dir, vector(0,1,0), true);
+
+	trUnitSelectClear();
+	trUnitSelectByQV("p"+p+"floater");
+	trMutateSelected(kbGetProtoUnitID("Hero Greek Achilles"));
+
+	xUnitSelectByID(dPlayerData, xPlayerUnitID);
+	trMutateSelected(kbGetProtoUnitID("Relic"));
+	trImmediateUnitGarrison(""+1*trQuestVarGet("p"+p+"floater"));
+	trMutateSelected(kbGetProtoUnitID("Hoplite"));
+
+	trUnitSelectClear();
+	trUnitSelectByQV("p"+p+"phoenix");
+	trMutateSelected(kbGetProtoUnitID("Phoenix"));
+	trUnitOverrideAnimation(2, 0, true, false, -1);
+	trMutateSelected(kbGetProtoUnitID("Relic"));
+	trImmediateUnitGarrison(""+1*trQuestVarGet("p"+p+"floater"));
+	trMutateSelected(kbGetProtoUnitID("Phoenix"));
+
+	trUnitSelectClear();
+	trUnitSelectByQV("p"+p+"worldSplitterLaser");
+	trMutateSelected(kbGetProtoUnitID("Relic"));
+	trImmediateUnitGarrison(""+1*trQuestVarGet("p"+p+"floater"));
+	trUnitChangeProtoUnit("Phoenix");
+	trUnitSelectClear();
+	trUnitSelectByQV("p"+p+"worldSplitterLaser");
+	trMutateSelected(kbGetProtoUnitID("Petosuchus Projectile"));
+
+	trUnitSelectClear();
+	trUnitSelectByQV("p"+p+"floater");
+	trMutateSelected(kbGetProtoUnitID("Wadjet Spit"));
+	trSetUnitOrientation(dir, vector(0,1,0), true);
+
+	trQuestVarSet("p"+p+"worldSplitterActive", 1);
+
+	trVectorQuestVarSet("p"+p+"worldSplitterDir", dir);
+	trVectorQuestVarSet("p"+p+"worldSplitterPrev", xGetVector(dPlayerData, xPlayerPos));
+
+	trQuestVarSet("p"+p+"worldSplitterTimeout", trTimeMS() + 1000);
+	trQuestVarSet("p"+p+"worldSplitterHit", 0);
+
+	trSoundPlayFN("phoenixselect2.wav");
+	trSoundPlayFN("attackwarning.wav");
 }

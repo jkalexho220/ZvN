@@ -195,6 +195,113 @@ highFrequency
 			}
 		}
 
+		// world splitter
+		if (trQuestVarGet("p"+p+"worldSplitterActive") > 0) {
+			switch(1*trQuestVarGet("p"+p+"worldSplitterActive"))
+			{
+			case 1:
+				{
+					if (trTimeMS() > trQuestVarGet("p"+p+"worldSplitterTimeout")) {
+						zSetProtoUnitStat("Meteorite", p, 1, 1.0);
+						trQuestVarSet("p"+p+"worldSplitterActive", 2);
+						trUnitSelectClear();
+						trUnitSelectByQV("p"+p+"meteorite");
+						trMutateSelected(kbGetProtoUnitID("Meteorite"));
+						trUnitOverrideAnimation(6, 0, true, false, -1); // EXPLOSION
+						dir = trVectorQuestVarGet("p"+p+"worldSplitterDir");
+						pos = vectorSetAsTargetVector(xGetVector(dPlayerData, xPlayerPos), dir, 999.0);
+						trUnitMoveToPoint(xsVectorGetX(pos), 0, xsVectorGetZ(pos), -1, false);
+
+						trUnitSelectClear();
+						trUnitSelectByQV("p"+p+"worldSplitterLaser");
+						trSetSelectedScale(12.0,12.0,50.0);
+						trUnitHighlight(50.0, false);
+						trSetUnitOrientation(vector(0,1,0), rotationMatrix(dir, 1.0, 0), true);
+
+						trSoundPlayFN("sonofosirisbolt.wav");
+						trSoundPlayFN("phoenixattack.wav");
+					}
+				}
+			case 2:
+				{
+					// calculate my speed
+					pos = kbGetBlockPosition(""+1*trQuestVarGet("p"+p+"meteorite"));
+					if (distanceBetweenVectors(pos, xGetVector(dPlayerData, xPlayerPos)) > 0.0) {
+						//point the laser at the meteorite
+						trUnitSelectClear();
+						trUnitSelectByQV("p"+p+"worldSplitterLaser");
+						trSetUnitOrientation(xsVectorNormalize(xGetVector(dPlayerData, xPlayerPos) - pos), rotationMatrix(trVectorQuestVarGet("p"+p+"worldSplitterDir"), 0.0, 1.0), true);
+
+						dist = distanceBetweenVectors(pos, xGetVector(dPlayerData, xPlayerPos), false);
+						dir = xsVectorSet(dist, 0, xsVectorGetY(xGetVector(dPlayerData, xPlayerPos)) - 9.0); // construct a vector representation of the 3d angle
+						dir = rotationMatrix(dir, 0.9998, -0.019999); // the angle one second from now is 0.02 radians further
+						dir = dir * ((xsVectorGetY(xGetVector(dPlayerData, xPlayerPos)) - 9.0) / xsVectorGetZ(dir)); // scale it back up
+
+						scale = 60.0 * (xsVectorGetX(dir) - dist); // this is our speed if we need to reach that next spot in 1/60th of a second
+						zSetProtoUnitStat("Meteorite", p, 1, scale);
+					}
+					if (positionInArena(pos) == false) {
+						trQuestVarSet("p"+p+"worldSplitterActive", 3);
+						trQuestVarSet("p"+p+"worldSplitterTimeout", trTimeMS() + 1000);
+						trUnitSelectClear();
+						trUnitSelectByQV("p"+p+"meteorite");
+						trMutateSelected(kbGetProtoUnitID("Cinematic Block"));
+					}
+					next = pos;
+					pos = trVectorQuestVarGet("p"+p+"worldSplitterPrev");
+					dist = distanceBetweenVectors(next, pos);
+					if (dist > 9.0) {
+						dir = trVectorQuestVarGet("p"+p+"worldSplitterDir");
+						dist = xsSqrt(dist);
+						xUnitSelect(dPlayerData, xPlayerWorldSplitterLava);
+						trUnitChangeProtoUnit("Transport Ship Greek");
+						target = trGetNextUnitScenarioNameNumber();
+						trArmyDispatch(""+p+",0","Dwarf",1,xsVectorGetX(pos),0,xsVectorGetZ(pos),0,true);
+						trUnitSelectClear();
+						trUnitSelect(""+target, true);
+						trImmediateUnitGarrison(""+xGetInt(dPlayerData, xPlayerWorldSplitterLava));
+						trUnitChangeProtoUnit("Tartarian Gate flame");
+						
+						xUnitSelect(dPlayerData, xPlayerWorldSplitterLava);
+						trUnitChangeProtoUnit("Cinematic Block");
+
+						trUnitSelectClear();
+						trUnitSelect(""+target, true);
+						trSetSelectedScale(1.0, 1.0, dist * 0.3);
+						if (rayCollision(xGetVector(dPlayerData, xPlayerPos, 3 - p), pos, dir, dist + 2.0, 4.0)) {
+							damagePlayer(3 - p, dist * 10.0);
+						}
+						trVectorQuestVarSet("p"+p+"worldSplitterPrev", next);
+					}
+				}
+			case 3:
+				{
+					scale = 0.012 * (trQuestVarGet("p"+p+"worldSplitterTimeout") - trTimeMS());
+					if (scale > 0) {
+						trUnitSelectClear();
+						trUnitSelectByQV("p"+p+"worldSplitterLaser");
+						trSetSelectedScale(scale, scale, 50.0);
+					} else {
+						xUnitSelectByID(dPlayerData, xPlayerUnitID);
+						trUnitChangeProtoUnit(xGetString(dPlayerData, xPlayerProto));
+						xSetBool(dPlayerData, xPlayerCanCast, true);
+						trSoundPlayFN("godpowerfailed.wav");
+						trUnitSelectClear();
+						trUnitSelectByQV("p"+p+"phoenix");
+						trUnitChangeProtoUnit("Cinematic Block");
+						trUnitSelectClear();
+						trUnitSelectByQV("p"+p+"worldSplitterLaser");
+						trUnitChangeProtoUnit("Cinematic Block");
+
+						trUnitSelectClear();
+						trUnitSelectByQV("p"+p+"floater");
+						trMutateSelected(kbGetProtoUnitID("Cinematic Block"));
+						trQuestVarSet("p"+p+"worldSplitterActive", 0);
+					}
+				}
+			}
+		}
+
 		// basic attacks
 		id = xGetInt(dPlayerData, xPlayerUnitID);
 		// gather information
@@ -381,10 +488,13 @@ highFrequency
 			pos = xGetVector(dMissiles, xMissilePrev);
 			dist = xsSqrt(dist);
 			if (rayCollision(xGetVector(dPlayerData, xPlayerPos, 3 - p), pos, xsVectorNormalize(xGetVector(dMissiles, xMissileDir)), dist + 1.0, 1.0)) {
-				damagePlayer(3 - p, 3);
-				xUnitSelectByID(dMissiles, xUnitID);
-				trUnitDestroy();
-				xFreeDatabaseBlock(dMissiles);
+				if (damagePlayer(3 - p, 3)) {
+					xUnitSelectByID(dMissiles, xUnitID);
+					trUnitDestroy();
+					xFreeDatabaseBlock(dMissiles);
+				} else {
+					xSetVector(dMissiles, xMissilePrev, xGetVector(dMissiles, xMissilePos));
+				}
 			} else {
 				xSetVector(dMissiles, xMissilePrev, xGetVector(dMissiles, xMissilePos));
 				if (vectorInMap(pos) == false) {
@@ -440,7 +550,7 @@ highFrequency
 					for(j=xGetInt(dCarousels, xCarouselStart); < xGetInt(dCarousels, xCarouselEnd)) {
 						trUnitSelectClear();
 						trUnitSelect(""+j, true);
-						trSetSelectedScale(15.0, 15.0, 40.0);
+						trSetSelectedScale(12.0, 12.0, 40.0);
 						trUnitHighlight(50.0, false);
 					}
 					trSoundPlayFN("sonofosirisbolt.wav");
@@ -461,7 +571,7 @@ highFrequency
 				}
 			}
 		}
-		scale = 0.03 * (xGetInt(dCarousels, xCarouselTimeout) - trTimeMS());
+		scale = 0.024 * (xGetInt(dCarousels, xCarouselTimeout) - trTimeMS());
 		for(j=xGetInt(dCarousels, xCarouselStart); < xGetInt(dCarousels, xCarouselEnd)) {
 			trUnitSelectClear();
 			trUnitSelect(""+j, true);
@@ -472,7 +582,7 @@ highFrequency
 			if ((db < 4) && (xGetInt(dCarousels, xCarouselStep) == 1)) { // hitboxes for the first four lasers
 				db = db + 1;
 				pos = xGetVector(dCarousels, xCarouselPos) - dir * 40.0;
-				if (rayCollision(xGetVector(dPlayerData, xPlayerPos, 3 - p), pos, dir, 80.0, 4.0)) {
+				if (rayCollision(xGetVector(dPlayerData, xPlayerPos, 3 - p), pos, dir, 80.0, 2.0)) {
 					damagePlayer(3 - p, timediff * 3.0);
 					db = 100; // no need to check the rest
 				}

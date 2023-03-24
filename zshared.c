@@ -1077,7 +1077,7 @@ void zInitProtoUnitStat(string r = "", int p = 0, int f = 0, float v = 0.0) {
 	trQuestVarSet("p"+p+"pf"+kbGetProtoUnitID(r)+"f"+f, v);
 }
 
-void mSetProtoUnitStat(string r = "", int p = 0, int f = 0, float v = 0.0) {
+void zSetProtoUnitStat(string r = "", int p = 0, int f = 0, float v = 0.0) {
 for(zsps=0; >1){}
 	zsps = kbGetProtoUnitID(r);
 	trModifyProtounit(r, p, f, 0.0 + v - trQuestVarGet("p"+p+"pf"+zsps+"f"+f));
