@@ -43,6 +43,19 @@ int xLaserTimeout = 0;
 int xLaserLength = 0;
 int xLaserDamage = 0;
 
+int dTurrets = 0;
+int xTurretCooldown = 0;
+int xTurretType = 0;
+int xTurretPos = 0;
+
+int dDeflectorShields = 0;
+int xDeflectorShieldLeft = 0;
+int xDeflectorShieldRight = 0;
+int xDeflectorShieldStep = 0;
+int xDeflectorShieldTimeout = 0;
+int xDeflectorShieldPos = 0;
+int xDeflectorShieldDir = 0;
+
 void setupZeno(int p = 0) {
 	xSetPointer(dPlayerData, p);
 	xSetString(dPlayerData, xPlayerProto, "Hoplite", p);
@@ -119,6 +132,21 @@ highFrequency
 	xMissileDir = xInitAddVector(dMissiles, "dir");
 	xMissilePrev = xInitAddVector(dMissiles, "prev");
 	xMissileHoming = xInitAddBool(dMissiles, "homing");
+
+	// turrets
+	dTurrets = xInitDatabase("turrets");
+	OwnerNameID(dTurrets);
+	xTurretType = xInitAddInt(dTurrets, "type", ZENO_ABILITIES);
+	xTurretCooldown = xInitAddInt(dTurrets, "cooldown");
+	xTurretPos = xInitAddVector(dTurrets, "pos");
+
+	dDeflectorShields = xInitDatabase("Deflector Shields");
+	xDeflectorShieldLeft = xInitAddInt(dDeflectorShields, "leftUnit");
+	xDeflectorShieldRight = xInitAddInt(dDeflectorShields, "rightUnit");
+	xDeflectorShieldStep = xInitAddInt(dDeflectorShields, "step", 0);
+	xDeflectorShieldTimeout = xInitAddInt(dDeflectorShields, "timeout", 800);
+	xDeflectorShieldPos = xInitAddVector(dDeflectorShields, "pos");
+	xDeflectorShieldDir = xInitAddVector(dDeflectorShields, "dir");
 
 	int db = 0;
 	for(p=1; <= 2) {

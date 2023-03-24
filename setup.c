@@ -74,6 +74,8 @@ runImmediately
 
 	trTechSetStatus(0, 304, 4);
 
+	trModifyProtounit("Dwarf", 0, 55, 4); // flying dwarves
+
 	for(p=1; <= 2) {
 		trTechSetStatus(p, 304, 4);
 		trPlayerGrantResources(p, "Food", -999);

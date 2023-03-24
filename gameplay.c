@@ -62,9 +62,9 @@ highFrequency
 	trEventSetHandler(EVENT_REMOVE_CAM_TRACKS, "removeCamTracks");
 	trEventSetHandler(EVENT_BUILD_AT_CURSOR, "buildAtCursor");
 
-	map("q", "game", "trackInsert(); trackAddWaypoint();trackPlay(-1,0);");
-	map("w", "game", "trackInsert(); trackAddWaypoint();trackPlay(-1,1);");
-	map("e", "game", "trackInsert(); trackAddWaypoint();trackPlay(-1,2);");
+	map("q", "game", "trackInsert(); trackAddWaypoint();trackPlay(-1,"+BUTTON_Q+");");
+	map("w", "game", "trackInsert(); trackAddWaypoint();trackPlay(-1,"+BUTTON_W+");");
+	map("e", "game", "trackInsert(); trackAddWaypoint();trackPlay(-1,"+BUTTON_E+");");
 
 	// spawn players
 	spawnPlayer(1, vector(21,9,21));
@@ -121,13 +121,18 @@ highFrequency
 				if (xGetInt(db, xAbilityType) != ABILITY_ON_COOLDOWN) {
 					switch(xGetInt(db, xAbilityType))
 					{
-					case ZENO_BOUNCING:
+					case ZENO_GRID:
 						{
-							zenoBouncingLaser(p);
+							zenoLaserGrid(p);
+						}
+					case ZENO_TURRET:
+						{
+							zenoTurret(p);
 						}
 					}
 					xSetInt(db, xAbilityType, ABILITY_ON_COOLDOWN);
-					xSetInt(db, xAbilityCooldown, trTimeMS() + 5000);
+					xSetInt(db, xAbilityCooldown, trTimeMS() + 15000);
+					updateAbilities(p, true);
 				} else if (trCurrentPlayer() == p) {
 					trSoundPlayFN("cantdothat.wav");
 					trChatSend(0, "Your " + hotkeyName(xGetInt(dPlayerData, xPlayerButton)) + " is on cooldown!");
@@ -136,6 +141,14 @@ highFrequency
 		}
 		xSetInt(dPlayerData, xPlayerButton, BUTTON_NONE);
 		updateAbilities(p);
+
+		// speed boost
+		if (trQuestVarGet("p"+p+"speed") == 1) {
+			if (trTimeMS() > trQuestVarGet("p"+p+"speedTimeout")) {
+				trQuestVarSet("p"+p+"speed", 0);
+				trModifyProtounit("Hoplite", p, 1, -5);
+			}
+		}
 
 		// basic attacks
 		id = xGetInt(dPlayerData, xPlayerUnitID);
@@ -225,7 +238,7 @@ highFrequency
 					trUnitDestroy();
 					xFreeDatabaseBlock(dLasers);
 				} else {
-					trSetSelectedScale(scale, scale, xGetFloat(dLasers, xLaserLength) * 1.3);
+					trSetSelectedScale(scale, scale, xGetFloat(dLasers, xLaserLength) * 1.222222);
 				}
 			}
 		}
@@ -256,6 +269,33 @@ highFrequency
 					trUnitDestroy();
 					xFreeDatabaseBlock(dMissiles);
 				}
+			}
+		}
+	}
+
+	// Turrets
+	if (xGetDatabaseCount(dTurrets) > 0) {
+		xDatabaseNext(dTurrets);
+		p = xGetInt(dTurrets, xOwner);
+		if (xGetInt(dTurrets, xTurretType) == NICK_ABILITIES) {
+			pos = xGetVector(dTurrets, xTurretPos);
+			dir = getUnitVector(pos, xGetVector(dPlayerData, xPlayerPos, 3 - p));
+			xUnitSelectByID(dTurrets, xUnitID);
+			trSetSelectedUpVector(xsVectorGetX(dir), -1.0, xsVectorGetZ(dir));
+		}
+
+		if (trTimeMS() > xGetInt(dTurrets, xTurretCooldown)) {
+			dir = getUnitVector(xGetVector(dTurrets, xTurretPos), xGetVector(dPlayerData, xPlayerPos, 3 - p));
+			xSetInt(dTurrets, xTurretCooldown, xGetInt(dTurrets, xTurretCooldown) + 5000);
+			if (xGetInt(dTurrets, xTurretType) == ZENO_ABILITIES) {
+				shootLaser(p, xGetInt(dTurrets, xUnitName), dir);
+				xUnitSelectByID(dTurrets, xUnitID);
+				trUnitChangeProtoUnit("Spy Eye");
+				xUnitSelectByID(dTurrets, xUnitID);
+				trMutateSelected(kbGetProtoUnitID("Tower Mirror"));
+				trSetSelectedScale(0, 0.15, 0);
+			} else if (xGetInt(dTurrets, xTurretType) == NICK_ABILITIES) {
+				shootMissile(p, xGetVector(dTurrets, xTurretPos), dir);
 			}
 		}
 	}

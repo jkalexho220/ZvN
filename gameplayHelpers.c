@@ -26,6 +26,11 @@ void damagePlayer(int p = 0, float amt = 0) {
 	trSoundPlayFN("ui\lightning"+1*trQuestVarGet("sound")+".wav");
 }
 
+bool positionInArena(vector pos = vector(0,0,0)) {
+	vector loc = vectorToGrid(pos);
+	return(trGetTerrainSubType(xsVectorGetX(loc), xsVectorGetZ(loc)) == 53);
+}
+
 /*
 Assumes that the target unit is already selected
 */
@@ -93,7 +98,28 @@ void spawnPlayer(int p = 0, vector pos = vector(0,0,0)) {
 	xSetVector(dPlayerData, xPlayerPos, pos);
 }
 
-void shootLaser(int p = 0, int spawner = 0, vector dir = vector(0,0,0), int delay = 1500) {
+void shootLaserGround(int p = 0, vector pos = vector(0,0,0), vector dir = vector(0,0,0), float length = 40.0, int delay = 1500) {
+	int next = trGetNextUnitScenarioNameNumber();
+	trArmyDispatch("0,0","Dwarf",1,xsVectorGetX(pos),0,xsVectorGetZ(pos),0,true);
+	// change spawner into transport ship
+	// change into laser
+	trUnitSelectClear();
+	trUnitSelect(""+next, true);
+	trMutateSelected(kbGetProtoUnitID("Petosuchus Projectile"));
+	trSetSelectedScale(3.0,0.0, length * 1.222222);
+	trSetUnitOrientation(vector(0,0,0) - dir, vector(0,1,0), true);
+	// add to database
+	xAddDatabaseBlock(dLasers, true);
+	xSetInt(dLasers, xOwner, p);
+	xSetInt(dLasers, xUnitName, next);
+	xSetInt(dLasers, xUnitID, kbGetBlockID(""+next, true));
+	xSetVector(dLasers, xLaserPos, kbGetBlockPosition(""+next, true));
+	xSetVector(dLasers, xLaserDir, dir);
+	xSetInt(dLasers, xLaserTimeout, trTimeMS() + delay);
+	xSetFloat(dLasers, xLaserLength, length);
+}
+
+void shootLaser(int p = 0, int spawner = 0, vector dir = vector(0,0,0), float length = 40.0, int delay = 1500) {
 	int next = trGetNextUnitScenarioNameNumber();
 	trArmyDispatch("0,0","Dwarf",1,1,0,1,0,true);
 	// change spawner into transport ship
@@ -113,7 +139,7 @@ void shootLaser(int p = 0, int spawner = 0, vector dir = vector(0,0,0), int dela
 	trUnitSelectClear();
 	trUnitSelect(""+next, true);
 	trMutateSelected(kbGetProtoUnitID("Petosuchus Projectile"));
-	trSetSelectedScale(3.0,0.0,80.0);
+	trSetSelectedScale(3.0,0.0, length * 1.222222);
 	trSetUnitOrientation(vector(0,0,0) - dir, vector(0,1,0), true);
 	// add to database
 	xAddDatabaseBlock(dLasers, true);
@@ -123,6 +149,7 @@ void shootLaser(int p = 0, int spawner = 0, vector dir = vector(0,0,0), int dela
 	xSetVector(dLasers, xLaserPos, kbGetBlockPosition(""+next, true));
 	xSetVector(dLasers, xLaserDir, dir);
 	xSetInt(dLasers, xLaserTimeout, trTimeMS() + delay);
+	xSetFloat(dLasers, xLaserLength, length);
 }
 
 void shootMissile(int p = 0, vector pos = vector(0,0,0), vector dir = vector(0,0,0), float velocity = 15.0, bool homing = false) {
@@ -155,6 +182,7 @@ highFrequency
 {
 	int id = 0;
 	int unittype = 0;
+	int p = 0;
 	vector scale = vector(0,0,0);
 	vector dest = vector(0,0,0);
 	for(i = spysearch; < trGetNextUnitScenarioNameNumber()) {
@@ -184,29 +212,32 @@ highFrequency
 			}
 			case kbGetProtoUnitID("House"):
 			{
-				xSetVector(dPlayerData, xPlayerCastPos, kbGetBlockPosition(""+i, true), kbUnitGetOwner(id));
+				p = kbUnitGetOwner(id);
+				xSetVector(dPlayerData, xPlayerCastPos, kbGetBlockPosition(""+i, true), p);
+				xSetInt(dPlayerData, xPlayerButton, EVENT_BUILD_HOUSE, p);
 				trUnitSelectClear();
 				trUnitSelectByID(id);
 				trUnitDestroy();
-				xSetInt(dPlayerData, xPlayerButton, EVENT_BUILD_HOUSE);
 				break;
 			}
 			case kbGetProtoUnitID("Storehouse"):
 			{
-				xSetVector(dPlayerData, xPlayerCastPos, kbGetBlockPosition(""+i, true), kbUnitGetOwner(id));
+				p = kbUnitGetOwner(id);
+				xSetVector(dPlayerData, xPlayerCastPos, kbGetBlockPosition(""+i, true), p);
+				xSetInt(dPlayerData, xPlayerButton, EVENT_BUILD_STOREHOUSE, p);
 				trUnitSelectClear();
 				trUnitSelectByID(id);
 				trUnitDestroy();
-				xSetInt(dPlayerData, xPlayerButton, EVENT_BUILD_STOREHOUSE);
 				break;
 			}
 			case kbGetProtoUnitID("Granary"):
 			{
-				xSetVector(dPlayerData, xPlayerCastPos, kbGetBlockPosition(""+i, true), kbUnitGetOwner(id));
+				p = kbUnitGetOwner(id);
+				xSetVector(dPlayerData, xPlayerCastPos, kbGetBlockPosition(""+i, true), p);
+				xSetInt(dPlayerData, xPlayerButton, EVENT_BUILD_GRANARY, p);
 				trUnitSelectClear();
 				trUnitSelectByID(id);
 				trUnitDestroy();
-				xSetInt(dPlayerData, xPlayerButton, EVENT_BUILD_GRANARY);
 				break;
 			}
 		}

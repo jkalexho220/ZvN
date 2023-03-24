@@ -1,6 +1,10 @@
 
 int randomAbility(int p = 0) {
 	trQuestVarSetFromRand("temp", 1, 7, true);
+	trQuestVarSetFromRand("temp2", 3, 4, true);
+	if (trQuestVarGet("temp2") < trQuestVarGet("temp")) {
+		trQuestVarSet("temp", trQuestVarGet("temp2"));
+	}
 	return(xGetInt(dPlayerData, xPlayerAbilitiesStart, p) + trQuestVarGet("temp"));
 }
 
@@ -13,9 +17,9 @@ string abilityName(int ability = 0) {
 			name = "On Cooldown";
 			break;
 		}
-	case ZENO_BOUNCING:
+	case ZENO_GRID:
 		{
-			name = "Bouncing Laser";
+			name = "Laser Grid";
 			break;
 		}
 	case ZENO_TURRET:
@@ -28,14 +32,14 @@ string abilityName(int ability = 0) {
 			name = "Light Speed";
 			break;
 		}
-	case ZENO_MIRROR:
+	case ZENO_SHIELD:
 		{
-			name = "Mirror Circle";
+			name = "Deflector Shield";
 			break;
 		}
-	case ZENO_SWORD:
+	case ZENO_BARRAGE:
 		{
-			name = "Laser Sword";
+			name = "Laser Barrage";
 			break;
 		}
 	case ZENO_CAROUSEL:
@@ -63,19 +67,19 @@ string abilityName(int ability = 0) {
 			name = "Teleport";
 			break;
 		}
-	case NICK_CONVERGE:
+	case NICK_SPLIT:
 		{
-			name = "Bullet Convergence";
+			name = "Split Bullets";
 			break;
 		}
-	case NICK_STORM:
+	case NICK_MIRROR:
 		{
-			name = "Bullet Storm";
+			name = "Mirror Circle";
 			break;
 		}
 	case NICK_MISSILES:
 		{
-			name = "Missile Barrage";
+			name = "Homing Missiles";
 			break;
 		}
 	case NICK_HELL:
@@ -127,11 +131,13 @@ void updateAbilities(int p = 0, bool updateDisplay = false) {
 	}
 
 	if (updateDisplay && (trCurrentPlayer() == p)) {
-		trCounterAbort("countdown");
+		for(i = 3; >0) {
+			trCounterAbort("countdown"+i);
+		}
 		for(i = 1; <= 3) {
 			xSetPointer(db, i);
-			int duration = (trTimeMS() - xGetInt(db, xAbilityCooldown)) / 1000;
-			trCounterAddTime("countdown", duration, -9999, hotkeyName(i) + " " + abilityName(xGetInt(db, xAbilityType)), -1);
+			int duration = (xGetInt(db, xAbilityCooldown) - trTimeMS()) / 1000;
+			trCounterAddTime("countdown"+i, duration, -9999, hotkeyName(i) + " " + abilityName(xGetInt(db, xAbilityType)), -1);
 		}
 	}
 }
