@@ -90,7 +90,11 @@ void nickMirror(int p = 0) {
 }
 
 void nickMissiles(int p = 0) {
-
+	if (trQuestVarGet("p"+p+"nickMissiles") == 0) {
+		trVectorQuestVarSet("p"+p+"nickMissilesDir", vector(1,0,0));
+		trQuestVarSet("p"+p+"nickMissilesNext", trTimeMS());
+	}
+	trQuestVarSet("p"+p+"nickMissiles", trQuestVarGet("p"+p+"nickMissiles") + 12);
 }
 
 void nickOnHawk(int p = 0) {

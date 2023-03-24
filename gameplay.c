@@ -344,6 +344,19 @@ highFrequency
 			}
 		}
 
+		// magic missiles
+		if (trQuestVarGet("p"+p+"nickMissiles") > 0) {
+			if (trTimeMS() > trQuestVarGet("p"+p+"nickMissilesNext")) {
+				trQuestVarSet("p"+p+"nickMissiles", trQuestVarGet("p"+p+"nickMissiles") - 1);
+				trQuestVarSet("p"+p+"nickMissilesNext", trQuestVarGet("p"+p+"nickMissilesNext") + 150);
+				trQuestVarSetFromRand("rand", 1, 3, true);
+				trSoundPlayFN("suckup"+1*trQuestVarGet("rand")+".wav");
+				dir = rotationMatrix(trVectorQuestVarGet("p"+p+"nickMissilesDir"), -0.740544, -0.672008);
+				trVectorQuestVarSet("p"+p+"nickMissilesDir", dir);
+				shootMissile(p, xGetVector(dPlayerData, xPlayerPos), dir, 15.0, true);
+			}
+		}
+
 		// basic attacks
 		id = xGetInt(dPlayerData, xPlayerUnitID);
 		// gather information
@@ -489,6 +502,7 @@ highFrequency
 									dir = xGetVector(dDeflectorShields, xDeflectorShieldDir) * dotProduct(firstDir, nextDir);
 									dir = xGetVector(dMissiles, xMissileDir) * (-1.0) + dir * 2.0;
 									xSetVector(dMissiles, xMissileDir, dir);
+									xSetBool(dMissiles, xMissileHoming, false);
 									trQuestVarSetFromRand("sound", 1, 3, true);
 									trSoundPlayFN("mine"+1*trQuestVarGet("sound")+".wav");
 								}
@@ -520,6 +534,11 @@ highFrequency
 	for(i=xGetDatabaseCount(dMissiles); >0) {
 		xDatabaseNext(dMissiles);
 		p = xGetInt(dMissiles, xOwner);
+		if (xGetBool(dMissiles, xMissileHoming)) {
+			dir = xGetVector(dMissiles, xMissileDir) / (1.0 + timediff);
+			scale = timediff * 20.0;
+			xSetVector(dMissiles, xMissileDir, dir + getUnitVector(xGetVector(dMissiles, xMissilePos), xGetVector(dPlayerData, xPlayerPos, 3 - p), scale));
+		}
 		pos = xGetVector(dMissiles, xMissilePos) + xGetVector(dMissiles, xMissileDir) * timediff;
 		dir = (pos - vector(31, 0, 31)) * 3.33;
 		xUnitSelectByID(dMissiles, xUnitID);
@@ -529,6 +548,13 @@ highFrequency
 		if (dist > 2.0) {
 			pos = xGetVector(dMissiles, xMissilePrev);
 			dist = xsSqrt(dist);
+			if (xGetBool(dMissiles, xMissileHoming)) {
+				dir = xsVectorNormalize(xGetVector(dMissiles, xMissileDir));
+				if ((8.0 * dotProduct(dir, getUnitVector(xGetVector(dMissiles, xMissilePos), xGetVector(dPlayerData, xPlayerPos, 3 - p)))) > 
+					distanceBetweenVectors(xGetVector(dMissiles, xMissilePos), xGetVector(dPlayerData, xPlayerPos, 3 - p), false)) {
+					xSetBool(dMissiles, xMissileHoming, false);
+				}
+			}
 			if (rayCollision(xGetVector(dPlayerData, xPlayerPos, 3 - p), pos, xsVectorNormalize(xGetVector(dMissiles, xMissileDir)), dist + 1.0, 1.0)) {
 				if (damagePlayer(3 - p, 2)) {
 					xUnitSelectByID(dMissiles, xUnitID);
