@@ -92,11 +92,22 @@ void zenoShield(int p = 0) {
 	xSetVector(dDeflectorShields, xDeflectorShieldPos, pos - dir * 4.0);
 	xSetVector(dDeflectorShields, xDeflectorShieldDir, dir);
 
+	xSetInt(dDeflectorShields, xDeflectorShieldTimeout, trTimeMS() + 500);
+
 	trSoundPlayFN("petsuchosattack.wav");
 }
 
 void zenoBarrage(int p = 0) {
-
+	xUnitSelect(dPlayerData, xPlayerSphinx);
+	trMutateSelected(kbGetProtoUnitID("Sphinx"));
+	trSetSelectedScale(0,0,0);
+	trUnitOverrideAnimation(39, 0, false, false, -1);
+	if (trQuestVarGet("p"+p+"barrage") == 0) {
+		trSoundPlayFN("lapadesconvert.wav");
+		trQuestVarSet("p"+p+"barrageNext", trTimeMS() + 100);
+		trVectorQuestVarSet("p"+p+"barrageDir", getUnitVector(xGetVector(dPlayerData, xPlayerPos, 3 - p), xGetVector(dPlayerData, xPlayerPos)));
+	}
+	trQuestVarSet("p"+p+"barrage", trQuestVarGet("p"+p+"barrage") + 24);
 }
 
 void zenoCarousel(int p = 0) {

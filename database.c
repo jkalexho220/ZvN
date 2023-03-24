@@ -16,6 +16,8 @@ int xPlayerAttackStep = 0;
 int xPlayerAttackNext = 0;
 int xPlayerAttackDir = 0;
 
+int xPlayerSphinx = 0;
+
 int xAbilityCooldown = 0;
 int xAbilityType = 0;
 
@@ -92,8 +94,10 @@ highFrequency
 	xPlayerProto = xInitAddString(dPlayerData, "proto");
 	xPlayerCastPos = xInitAddVector(dPlayerData, "Cast Pos");
 	xPlayerCanCast = xInitAddBool(dPlayerData, "can cast", true);
-	xPlayerSpawner = xInitAddInt(dPlayerData, "spawner");
 	xPlayerPos = xInitAddVector(dPlayerData, "position");
+	
+	xPlayerSphinx = xInitAddInt(dPlayerData, "sphinxSFX");
+	xPlayerSpawner = xInitAddInt(dPlayerData, "spawner");
 
 	// abilities
 	xPlayerButton = xInitAddInt(dPlayerData, "button", BUTTON_NONE);

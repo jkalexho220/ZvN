@@ -67,8 +67,8 @@ highFrequency
 	map("e", "game", "trackInsert(); trackAddWaypoint();trackPlay(-1,"+BUTTON_E+");");
 
 	// spawn players
-	spawnPlayer(1, vector(21,9,21));
-	spawnPlayer(2, vector(43,9,43));
+	spawnPlayer(1, vector(21,9,43));
+	spawnPlayer(2, vector(43,9,21));
 	
 	xsEnableRule("gameplay_start");
 }
@@ -88,6 +88,9 @@ highFrequency
 
 	// select myself
 	uiFindType(xGetString(dPlayerData, xPlayerProto, trCurrentPlayer()));
+
+	trQuestVarSet("p1cooldowns", 15000);
+	trQuestVarSet("p2cooldowns", 15000);
 
 	xsEnableRule("the_game");
 }
@@ -155,7 +158,9 @@ highFrequency
 						}
 					}
 					xSetInt(db, xAbilityType, ABILITY_ON_COOLDOWN);
-					xSetInt(db, xAbilityCooldown, trTimeMS() + 15000);
+					xSetInt(db, xAbilityCooldown, trTimeMS() + trQuestVarSet("p"+p+"cooldowns"));
+					trQuestVarSet("p1cooldowns", trQuestVarGet("p1cooldowns") * 0.99);
+					trQuestVarSet("p2cooldowns", trQuestVarGet("p2cooldowns") * 0.99);
 					updateAbilities(p, true);
 				} else if (trCurrentPlayer() == p) {
 					trSoundPlayFN("cantdothat.wav");
@@ -171,6 +176,22 @@ highFrequency
 			if (trTimeMS() > trQuestVarGet("p"+p+"speedTimeout")) {
 				trQuestVarSet("p"+p+"speed", 0);
 				trModifyProtounit("Hoplite", p, 1, -5);
+			}
+		}
+
+		// barrage
+		if (trQuestVarGet("p"+p+"barrage") > 0) {
+			if (trTimeMS() > trQuestVarGet("p"+p+"barrageNext")) {
+				trQuestVarSet("p"+p+"barrageNext", trTimeMS() + 100);
+				dir = rotationMatrix(trVectorQuestVarGet("p"+p+"barrageDir"), 0.965926, 0.258819);
+				shootLaser(p, xGetInt(dPlayerData, xPlayerSpawner), dir, 40.0, 1000);
+				trVectorQuestVarSet("p"+p+"barrageDir", dir);
+				trQuestVarSet("p"+p+"barrage", trQuestVarGet("p"+p+"barrage") - 1);
+				if (trQuestVarGet("p"+p+"barrage") == 0) {
+					xUnitSelect(dPlayerData, xPlayerSphinx);
+					trUnitOverrideAnimation(-1, 0, false, true, -1);
+					trMutateSelected(kbGetProtoUnitID("Cinematic Block"));
+				}
 			}
 		}
 
@@ -242,12 +263,12 @@ highFrequency
 		case LASER_WARN:
 			{
 				if (trTimeMS() > xGetInt(dLasers, xLaserTimeout)) {
-					trSoundPlayFN("sky passage.wav");
+					trQuestVarSet("laserSound", 1);
 					if (rayCollision(xGetVector(dPlayerData, xPlayerPos, 3 - p), xGetVector(dLasers, xLaserPos), 
 						xGetVector(dLasers, xLaserDir), xGetFloat(dLasers, xLaserLength), 1.0)) {
 						damagePlayer(3 - p, xGetInt(dLasers, xLaserDamage));
 					}
-					xSetInt(dLasers, xLaserTimeout, trTimeMS() + 500 + 100 * xGetInt(dLasers, xLaserDamage));
+					xSetInt(dLasers, xLaserTimeout, trTimeMS() + 300 + 100 * xGetInt(dLasers, xLaserDamage));
 					xSetInt(dLasers, xLaserStep, LASER_FIRED);
 					xUnitSelectByID(dLasers, xUnitID);
 					trUnitHighlight(10.0, false);
@@ -266,6 +287,11 @@ highFrequency
 				}
 			}
 		}
+	}
+
+	if (trQuestVarGet("laserSound") == 1) {
+		trSoundPlayFN("sky passage.wav");
+		trQuestVarSet("laserSound", 0);
 	}
 
 	// deflector shields

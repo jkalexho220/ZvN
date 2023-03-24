@@ -91,6 +91,7 @@ void spawnPlayer(int p = 0, vector pos = vector(0,0,0)) {
 	
 	xUnitSelectByID(dPlayerData, xPlayerUnitID);
 	spyEffect(kbGetProtoUnitID("Cinematic Block"), -1, xsVectorSet(dPlayerData, xPlayerSpawner, p));
+	spyEffect(kbGetProtoUnitID("Cinematic Block"), -1, xsVectorSet(dPlayerData, xPlayerSphinx, p));
 	vector dir = getUnitVector(pos, xsVectorSet(mapSize, 0, mapSize), 1.0);
 	trSetUnitOrientation(dir, vector(0,1,0), true);
 	trUnitChangeProtoUnit(xGetString(dPlayerData, xPlayerProto));

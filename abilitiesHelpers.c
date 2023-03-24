@@ -1,7 +1,7 @@
 
 int randomAbility(int p = 0) {
-	trQuestVarSetFromRand("temp", 3, 4, true);
-	trQuestVarSetFromRand("temp2", 3, 4, true);
+	trQuestVarSetFromRand("temp", 4, 5, true);
+	trQuestVarSetFromRand("temp2", 4, 5, true);
 	if (trQuestVarGet("temp2") < trQuestVarGet("temp")) {
 		trQuestVarSet("temp", trQuestVarGet("temp2"));
 	}
