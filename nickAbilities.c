@@ -70,7 +70,19 @@ void nickTeleport(int p = 0) {
 }
 
 void nickSplit(int p = 0) {
-
+	trSoundPlayFN("changeunit.wav");
+	vector dir = vector(0,0,0);
+	float speed = 0;
+	int index = 0;
+	for(i=xGetDatabaseCount(dMissiles); >0) {
+		index = xDatabaseNext(dMissiles, true);
+		if (xGetInt(dMissiles, xOwner) == p) {
+			dir = xGetVector(dMissiles, xMissileDir);
+			xSetVector(dMissiles, xMissileDir, rotationMatrix(dir, 0.984808, 0.173648));
+			shootMissile(p, xGetVector(dMissiles, xMissilePos), rotationMatrix(dir, 0.984808, -0.173648), 1.0, xGetBool(dMissiles, xMissileHoming));
+			xSetPointer(dMissiles, index);
+		}
+	}
 }
 
 void nickMirror(int p = 0) {
@@ -82,5 +94,9 @@ void nickMissiles(int p = 0) {
 }
 
 void nickOnHawk(int p = 0) {
+
+}
+
+void nickSingularity(int p = 0) {
 
 }

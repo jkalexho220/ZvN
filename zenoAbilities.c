@@ -202,3 +202,7 @@ void zenoWorldSplitter(int p = 0) {
 	trSoundPlayFN("phoenixselect2.wav");
 	trSoundPlayFN("attackwarning.wav");
 }
+
+void zenoFinale(int p = 0) {
+
+}

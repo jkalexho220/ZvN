@@ -1114,6 +1114,10 @@ float distanceBetweenVectors(vector start = vector(0,0,0), vector end = vector(0
 	return(dist);
 }
 
+float vectorMagnitude(vector v = vector(0,0,0)) {
+	return(xsSqrt(xsVectorGetX(v) * xsVectorGetX(v) + xsVectorGetZ(v) * xsVectorGetZ(v)));
+}
+
 float trDistanceBetweenVectorsSquared(string start = "", string end = "") {
 	return(distanceBetweenVectors(trVectorQuestVarGet(start),trVectorQuestVarGet(end)));
 }

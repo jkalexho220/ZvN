@@ -1,9 +1,15 @@
 
 int randomAbility(int p = 0) {
-	trQuestVarSetFromRand("temp", 3, 3, true);
-	trQuestVarSetFromRand("temp2", 1, 15, true);
+	//trQuestVarSetFromRand("temp", ZENO_ABILITIES + 1, NICK_ABILITIES + 1, true);
+	trQuestVarSetFromRand("temp", NICK_SPLIT - NICK_ABILITIES, NICK_SPLIT - NICK_ABILITIES, true);
+	trQuestVarSetFromRand("temp2", 14, 15, true);
 	if (trQuestVarGet("temp2") < trQuestVarGet("temp")) {
 		trQuestVarSet("temp", trQuestVarGet("temp2"));
+	}
+	if (trQuestVarGet("temp") == NICK_ABILITIES) {
+		if (trCurrentPlayer() == p) {
+			trSoundPlayFN("ui\thunder5.wav");
+		}
 	}
 	return(xGetInt(dPlayerData, xPlayerAbilitiesStart, p) + trQuestVarGet("temp"));
 }
@@ -52,6 +58,11 @@ string abilityName(int ability = 0) {
 			name = "World Splitter";
 			break;
 		}
+	case ZENO_DANCE:
+		{
+			name = "Zenofinale (Ultimate)";
+			break;
+		}
 	case NICK_VOLLEY:
 		{
 			name = "Scattershot";
@@ -69,7 +80,7 @@ string abilityName(int ability = 0) {
 		}
 	case NICK_SPLIT:
 		{
-			name = "Split Bullets";
+			name = "Duplicate Bullets";
 			break;
 		}
 	case NICK_MIRROR:
@@ -85,6 +96,11 @@ string abilityName(int ability = 0) {
 	case NICK_ON_HAWK:
 		{
 			name = "Nick on Hawk";
+			break;
+		}
+	case NICK_SINGULARITY:
+		{
+			name = "Singularity (Ultimate)";
 			break;
 		}
 	}
