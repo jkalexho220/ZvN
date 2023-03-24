@@ -1,7 +1,7 @@
 
 int randomAbility(int p = 0) {
-	trQuestVarSetFromRand("temp", 4, 5, true);
-	trQuestVarSetFromRand("temp2", 4, 5, true);
+	trQuestVarSetFromRand("temp", 6, 6, true);
+	trQuestVarSetFromRand("temp2", 6, 15, true);
 	if (trQuestVarGet("temp2") < trQuestVarGet("temp")) {
 		trQuestVarSet("temp", trQuestVarGet("temp2"));
 	}
@@ -82,9 +82,9 @@ string abilityName(int ability = 0) {
 			name = "Homing Missiles";
 			break;
 		}
-	case NICK_HELL:
+	case NICK_PORTAL:
 		{
-			name = "Portal to Space";
+			name = "Arrow Portal";
 			break;
 		}
 	}

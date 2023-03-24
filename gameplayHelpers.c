@@ -24,11 +24,29 @@ void damagePlayer(int p = 0, float amt = 0) {
 	trUnitChangeProtoUnit("Lightning Sparks");
 	trQuestVarSetFromRand("sound", 1, 5, true);
 	trSoundPlayFN("ui\lightning"+1*trQuestVarGet("sound")+".wav");
+	if (trCurrentPlayer() == p) {
+		trCameraShake(0.16,0.16);
+	}
 }
 
 bool positionInArena(vector pos = vector(0,0,0)) {
 	vector loc = vectorToGrid(pos);
 	return(trGetTerrainSubType(xsVectorGetX(loc), xsVectorGetZ(loc)) == 53);
+}
+
+vector closestAvailablePos(int p = 0, vector pos = vector(0,0,0)) {
+	pos = vectorSnapToGrid(pos);
+	if (positionInArena(pos) == false) {
+		vector dir = getUnitVector(pos, xGetVector(dPlayerData, xPlayerPos, p), 2.0);
+		for(i = distanceBetweenVectors(pos, xGetVector(dPlayerData, xPlayerPos, p), false) / 2; >0) {
+			pos = pos + dir;
+			if (positionInArena(pos)) {
+				pos = vectorSnapToGrid(pos);
+				break;
+			}
+		}
+	}
+	return(pos);
 }
 
 /*

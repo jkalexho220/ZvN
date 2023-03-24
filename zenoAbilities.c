@@ -24,17 +24,7 @@ void zenoLaserGrid(int p = 0) {
 }
 
 void zenoTurret(int p = 0) {
-	vector pos = vectorSnapToGrid(xGetVector(dPlayerData, xPlayerCastPos, p));
-	if (positionInArena(pos) == false) {
-		vector dir = getUnitVector(pos, xGetVector(dPlayerData, xPlayerPos, p), 2.0);
-		for(i = distanceBetweenVectors(pos, xGetVector(dPlayerData, xPlayerPos, p), false) / 2; >0) {
-			pos = pos + dir;
-			if (positionInArena(pos)) {
-				pos = vectorSnapToGrid(pos);
-				break;
-			}
-		}
-	}
+	vector pos = closestAvailablePos(p, xGetVector(dPlayerData, xPlayerCastPos, p));
 	xAddDatabaseBlock(dTurrets, true);
 	xSetVector(dTurrets, xTurretPos, pos);
 	xSetInt(dTurrets, xTurretCooldown, trTimeMS() + 1000);
@@ -111,7 +101,22 @@ void zenoBarrage(int p = 0) {
 }
 
 void zenoCarousel(int p = 0) {
-
+	vector pos = closestAvailablePos(p, xGetVector(dPlayerData, xPlayerCastPos, p));
+	xAddDatabaseBlock(dCarousels, true);
+	xSetInt(dCarousels, xOwner, p);
+	xSetVector(dCarousels, xCarouselPos, pos);
+	xSetInt(dCarousels, xCarouselStart, trGetNextUnitScenarioNameNumber());
+	trArmyDispatch("0,0","Dwarf",8,xsVectorGetX(pos),0,xsVectorGetZ(pos),0,true);
+	xSetInt(dCarousels, xCarouselEnd, trGetNextUnitScenarioNameNumber());
+	xSetInt(dCarousels, xCarouselTimeout, trTimeMS() + 2000);
+	for(i=xGetInt(dCarousels, xCarouselStart); < xGetInt(dCarousels, xCarouselEnd)) {
+		trUnitSelectClear();
+		trUnitSelect(""+i, true);
+		trMutateSelected(kbGetProtoUnitID("Petosuchus Projectile"));
+		trSetSelectedScale(5.0, 5.0, 40.0);
+	}
+	trSoundPlayFN("attackwarning.wav");
+	trSoundPlayFN("lapadesconvert.wav");
 }
 
 void zenoWorldSplitter(int p = 0) {

@@ -158,7 +158,7 @@ highFrequency
 						}
 					}
 					xSetInt(db, xAbilityType, ABILITY_ON_COOLDOWN);
-					xSetInt(db, xAbilityCooldown, trTimeMS() + trQuestVarSet("p"+p+"cooldowns"));
+					xSetInt(db, xAbilityCooldown, trTimeMS() + trQuestVarGet("p"+p+"cooldowns"));
 					trQuestVarSet("p1cooldowns", trQuestVarGet("p1cooldowns") * 0.99);
 					trQuestVarSet("p2cooldowns", trQuestVarGet("p2cooldowns") * 0.99);
 					updateAbilities(p, true);
@@ -420,6 +420,64 @@ highFrequency
 			} else if (xGetInt(dTurrets, xTurretType) == NICK_ABILITIES) {
 				shootMissile(p, xGetVector(dTurrets, xTurretPos), dir);
 			}
+		}
+	}
+
+	// carousels
+	for(i=xGetDatabaseCount(dCarousels); >0) {
+		xDatabaseNext(dCarousels);
+		p = xGetInt(dCarousels, xOwner);
+		dir = xGetVector(dCarousels, xCarouselDir);
+		dir = rotationMatrix(dir, xsCos(timediff * 0.4), xsSin(timediff * 0.4));
+		xSetVector(dCarousels, xCarouselDir, dir);
+		db = 0;
+		if (trTimeMS() > xGetInt(dCarousels, xCarouselTimeout)) {
+			xSetInt(dCarousels, xCarouselStep, xGetInt(dCarousels, xCarouselStep) + 1);
+			switch(xGetInt(dCarousels, xCarouselStep))
+			{
+			case 1:
+				{
+					for(j=xGetInt(dCarousels, xCarouselStart); < xGetInt(dCarousels, xCarouselEnd)) {
+						trUnitSelectClear();
+						trUnitSelect(""+j, true);
+						trSetSelectedScale(15.0, 15.0, 40.0);
+						trUnitHighlight(50.0, false);
+					}
+					trSoundPlayFN("sonofosirisbolt.wav");
+					xSetInt(dCarousels, xCarouselTimeout, trTimeMS() + 6000);
+				}
+			case 2:
+				{
+					xSetInt(dCarousels, xCarouselTimeout, trTimeMS() + 500);
+				}
+			case 3:
+				{
+					for(j=xGetInt(dCarousels, xCarouselStart); < xGetInt(dCarousels, xCarouselEnd)) {
+						trUnitSelectClear();
+						trUnitSelect(""+j, true);
+						trUnitDestroy();
+					}
+					xFreeDatabaseBlock(dCarousels);
+				}
+			}
+		}
+		scale = 0.03 * (xGetInt(dCarousels, xCarouselTimeout) - trTimeMS());
+		for(j=xGetInt(dCarousels, xCarouselStart); < xGetInt(dCarousels, xCarouselEnd)) {
+			trUnitSelectClear();
+			trUnitSelect(""+j, true);
+			trSetUnitOrientation(dir, vector(0,1,0), true);
+			if (xGetInt(dCarousels, xCarouselStep) == 2) {
+				trSetSelectedScale(scale, scale, 40.0);
+			}
+			if ((db < 4) && (xGetInt(dCarousels, xCarouselStep) == 1)) { // hitboxes for the first four lasers
+				db = db + 1;
+				pos = xGetVector(dCarousels, xCarouselPos) - dir * 40.0;
+				if (rayCollision(xGetVector(dPlayerData, xPlayerPos, 3 - p), pos, dir, 80.0, 4.0)) {
+					damagePlayer(3 - p, timediff * 3.0);
+					db = 100; // no need to check the rest
+				}
+			}
+			dir = rotationMatrix(dir, 0.707107, 0.707107);
 		}
 	}
 }

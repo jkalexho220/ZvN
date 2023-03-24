@@ -1473,6 +1473,10 @@ void yClearDatabase(string db = "") {
 	xClearDatabase(1*trQuestVarGet("database"+db));
 }
 
+void deployAtVector(int p = 0, string proto = "", int count = 1, vector pos = vector(0,0,0)) {
+	trArmyDispatch(""+p+",0", proto, count, xsVectorGetX(pos), 0, xsVectorGetZ(pos), 0, true);
+}
+
 
 /*
 Starting from NextUnitScenarioNameNumber and going backwards until the quest var 'qv',

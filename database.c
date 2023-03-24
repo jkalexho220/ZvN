@@ -58,6 +58,14 @@ int xDeflectorShieldTimeout = 0;
 int xDeflectorShieldPos = 0;
 int xDeflectorShieldDir = 0;
 
+int dCarousels = 0;
+int xCarouselStart = 0;
+int xCarouselEnd = 0;
+int xCarouselPos = 0;
+int xCarouselDir = 0;
+int xCarouselTimeout = 0;
+int xCarouselStep = 0;
+
 void setupZeno(int p = 0) {
 	xSetPointer(dPlayerData, p);
 	xSetString(dPlayerData, xPlayerProto, "Hoplite", p);
@@ -95,7 +103,7 @@ highFrequency
 	xPlayerCastPos = xInitAddVector(dPlayerData, "Cast Pos");
 	xPlayerCanCast = xInitAddBool(dPlayerData, "can cast", true);
 	xPlayerPos = xInitAddVector(dPlayerData, "position");
-	
+
 	xPlayerSphinx = xInitAddInt(dPlayerData, "sphinxSFX");
 	xPlayerSpawner = xInitAddInt(dPlayerData, "spawner");
 
@@ -151,6 +159,15 @@ highFrequency
 	xDeflectorShieldTimeout = xInitAddInt(dDeflectorShields, "timeout", 500);
 	xDeflectorShieldPos = xInitAddVector(dDeflectorShields, "pos");
 	xDeflectorShieldDir = xInitAddVector(dDeflectorShields, "dir");
+
+	dCarousels = xInitDatabase("Carousels");
+	xInitAddInt(dCarousels, "owner");
+	xCarouselStart = xInitAddInt(dCarousels, "start");
+	xCarouselEnd = xInitAddInt(dCarousels, "end");
+	xCarouselPos = xInitAddVector(dCarousels, "pos");
+	xCarouselDir = xInitAddVector(dCarousels, "dir", vector(1,0,0));
+	xCarouselTimeout = xInitAddInt(dCarousels, "timeout");
+	xCarouselStep = xInitAddInt(dCarousels, "step", 0);
 
 	int db = 0;
 	for(p=1; <= 2) {
