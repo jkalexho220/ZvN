@@ -3,6 +3,7 @@ int xPlayerUnit = 0;
 int xPlayerUnitID = 0;
 int xPlayerCastPos = 0;
 int xPlayerProto = 0;
+int xPlayerCharName = 0;
 int xPlayerCanCast = 0;
 int xPlayerAlive = 0;
 int xPlayerSpawner = 0;
@@ -97,6 +98,7 @@ int xCinematicDuration = 0;
 void setupZeno(int p = 0) {
 	xSetPointer(dPlayerData, p);
 	xSetString(dPlayerData, xPlayerProto, "Hoplite", p);
+	xSetString(dPlayerData, xPlayerCharName, "Zenophobia");
 	xSetInt(dPlayerData, xPlayerAbilitiesStart, ZENO_ABILITIES, p);
 	xSetInt(dPlayerData, xPlayerAttackAnimation, 1);
 	xSetInt(dPlayerData, xPlayerStartDelay, 563);
@@ -106,6 +108,7 @@ void setupZeno(int p = 0) {
 void setupNick(int p = 0) {
 	xSetPointer(dPlayerData, p);
 	xSetString(dPlayerData, xPlayerProto, "Hero Greek Odysseus", p);
+	xSetString(dPlayerData, xPlayerCharName, "Nickonhawk");
 	xSetInt(dPlayerData, xPlayerAbilitiesStart, NICK_ABILITIES, p);
 	xSetInt(dPlayerData, xPlayerAttackAnimation, 12);
 	xSetInt(dPlayerData, xPlayerStartDelay, 480);
@@ -132,6 +135,7 @@ highFrequency
 	xPlayerAlive = xInitAddBool(dPlayerData, "alive", false);
 	xPlayerCanCast = xInitAddBool(dPlayerData, "can cast", true);
 	xPlayerPos = xInitAddVector(dPlayerData, "position");
+	xPlayerCharName = xInitAddString(dPlayerData, "name");
 
 	xPlayerSphinx = xInitAddInt(dPlayerData, "sphinxSFX");
 	xPlayerSpawner = xInitAddInt(dPlayerData, "spawner");

@@ -1,3 +1,47 @@
+rule music
+minInterval 3
+inactive
+{
+	if (trTime() >= trQuestVarGet("musicTime")) {
+		if (customContent) {
+			// custom music?
+		} else {
+			trQuestVarSet("musicTime", trTime() + 50);
+			trQuestVarSet("music", 1 + trQuestVarGet("music"));
+			if (trQuestVarGet("music") > 6) {
+				trQuestVarSet("music", 1);
+			}
+			switch(1*trQuestVarGet("music"))
+			{
+				case 1:
+				{
+					trMusicPlay("music\fight\i wish i could throw shapes.mp3","1",3.0);
+				}
+				case 2:
+				{
+					trMusicPlay("music\fight\li'l drips.mp3","1",3.0);
+				}
+				case 3:
+				{
+					trMusicPlay("music\fight\meatier shower.mp3","1",3.0);
+				}
+				case 4:
+				{
+					trMusicPlay("music\fight\oi, that pops!!!.mp3","1",3.0);
+				}
+				case 5:
+				{
+					trMusicPlay("music\fight\rot loaf.mp3","1",3.0);
+				}
+				case 6:
+				{
+					trMusicPlay("music\fight\the fire brigade.mp3","1",3.0);
+				}
+			}
+		}
+	}
+}
+
 void removeCamTracks(int eventID = -1) {
 	trackRemove();
 	trUnblockAllSounds();
@@ -88,6 +132,7 @@ highFrequency
 	trQuestVarSet("p2cooldowns", 15000);
 
 	xsEnableRule("the_game");
+	xsEnableRule("music");
 }
 
 rule the_game
@@ -840,7 +885,7 @@ highFrequency
 				db = db + 1;
 				pos = xGetVector(dCarousels, xCarouselPos) - dir * 40.0;
 				if (rayCollision(xGetVector(dPlayerData, xPlayerPos, 3 - p), pos, dir, 80.0, 2.0)) {
-					damagePlayer(3 - p, timediff * xGetFloat(dPlayerData, xPlayerAttack, p));
+					damagePlayer(3 - p, timediff * xGetFloat(dPlayerData, xPlayerAttack, p) * 3.0);
 					db = 100; // no need to check the rest
 				}
 			}

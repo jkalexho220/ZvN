@@ -116,6 +116,9 @@ void spawnPlayer(int p = 0, vector pos = vector(0,0,0)) {
 	vector dir = getUnitVector(pos, xsVectorSet(mapSize, 0, mapSize), 1.0);
 	trSetUnitOrientation(dir, vector(0,1,0), true);
 	trUnitChangeProtoUnit(xGetString(dPlayerData, xPlayerProto));
+
+	xUnitSelectByID(dPlayerData, xPlayerUnitID);
+	trUnitChangeName(xGetString(dPlayerData, xPlayerCharName));
 	
 	xSetVector(dPlayerData, xPlayerPos, pos);
 	xSetBool(dPlayerData, xPlayerAlive, true);

@@ -2,6 +2,8 @@ int mapSize = 32;
 float timediff = 0;
 int prevTime = 0;
 
+bool customContent = false;
+
 void modifyPlayableProto(string proto = "", int p = 0) {
 	// HP
 	trModifyProtounit(proto, p, 0, 9999999999999999999.0);
@@ -58,7 +60,7 @@ runImmediately
 	trSetFogAndBlackmap(false, false);
 	trUIFadeToColor(0,0,0,0,0,true);
 	if (aiIsMultiplayer() == false) {
-		uiMessageBox("This map can only be played in multiplayer.","leaveGame()");
+		uiMessageBox("This map can only be played in multiplayer. Invite a friend for an epic duel!","leaveGame()");
 	} else {
 		xsEnableRule("gameplay_setup");
 		xsEnableRule("intro_cinematic_start");

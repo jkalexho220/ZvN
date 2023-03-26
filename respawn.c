@@ -128,6 +128,16 @@ void death(int p = 0) {
 	clearUnitDatabase(dLasers);
 	clearUnitDatabase(dTurrets);
 
+	for(i=xGetDatabaseCount(dCarousels); >0) {
+		xDatabaseNext(dCarousels);
+		for(j=xGetInt(dCarousels, xCarouselStart); < xGetInt(dCarousels, xCarouselEnd)) {
+			trUnitSelectClear();
+			trUnitSelect(""+j, true);
+			trUnitDestroy();
+		}
+	}
+	xClearDatabase(dCarousels);
+
 	trQuestVarSet("p"+p+"nickMissiles", 0);
 	trQuestVarSet("p"+p+"barrage", 0);
 
@@ -146,21 +156,23 @@ void death(int p = 0) {
 	trChatSend(0, "<color={Playercolor("+p+")}>{Playername("+p+")}</color> has died!");
 	trChatSend(0, "" + xGetInt(dPlayerData, xPlayerLives) + " lives remaining!");
 
-	// choose two upgrades at random
-	int first = getRandomUpgrade(p, UPGRADES_COUNT - 1);
-	int second = getRandomUpgrade(p, UPGRADES_COUNT - 2);
-	trQuestVarSet("p"+p+"upgrade" + EVENT_BUILD_HOUSE, first);
-	trQuestVarSet("p"+p+"upgrade" + EVENT_BUILD_GRANARY, second);
-	if (trCurrentPlayer() == p) {
-		trShowChoiceDialog("Choose an upgrade.", upgradeName(first), EVENT_CHOOSE_FIRST_UPGRADE, upgradeName(second), EVENT_CHOOSE_SECOND_UPGRADE);
-	}
-	trQuestVarSet("p"+p+"dwarf", trGetNextUnitScenarioNameNumber());
-	trArmyDispatch(""+p+",0","Dwarf",1,1,0,1,0,true);
-	trArmySelect(""+p+",0");
-	trSetSelectedScale(0,0,0);
+	if (xGetInt(dPlayerData, xPlayerLives) > 0) {
+		// choose two upgrades at random
+		int first = getRandomUpgrade(p, UPGRADES_COUNT - 1);
+		int second = getRandomUpgrade(p, UPGRADES_COUNT - 2);
+		trQuestVarSet("p"+p+"upgrade" + EVENT_BUILD_HOUSE, first);
+		trQuestVarSet("p"+p+"upgrade" + EVENT_BUILD_GRANARY, second);
+		if (trCurrentPlayer() == p) {
+			trShowChoiceDialog("Choose an upgrade.", upgradeName(first), EVENT_CHOOSE_FIRST_UPGRADE, upgradeName(second), EVENT_CHOOSE_SECOND_UPGRADE);
+		}
+		trQuestVarSet("p"+p+"dwarf", trGetNextUnitScenarioNameNumber());
+		trArmyDispatch(""+p+",0","Dwarf",1,1,0,1,0,true);
+		trArmySelect(""+p+",0");
+		trSetSelectedScale(0,0,0);
 
-	trQuestVarSet("p"+p+"respawnTime", trTime() + 10);
-	if (trCurrentPlayer() == p) {
-		trCounterAddTime("respawn", 10, 1, "Respawning...");
+		trQuestVarSet("p"+p+"respawnTime", trTime() + 10);
+		if (trCurrentPlayer() == p) {
+			trCounterAddTime("respawn", 10, 1, "Respawning...");
+		}
 	}
 }
