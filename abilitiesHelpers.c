@@ -2,7 +2,7 @@
 int randomAbility(int p = 0) {
 	//trQuestVarSetFromRand("temp", ZENO_ABILITIES + 1, NICK_ABILITIES + 1, true);
 	trQuestVarSetFromRand("temp", 1, 7, true);
-	trQuestVarSetFromRand("temp2", 1, 15, true);
+	trQuestVarSetFromRand("temp2", 1, 12, true);
 	if (trQuestVarGet("temp2") < trQuestVarGet("temp")) {
 		trQuestVarSet("temp", trQuestVarGet("temp2"));
 	}
@@ -45,7 +45,7 @@ string abilityName(int ability = 0) {
 		}
 	case ZENO_BARRAGE:
 		{
-			name = "Triple Attacks";
+			name = "Laser Barrage";
 			break;
 		}
 	case ZENO_CAROUSEL:
@@ -78,13 +78,11 @@ string abilityName(int ability = 0) {
 			name = "Teleport";
 			break;
 		}
-		/*
 	case NICK_SPLIT:
 		{
 			name = "Duplicate Bullets";
 			break;
 		}
-		*/
 	case NICK_BOMB:
 		{
 			name = "Bomb Drop";

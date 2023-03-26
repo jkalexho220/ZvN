@@ -33,7 +33,7 @@ string upgradeName(int upgrade = -1) {
 		}
 	case UPGRADE_BULLETS:
 		{
-			name = "0.2x faster bullets/lasers";
+			name = "+0.3x faster bullets/lasers";
 			break;
 		}
 	case UPGRADE_HEALTH:
@@ -43,7 +43,7 @@ string upgradeName(int upgrade = -1) {
 		}
 	case UPGRADE_TURRETS:
 		{
-			name = "+0.2x Turret Attack Speed";
+			name = "+0.3x Turret Attack Speed";
 			break;
 		}
 	}
@@ -68,7 +68,7 @@ void getUpgrade(int p = 0, int upgrade = -1) {
 		}
 	case UPGRADE_BULLETS:
 		{
-			xSetFloat(dPlayerData, xPlayerBulletSpeed, xGetFloat(dPlayerData, xPlayerBulletSpeed) * 1.2);
+			xSetFloat(dPlayerData, xPlayerBulletSpeed, xGetFloat(dPlayerData, xPlayerBulletSpeed) + 0.3);
 			break;
 		}
 	case UPGRADE_HEALTH:
@@ -78,7 +78,7 @@ void getUpgrade(int p = 0, int upgrade = -1) {
 		}
 	case UPGRADE_TURRETS:
 		{
-			xSetFloat(dPlayerData, xPlayerTurretSpeed, xGetFloat(dPlayerData, xPlayerTurretSpeed) * 1.2);
+			xSetFloat(dPlayerData, xPlayerTurretSpeed, xGetFloat(dPlayerData, xPlayerTurretSpeed) + 0.3);
 			break;
 		}
 	}
@@ -137,6 +137,9 @@ void death(int p = 0) {
 		}
 	}
 	xClearDatabase(dCarousels);
+
+	xUnitSelect(dPlayerData, xPlayerSphinx);
+	trUnitDestroy();
 
 	trQuestVarSet("p"+p+"nickMissiles", 0);
 	trQuestVarSet("p"+p+"barrage", 0);

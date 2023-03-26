@@ -15,9 +15,10 @@ const int NICK_VOLLEY = 9;
 const int NICK_TELEPORT = 10;
 const int NICK_TURRET = 11;
 const int NICK_MISSILES = 12;
-const int NICK_BOMB = 13;
+const int NICK_SPLIT = 13;
+//const int NICK_BOMB = 13;
 const int NICK_MIRROR = 14;
 const int NICK_ON_HAWK = 15;
 const int NICK_SINGULARITY = 16;
 
-const int NICK_SPLIT = 14;
+const int NICK_BOMB = 14000;

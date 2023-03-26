@@ -249,13 +249,11 @@ highFrequency
 							nickBomb(p);
 							break;
 						}
-						/*
 					case NICK_SPLIT:
 						{
 							nickSplit(p);
 							break;
 						}
-						*/
 					case NICK_MIRROR:
 						{
 							nickMirror(p);
@@ -297,14 +295,16 @@ highFrequency
 		// barrage
 		if (trQuestVarGet("p"+p+"barrage") > 0) {
 			if (trTimeMS() > trQuestVarGet("p"+p+"barrageNext")) {
+				/*
 				trQuestVarSet("p"+p+"barrage", 0);
 				xUnitSelect(dPlayerData, xPlayerSphinx);
 				trUnitOverrideAnimation(-1, 0, false, true, -1);
 				trMutateSelected(kbGetProtoUnitID("Cinematic Block"));
-				/*
+				*/
 				trQuestVarSet("p"+p+"barrageNext", trTimeMS() + 300);
-				dir = rotationMatrix(trVectorQuestVarGet("p"+p+"barrageDir"), 0.965926, 0.258819);
-				shootLaser(p, xGetInt(dPlayerData, xPlayerSpawner), dir, 40.0, 1000);
+				//dir = rotationMatrix(trVectorQuestVarGet("p"+p+"barrageDir"), 0.965926, 0.258819);
+				dir = trVectorQuestVarGet("p"+p+"barrageDir");
+				shootLaser(p, xGetInt(dPlayerData, xPlayerSpawner), dir, 40.0);
 				//trVectorQuestVarSet("p"+p+"barrageDir", dir);
 				trQuestVarSet("p"+p+"barrage", trQuestVarGet("p"+p+"barrage") - 1);
 				if (trQuestVarGet("p"+p+"barrage") == 0) {
@@ -312,7 +312,6 @@ highFrequency
 					trUnitOverrideAnimation(-1, 0, false, true, -1);
 					trMutateSelected(kbGetProtoUnitID("Cinematic Block"));
 				}
-				*/
 			}
 		}
 
@@ -444,7 +443,7 @@ highFrequency
 
 		if (trQuestVarGet("p"+p+"hawkActive") > 0) {
 			dir = getUnitVector(trVectorQuestVarGet("p"+p+"hawkPos"), xGetVector(dPlayerData, xPlayerPos, 3 - p));
-			trVectorQuestVarSet("p"+p+"hawkPos", trVectorQuestVarGet("p"+p+"hawkPos") + dir * timediff * 3.0);
+			trVectorQuestVarSet("p"+p+"hawkPos", trVectorQuestVarGet("p"+p+"hawkPos") + dir * timediff * 2.0);
 			// update the circle
 			dir = vector(8,0,0);
 			for(i=trQuestVarGet("p"+p+"hawkWarnStart"); < trQuestVarGet("p"+p+"hawkWarnEnd")) {
@@ -522,6 +521,7 @@ highFrequency
 					case 1: // zenophobia
 						{
 							shootLaser(p, xGetInt(dPlayerData, xPlayerSpawner), dir);
+							/*
 							if (trQuestVarGet("p"+p+"barrage") > 0) {
 								trQuestVarSet("p"+p+"barrage", trQuestVarGet("p"+p+"barrage") - 1);
 								shootLaser(p, xGetInt(dPlayerData, xPlayerSpawner), rotationMatrix(dir, 0.984808, 0.173648));
@@ -532,6 +532,7 @@ highFrequency
 									trMutateSelected(kbGetProtoUnitID("Cinematic Block"));
 								}
 							}
+							*/
 						}
 					case 12: // nickonhawk
 						{
@@ -628,6 +629,7 @@ highFrequency
 	// deflector shields
 	if (xGetDatabaseCount(dDeflectorShields) > 0) {
 		xDatabaseNext(dDeflectorShields);
+		p = xGetInt(dDeflectorShields, xOwner);
 		// collision detection with bullets
 		center = xGetVector(dDeflectorShields, xDeflectorShieldPos);
 		for(i=xGetDatabaseCount(dMissiles); >0) {
@@ -649,6 +651,7 @@ highFrequency
 						dir = firstDir * dotProduct(firstDir, nextDir);
 						dir = nextDir * (-1.0) + dir * 2.0;
 						xSetVector(dMissiles, xMissileDir, dir);
+						xSetInt(dMissiles, xOwner, p);
 						xSetBool(dMissiles, xMissileHoming, false);
 						trQuestVarSetFromRand("sound", 1, 3, true);
 						trSoundPlayFN("mine"+1*trQuestVarGet("sound")+".wav");
@@ -782,7 +785,7 @@ highFrequency
 			p = xGetInt(dHawkBarrages, xOwner);
 			pos = xGetVector(dHawkBarrages, xHawkBarragePos);
 			if (distanceBetweenVectors(xGetVector(dPlayerData, xPlayerPos, 3 - p), pos) < 9.0) {
-				damagePlayer(3 - p, 2.0 * xGetFloat(dPlayerData, xPlayerAttack, p));
+				damagePlayer(3 - p, xGetFloat(dPlayerData, xPlayerAttack, p));
 			}
 			xFreeDatabaseBlock(dHawkBarrages);
 		}

@@ -78,8 +78,11 @@ void nickSplit(int p = 0) {
 		index = xDatabaseNext(dMissiles, true);
 		if (xGetInt(dMissiles, xOwner) == p) {
 			dir = xGetVector(dMissiles, xMissileDir);
+			xSetVector(dMissiles, xMissileDir, rotationMatrix(dir, 0.984808, 0.173648));
+			/*
 			shootMissile(p, xGetVector(dMissiles, xMissilePos), rotationMatrix(dir, 0.984808, 0.173648), 
 				1.0 / xGetFloat(dPlayerData, xPlayerBulletSpeed, p), xGetBool(dMissiles, xMissileHoming));
+			*/
 			shootMissile(p, xGetVector(dMissiles, xMissilePos), rotationMatrix(dir, 0.984808, -0.173648), 
 				1.0 / xGetFloat(dPlayerData, xPlayerBulletSpeed, p), xGetBool(dMissiles, xMissileHoming));
 			xSetPointer(dMissiles, index);
@@ -120,7 +123,7 @@ void nickMissiles(int p = 0) {
 		trSetSelectedScale(0,0,0);
 		trUnitOverrideAnimation(26, 0, false, false, -1);
 	}
-	trQuestVarSet("p"+p+"nickMissiles", trQuestVarGet("p"+p+"nickMissiles") + 12);
+	trQuestVarSet("p"+p+"nickMissiles", trQuestVarGet("p"+p+"nickMissiles") + 9);
 }
 
 void nickOnHawk(int p = 0) {
@@ -217,6 +220,7 @@ void nickHawkBarrage(int p = 0, vector pos = vector(0,0,0)) {
 void nickBomb(int p = 0) {
 	vector pos = closestAvailablePos(p, xGetVector(dPlayerData, xPlayerCastPos));
 	xAddDatabaseBlock(dHawkBombs, true);
+	xSetInt(dHawkBombs, xOwner, p);
 	xSetInt(dHawkBombs, xUnitName, trGetNextUnitScenarioNameNumber());
 	deployAtVector(p, "Dwarf", 1, pos);
 	xSetInt(dHawkBombs, xUnitID, kbGetBlockID(""+xGetInt(dHawkBombs, xUnitName), true));
