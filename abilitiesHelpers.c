@@ -2,7 +2,7 @@
 int randomAbility(int p = 0) {
 	//trQuestVarSetFromRand("temp", ZENO_ABILITIES + 1, NICK_ABILITIES + 1, true);
 	trQuestVarSetFromRand("temp", 1, 7, true);
-	trQuestVarSetFromRand("temp2", 1, 12, true);
+	trQuestVarSetFromRand("temp2", 1, 12 - xGetInt(dPlayerData, xPlayerLives, p), true);
 	if (trQuestVarGet("temp2") < trQuestVarGet("temp")) {
 		trQuestVarSet("temp", trQuestVarGet("temp2"));
 	}
@@ -60,7 +60,7 @@ string abilityName(int ability = 0) {
 		}
 	case ZENO_DANCE:
 		{
-			name = "Zenofinale (Ultimate)";
+			name = "Zeno's Dance Floor (Ultimate)";
 			break;
 		}
 	case NICK_VOLLEY:

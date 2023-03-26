@@ -123,7 +123,7 @@ void nickMissiles(int p = 0) {
 		trSetSelectedScale(0,0,0);
 		trUnitOverrideAnimation(26, 0, false, false, -1);
 	}
-	trQuestVarSet("p"+p+"nickMissiles", trQuestVarGet("p"+p+"nickMissiles") + 9);
+	trQuestVarSet("p"+p+"nickMissiles", trQuestVarGet("p"+p+"nickMissiles") + 10);
 }
 
 void nickOnHawk(int p = 0) {

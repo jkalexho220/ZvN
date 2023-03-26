@@ -609,8 +609,7 @@ highFrequency
 				xDatabaseNext(dMissiles);
 				pos = xGetVector(dMissiles, xMissilePos);
 				if (distanceBetweenVectors(pos, center) < 49.0) {
-					dir = xsVectorNormalize(xGetVector(dMissiles, xMissileDir));
-					next = pos + dir * 2.0;
+					next = pos + xGetVector(dMissiles, xMissileDir) * 0.2;
 					if (distanceBetweenVectors(next, center) >= 49.0) {
 						firstDir = rotationMatrix(getUnitVector(pos, center), 0.0, 1.0);
 						nextDir = xGetVector(dMissiles, xMissileDir);
@@ -635,8 +634,7 @@ highFrequency
 		for(i=xGetDatabaseCount(dMissiles); >0) {
 			xDatabaseNext(dMissiles);
 			pos = xGetVector(dMissiles, xMissilePos);
-			dir = xsVectorNormalize(xGetVector(dMissiles, xMissileDir));
-			next = pos + dir * 2.0;
+			next = pos + xGetVector(dMissiles, xMissileDir) * 0.2;
 			if (distanceBetweenVectors(pos, center) < 64.0 || distanceBetweenVectors(next, center) < 64.0) {
 				firstDir = getUnitVector(center, pos);
 				nextDir = getUnitVector(center, next);
@@ -803,7 +801,7 @@ highFrequency
 					trMutateSelected(kbGetProtoUnitID("Kronny Flying"));
 					trSetSelectedScale(0,2,0);
 					xSetInt(dHawkBombs, xHawkBombStep, 1);
-					xSetInt(dHawkBombs, xHawkBombTimeout, trTimeMS() + 1500);
+					xSetInt(dHawkBombs, xHawkBombTimeout, trTimeMS() + 1000);
 				}
 			}
 		case 1:

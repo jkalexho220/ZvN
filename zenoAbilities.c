@@ -98,7 +98,7 @@ void zenoBarrage(int p = 0) {
 		trQuestVarSet("p"+p+"barrageNext", trTimeMS());
 	}
 	trVectorQuestVarSet("p"+p+"barrageDir", getUnitVector(xGetVector(dPlayerData, xPlayerPos, p), xGetVector(dPlayerData, xPlayerCastPos, p)));
-	trQuestVarSet("p"+p+"barrage", trQuestVarGet("p"+p+"barrage") + 12);
+	trQuestVarSet("p"+p+"barrage", trQuestVarGet("p"+p+"barrage") + 10);
 }
 
 void zenoCarousel(int p = 0) {
