@@ -200,11 +200,18 @@ highFrequency
 							nickTeleport(p);
 							break;
 						}
+					case NICK_BOMB:
+						{
+							nickBomb(p);
+							break;
+						}
+						/*
 					case NICK_SPLIT:
 						{
 							nickSplit(p);
 							break;
 						}
+						*/
 					case NICK_MIRROR:
 						{
 							nickMirror(p);
@@ -246,6 +253,11 @@ highFrequency
 		// barrage
 		if (trQuestVarGet("p"+p+"barrage") > 0) {
 			if (trTimeMS() > trQuestVarGet("p"+p+"barrageNext")) {
+				trQuestVarSet("p"+p+"barrage", 0);
+				xUnitSelect(dPlayerData, xPlayerSphinx);
+				trUnitOverrideAnimation(-1, 0, false, true, -1);
+				trMutateSelected(kbGetProtoUnitID("Cinematic Block"));
+				/*
 				trQuestVarSet("p"+p+"barrageNext", trTimeMS() + 300);
 				dir = rotationMatrix(trVectorQuestVarGet("p"+p+"barrageDir"), 0.965926, 0.258819);
 				shootLaser(p, xGetInt(dPlayerData, xPlayerSpawner), dir, 40.0, 1000);
@@ -256,6 +268,7 @@ highFrequency
 					trUnitOverrideAnimation(-1, 0, false, true, -1);
 					trMutateSelected(kbGetProtoUnitID("Cinematic Block"));
 				}
+				*/
 			}
 		}
 
@@ -404,7 +417,7 @@ highFrequency
 				trQuestVarSetFromRand("randx", -6, 6, false);
 				scale = xsSqrt(36.0 - xsPow(trQuestVarGet("randx"), 2));
 				trQuestVarSetFromRand("randz", 0.0 - scale, scale, false);
-				nickHawkBomb(p, closestAvailablePos(p, trVectorQuestVarGet("p"+p+"hawkPos") + xsVectorSet(trQuestVarGet("randx"),0,trQuestVarGet("randz"))));
+				nickHawkBarrage(p, closestAvailablePos(p, trVectorQuestVarGet("p"+p+"hawkPos") + xsVectorSet(trQuestVarGet("randx"),0,trQuestVarGet("randz"))));
 				
 				if (trQuestVarGet("p"+p+"hawkActive") == 0) {
 					xSetPointer(dPlayerData, p);
@@ -452,7 +465,7 @@ highFrequency
 			}
 		case ATTACK_WINDUP:
 			{
-				if ((action == 11) || (action == 3)) {
+				if (action == 11) {
 					xSetInt(dPlayerData, xPlayerAttackStep, ATTACK_NONE);
 					xUnitSelectByID(dPlayerData, xPlayerUnitID);
 					trUnitOverrideAnimation(-1, 0, false, true, -1);
@@ -465,6 +478,16 @@ highFrequency
 					case 1: // zenophobia
 						{
 							shootLaser(p, xGetInt(dPlayerData, xPlayerSpawner), dir);
+							if (trQuestVarGet("p"+p+"barrage") > 0) {
+								trQuestVarSet("p"+p+"barrage", trQuestVarGet("p"+p+"barrage") - 1);
+								shootLaser(p, xGetInt(dPlayerData, xPlayerSpawner), rotationMatrix(dir, 0.984808, 0.173648));
+								shootLaser(p, xGetInt(dPlayerData, xPlayerSpawner), rotationMatrix(dir, 0.984808, -0.173648));
+								if (trQuestVarGet("p"+p+"barrage") == 0) {
+									xUnitSelect(dPlayerData, xPlayerSphinx);
+									trUnitOverrideAnimation(-1, 0, false, true, -1);
+									trMutateSelected(kbGetProtoUnitID("Cinematic Block"));
+								}
+							}
 						}
 					case 12: // nickonhawk
 						{
@@ -708,16 +731,63 @@ highFrequency
 		}
 	}
 
-	// hawk bombs
-	if (xGetDatabaseCount(dHawkBombs) > 0) {
-		xDatabaseNext(dHawkBombs);
-		if (trTimeMS() > xGetInt(dHawkBombs, xHawkBombTimeout)) {
-			p = xGetInt(dHawkBombs, xOwner);
-			pos = xGetVector(dHawkBombs, xHawkBombPos);
+	// hawk barrages
+	if (xGetDatabaseCount(dHawkBarrages) > 0) {
+		xDatabaseNext(dHawkBarrages);
+		if (trTimeMS() > xGetInt(dHawkBarrages, xHawkBarrageTimeout)) {
+			p = xGetInt(dHawkBarrages, xOwner);
+			pos = xGetVector(dHawkBarrages, xHawkBarragePos);
 			if (distanceBetweenVectors(xGetVector(dPlayerData, xPlayerPos, 3 - p), pos) < 9.0) {
 				damagePlayer(3 - p, 2.0 * xGetFloat(dPlayerData, xPlayerAttack, p));
 			}
-			xFreeDatabaseBlock(dHawkBombs);
+			xFreeDatabaseBlock(dHawkBarrages);
+		}
+	}
+
+	if (xGetDatabaseCount(dHawkBombs) > 0) {
+		xDatabaseNext(dHawkBombs);
+		switch(xGetInt(dHawkBombs, xHawkBombStep))
+		{
+		case 0:
+			{
+				if (trTimeMS() > xGetInt(dHawkBombs, xHawkBombTimeout)) {
+					xUnitSelectByID(dHawkBombs, xUnitID);
+					trDamageUnitPercent(100);
+					trMutateSelected(kbGetProtoUnitID("Kronny Flying"));
+					trSetSelectedScale(0,2,0);
+					xSetInt(dHawkBombs, xHawkBombStep, 1);
+					xSetInt(dHawkBombs, xHawkBombTimeout, trTimeMS() + 1500);
+				}
+			}
+		case 1:
+			{
+				xSetInt(dHawkBombs, xHawkBombStep, 2);
+				xUnitSelectByID(dHawkBombs, xUnitID);
+				trMutateSelected(kbGetProtoUnitID("Lampades"));
+				trUnitOverrideAnimation(18,0,false,false,-1);
+			}
+		case 2:
+			{
+				if (trTimeMS() > xGetInt(dHawkBombs, xHawkBombTimeout)) {
+					p = xGetInt(dHawkBombs, xOwner);
+					pos = xGetVector(dHawkBombs, xHawkBombPos);
+					if (distanceBetweenVectors(xGetVector(dPlayerData, xPlayerPos, 3 - p), pos) < 9.0) {
+						damagePlayer(3 - p, 3.0 * xGetFloat(dPlayerData, xPlayerAttack, p));
+					}
+					dir = vector(1,0,0);
+					for(i=16; >0) {
+						shootMissile(p, pos, dir);
+						dir = rotationMatrix(dir, 0.92388, 0.382683);
+					}
+
+					trSoundPlayFN("meteordustcloud.wav");
+
+					xUnitSelectByID(dHawkBombs, xUnitID);
+					trUnitChangeProtoUnit("Implode Sphere Effect");
+
+					xFreeDatabaseBlock(dHawkBombs);
+				}
+			}
 		}
 	}
 

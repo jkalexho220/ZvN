@@ -94,10 +94,9 @@ void zenoBarrage(int p = 0) {
 	trUnitOverrideAnimation(39, 0, false, false, -1);
 	if (trQuestVarGet("p"+p+"barrage") == 0) {
 		trSoundPlayFN("lapadesconvert.wav");
-		trQuestVarSet("p"+p+"barrageNext", trTimeMS() + 100);
+		trQuestVarSet("p"+p+"barrageNext", trTimeMS() + 10000);
 	}
-	trVectorQuestVarSet("p"+p+"barrageDir", getUnitVector(xGetVector(dPlayerData, xPlayerPos), xGetVector(dPlayerData, xPlayerCastPos)));
-	trQuestVarSet("p"+p+"barrage", trQuestVarGet("p"+p+"barrage") + 12);
+	trQuestVarSet("p"+p+"barrage", trQuestVarGet("p"+p+"barrage") + 5);
 }
 
 void zenoCarousel(int p = 0) {

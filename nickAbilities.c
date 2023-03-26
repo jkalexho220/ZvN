@@ -78,7 +78,8 @@ void nickSplit(int p = 0) {
 		index = xDatabaseNext(dMissiles, true);
 		if (xGetInt(dMissiles, xOwner) == p) {
 			dir = xGetVector(dMissiles, xMissileDir);
-			xSetVector(dMissiles, xMissileDir, rotationMatrix(dir, 0.984808, 0.173648));
+			shootMissile(p, xGetVector(dMissiles, xMissilePos), rotationMatrix(dir, 0.984808, 0.173648), 
+				1.0 / xGetFloat(dPlayerData, xPlayerBulletSpeed, p), xGetBool(dMissiles, xMissileHoming));
 			shootMissile(p, xGetVector(dMissiles, xMissilePos), rotationMatrix(dir, 0.984808, -0.173648), 
 				1.0 / xGetFloat(dPlayerData, xPlayerBulletSpeed, p), xGetBool(dMissiles, xMissileHoming));
 			xSetPointer(dMissiles, index);
@@ -189,14 +190,14 @@ void nickOnHawk(int p = 0) {
 	trSoundPlayFN("birdtitanbirth.wav");
 }
 
-void nickHawkBomb(int p = 0, vector pos = vector(0,0,0)) {
+void nickHawkBarrage(int p = 0, vector pos = vector(0,0,0)) {
 	vector dir = getUnitVector(xGetVector(dPlayerData, xPlayerPos), trVectorQuestVarGet("p"+p+"hawkPos"));
 	pos = closestAvailablePos(p, pos);
-	xAddDatabaseBlock(dHawkBombs, true);
+	xAddDatabaseBlock(dHawkBarrages, true);
 	
-	xSetInt(dHawkBombs, xOwner, p);
-	xSetInt(dHawkBombs, xHawkBombTimeout, trTimeMS() + 500);
-	xSetVector(dHawkBombs, xHawkBombPos, pos);
+	xSetInt(dHawkBarrages, xOwner, p);
+	xSetInt(dHawkBarrages, xHawkBarrageTimeout, trTimeMS() + 500);
+	xSetVector(dHawkBarrages, xHawkBarragePos, pos);
 
 	trQuestVarSetFromRand("rand", 1, 3, true);
 	trSoundPlayFN("rainofarrows"+1*trQuestVarGet("rand")+".wav");
@@ -211,6 +212,21 @@ void nickHawkBomb(int p = 0, vector pos = vector(0,0,0)) {
 	trUnitSelectClear();
 	trUnitSelectByQV("p"+p+"floater");
 	trSetUnitOrientation(dir, vector(0,1,0), true);
+}
+
+void nickBomb(int p = 0) {
+	vector pos = closestAvailablePos(p, xGetVector(dPlayerData, xPlayerCastPos));
+	xAddDatabaseBlock(dHawkBombs, true);
+	xSetInt(dHawkBombs, xUnitName, trGetNextUnitScenarioNameNumber());
+	deployAtVector(p, "Dwarf", 1, pos);
+	xSetInt(dHawkBombs, xUnitID, kbGetBlockID(""+xGetInt(dHawkBombs, xUnitName), true));
+	xSetInt(dHawkBombs, xHawkBombTimeout, trTimeMS() + 1000 / xGetFloat(dPlayerData, xPlayerBulletSpeed, p));
+	xSetVector(dHawkBombs, xHawkBombPos, pos);
+
+	xUnitSelectByID(dHawkBombs, xUnitID);
+	trMutateSelected(kbGetProtoUnitID("UI Range Indicator Norse SFX"));
+
+	trSoundPlayFN("catapultattack.wav");
 }
 
 void nickSingularity(int p = 0) {

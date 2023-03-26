@@ -73,6 +73,10 @@ int xCarouselDir = 0;
 int xCarouselTimeout = 0;
 int xCarouselStep = 0;
 
+int dHawkBarrages = 0;
+int xHawkBarragePos = 0;
+int xHawkBarrageTimeout = 0;
+
 int dHawkBombs = 0;
 int xHawkBombPos = 0;
 int xHawkBombStep = 0;
@@ -203,11 +207,16 @@ highFrequency
 	xBubbleCenter = xInitAddVector(dBubbles, "center");
 	xBubbleTimeout = xInitAddInt(dBubbles, "timeout");
 
+	dHawkBarrages = xInitDatabase("hawk barrages");
+	xInitAddInt(dHawkBarrages, "owner");
+	xHawkBarrageTimeout = xInitAddInt(dHawkBarrages, "timeout");
+	xHawkBarragePos = xInitAddVector(dHawkBarrages, "pos");
+
 	dHawkBombs = xInitDatabase("hawk bombs");
-	xInitAddInt(dHawkBombs, "owner");
-	xHawkBombStep = xInitAddInt(dHawkBombs, "step");
-	xHawkBombTimeout = xInitAddInt(dHawkBombs, "timeout");
+	OwnerNameID(dHawkBombs);
 	xHawkBombPos = xInitAddVector(dHawkBombs, "pos");
+	xHawkBombStep = xInitAddInt(dHawkBombs, "step", 0);
+	xHawkBombTimeout = xInitAddInt(dHawkBombs, "timeout");
 
 	int db = 0;
 	for(p=1; <= 2) {

@@ -132,7 +132,7 @@ void death(int p = 0) {
 	trQuestVarSet("p"+p+"barrage", 0);
 
 	xUnitSelectByID(dPlayerData, xPlayerUnitID);
-	trUnitOverrideAnimation(-1,0,false,true,-1);
+	trUnitChangeProtoUnit(xGetString(dPlayerData, xPlayerProto));
 
 	xSetBool(dPlayerData, xPlayerAlive, false, p);
 	xSetBool(dPlayerData, xPlayerCanCast, false, p);

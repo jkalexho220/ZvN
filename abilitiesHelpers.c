@@ -45,7 +45,7 @@ string abilityName(int ability = 0) {
 		}
 	case ZENO_BARRAGE:
 		{
-			name = "Laser Barrage";
+			name = "Triple Attacks";
 			break;
 		}
 	case ZENO_CAROUSEL:
@@ -78,9 +78,16 @@ string abilityName(int ability = 0) {
 			name = "Teleport";
 			break;
 		}
+		/*
 	case NICK_SPLIT:
 		{
 			name = "Duplicate Bullets";
+			break;
+		}
+		*/
+	case NICK_BOMB:
+		{
+			name = "Bomb Drop";
 			break;
 		}
 	case NICK_MIRROR:
