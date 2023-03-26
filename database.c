@@ -88,6 +88,12 @@ int xBubbleEnd = 0;
 int xBubbleCenter = 0;
 int xBubbleTimeout = 0;
 
+int dCinematicSteps = 0;
+int xCinematicSpeaker = 0;
+int xCinematicAnim = 0;
+int xCinematicText = 0;
+int xCinematicDuration = 0;
+
 void setupZeno(int p = 0) {
 	xSetPointer(dPlayerData, p);
 	xSetString(dPlayerData, xPlayerProto, "Hoplite", p);
@@ -217,6 +223,12 @@ highFrequency
 	xHawkBombPos = xInitAddVector(dHawkBombs, "pos");
 	xHawkBombStep = xInitAddInt(dHawkBombs, "step", 0);
 	xHawkBombTimeout = xInitAddInt(dHawkBombs, "timeout");
+
+	dCinematicSteps = xInitDatabase("Cinematic Steps");
+	xCinematicSpeaker = xInitAddInt(dCinematicSteps, "speaker");
+	xCinematicAnim = xInitAddString(dCinematicSteps, "anim");
+	xCinematicText = xInitAddString(dCinematicSteps, "text");
+	xCinematicDuration = xInitAddInt(dCinematicSteps, "duration");
 
 	int db = 0;
 	for(p=1; <= 2) {

@@ -14,7 +14,7 @@ import sys
 FILENAME = 'C:\\Program Files (x86)\\Steam\\steamapps\\common\\Age of Mythology\\trigger2\\ZvN.xml'
 NAME = ' Zeno vs Nickonhawk'
 files = ['zshared.c', 'upgrades.c', 'events.c', 'abilities.c', 'attackSteps.c',
- 		'setup.c', 'database.c', 'abilitiesHelpers.c', 'gameplayHelpers.c', 'zenoAbilities.c', 'nickAbilities.c', 'respawn.c', 'gameplay.c']
+ 		'setup.c', 'database.c', 'cinematic.c', 'abilitiesHelpers.c', 'gameplayHelpers.c', 'zenoAbilities.c', 'nickAbilities.c', 'respawn.c', 'gameplay.c']
 
 #files = ['terraform.c']
 

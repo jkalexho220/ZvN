@@ -51,8 +51,6 @@ highFrequency
 
 	xsEnableRule("ysearch");
 
-	trUIFadeToColor(0,0,0,1000,0,false);
-
 	//xsEnableRule("gameplay_start");
 
 	// spawn the hotkey units
@@ -66,11 +64,6 @@ highFrequency
 	map("w", "game", "trackInsert(); trackAddWaypoint();trackPlay(-1,"+BUTTON_W+");");
 	map("e", "game", "trackInsert(); trackAddWaypoint();trackPlay(-1,"+BUTTON_E+");");
 
-	// spawn players
-	spawnPlayer(1, vector(21,9,43));
-	spawnPlayer(2, vector(43,9,21));
-	
-	xsEnableRule("gameplay_start");
 }
 
 rule gameplay_start
@@ -78,7 +71,9 @@ inactive
 highFrequency
 {
 	xsDisableSelf();
-	trCameraCut(vector(-15.519794,70.710701,-15.519794), vector(0.5,-0.707107,0.5), vector(0.5,0.707107,0.5), vector(0.707107,0,-0.707107));
+	spawnPlayer(1, vector(21,9,43));
+	spawnPlayer(2, vector(43,9,21));
+	//trCameraCut(vector(-15.519794,70.710701,-15.519794), vector(0.5,-0.707107,0.5), vector(0.5,0.707107,0.5), vector(0.707107,0,-0.707107));
 
 	trPlayerSetDiplomacy(1, 2, "Enemy");
 	trPlayerSetDiplomacy(2, 1, "Enemy");
@@ -122,6 +117,10 @@ highFrequency
 				xSetVector(dPlayerData, xPlayerPos, kbGetBlockPosition(""+xGetInt(dPlayerData, xPlayerUnit)));
 			} else {
 				death(p);
+				if (xGetInt(dPlayerData, xPlayerLives, p) == 0) {
+					xsDisableSelf();
+					xsEnableRule("end_cinematic_start");
+				}
 			}
 		} else if ((xGetInt(dPlayerData, xPlayerButton) != BUTTON_NONE) || (trTime() > trQuestVarGet("p"+p+"respawnTime"))) {
 			if (trCurrentPlayer() == p) {
@@ -621,7 +620,7 @@ highFrequency
 				if (scale >= 50.0) {
 					scale = 50.0;
 					xSetInt(dDeflectorShields, xDeflectorShieldStep, 1);
-					xSetInt(dDeflectorShields, xDeflectorShieldTimeout, trTimeMS() + 6000);
+					xSetInt(dDeflectorShields, xDeflectorShieldTimeout, trTimeMS() + 5000);
 				}
 				xUnitSelect(dDeflectorShields, xDeflectorShieldLeft);
 				trSetSelectedScale(1, scale, 5);

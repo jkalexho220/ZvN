@@ -61,7 +61,10 @@ runImmediately
 		uiMessageBox("This map can only be played in multiplayer.","leaveGame()");
 	} else {
 		xsEnableRule("gameplay_setup");
+		xsEnableRule("intro_cinematic_start");
 	}
+
+	trSetUnitIdleProcessing(false);
 
 	trObjectiveSetID(1,1);
 
