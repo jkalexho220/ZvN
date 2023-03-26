@@ -118,6 +118,7 @@ void spawnPlayer(int p = 0, vector pos = vector(0,0,0)) {
 	trUnitChangeProtoUnit(xGetString(dPlayerData, xPlayerProto));
 	
 	xSetVector(dPlayerData, xPlayerPos, pos);
+	xSetBool(dPlayerData, xPlayerAlive, true);
 }
 
 void shootLaserGround(int p = 0, vector pos = vector(0,0,0), vector dir = vector(0,0,0), float length = 40.0, int delay = 1500) {

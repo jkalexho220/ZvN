@@ -4,6 +4,7 @@ int xPlayerUnitID = 0;
 int xPlayerCastPos = 0;
 int xPlayerProto = 0;
 int xPlayerCanCast = 0;
+int xPlayerAlive = 0;
 int xPlayerSpawner = 0;
 int xPlayerPos = 0;
 int xPlayerButton = 0;
@@ -67,6 +68,11 @@ int xCarouselDir = 0;
 int xCarouselTimeout = 0;
 int xCarouselStep = 0;
 
+int dHawkBombs = 0;
+int xHawkBombPos = 0;
+int xHawkBombStep = 0;
+int xHawkBombTimeout = 0;
+
 int dBubbles = 0;
 int xBubbleStart = 0;
 int xBubbleEnd = 0;
@@ -108,6 +114,7 @@ highFrequency
 	xPlayerUnitID = xInitAddInt(dPlayerData, "unitID");
 	xPlayerProto = xInitAddString(dPlayerData, "proto");
 	xPlayerCastPos = xInitAddVector(dPlayerData, "Cast Pos");
+	xPlayerAlive = xInitAddBool(dPlayerData, "alive", false);
 	xPlayerCanCast = xInitAddBool(dPlayerData, "can cast", true);
 	xPlayerPos = xInitAddVector(dPlayerData, "position");
 
@@ -184,6 +191,12 @@ highFrequency
 	xBubbleEnd = xInitAddInt(dBubbles, "end");
 	xBubbleCenter = xInitAddVector(dBubbles, "center");
 	xBubbleTimeout = xInitAddInt(dBubbles, "timeout");
+
+	dHawkBombs = xInitDatabase("hawk bombs");
+	xInitAddInt(dHawkBombs, "owner");
+	xHawkBombStep = xInitAddInt(dHawkBombs, "step");
+	xHawkBombTimeout = xInitAddInt(dHawkBombs, "timeout");
+	xHawkBombPos = xInitAddVector(dHawkBombs, "pos");
 
 	int db = 0;
 	for(p=1; <= 2) {

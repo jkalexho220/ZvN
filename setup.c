@@ -95,6 +95,10 @@ runImmediately
 
 		zInitProtoUnitStat("Meteorite", p, 1, 100.0); // who knew meteorites were so fast?
 
+		trModifyProtounit("Kronny Flying", p, 1, 9999999999999999999.0);
+		trModifyProtounit("Kronny Flying", p, 1, -9999999999999999999.0);
+		trModifyProtounit("Kronny Flying", p, 1, 0.00001);
+
 		trModifyProtounit("Hero Greek Achilles", p, 5, 99); // you can fit a lot of things on this horse
 
 		trModifyProtounit("Dwarf", p, 55, 4); // flying dwarves

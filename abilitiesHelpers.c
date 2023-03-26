@@ -1,7 +1,7 @@
 
 int randomAbility(int p = 0) {
 	//trQuestVarSetFromRand("temp", ZENO_ABILITIES + 1, NICK_ABILITIES + 1, true);
-	trQuestVarSetFromRand("temp", 3, 5, true);
+	trQuestVarSetFromRand("temp", 7, 7, true);
 	trQuestVarSetFromRand("temp2", 14, 15, true);
 	if (trQuestVarGet("temp2") < trQuestVarGet("temp")) {
 		trQuestVarSet("temp", trQuestVarGet("temp2"));

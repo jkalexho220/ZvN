@@ -101,7 +101,7 @@ void nickMirror(int p = 0) {
 		trUnitSelect(""+next, true);
 		trMutateSelected(kbGetProtoUnitID("UI Range Indicator Norse SFX"));
 		trSetUnitOrientation(dir, vector(0,1,0), true);
-		truedir = pos - vector(31, 0, 31) + dir * 9.0;
+		truedir = pos - vector(31, 0, 31) + dir * 7.0;
 		trSetSelectedUpVector(xsVectorGetX(truedir), 0, xsVectorGetZ(truedir));
 		dir = rotationMatrix(dir, 0.980785, 0.19509); //11.25 degrees
 	}
@@ -118,7 +118,94 @@ void nickMissiles(int p = 0) {
 }
 
 void nickOnHawk(int p = 0) {
+	vector pos = closestAvailablePos(p, xGetVector(dPlayerData, xPlayerCastPos));
+	vector dir = getUnitVector(xGetVector(dPlayerData, xPlayerPos), pos);
+	trVectorQuestVarSet("p"+p+"hawkPos", pos);
+	if (trQuestVarGet("p"+p+"hawk") == 0) {
+		trQuestVarSet("p"+p+"hawk", trGetNextUnitScenarioNameNumber());
+		trArmyDispatch(""+p+",0","Dwarf",1,1,0,1,0,true);
+		trQuestVarSet("p"+p+"floater", trGetNextUnitScenarioNameNumber());
+		trArmyDispatch(""+p+",0","Dwarf",1,1,0,1,0,true);
+		trQuestVarSet("p"+p+"hawkWarnStart", trGetNextUnitScenarioNameNumber());
+		trArmyDispatch(""+p+",0","Dwarf",16,31,0,31,0,true);
+		trArmySelect(""+p+",0");
+		trMutateSelected(kbGetProtoUnitID("UI Range Indicator Norse SFX"));
+		trQuestVarSet("p"+p+"hawkWarnEnd", trGetNextUnitScenarioNameNumber());
+	}
 
+	xUnitSelectByID(dPlayerData, xPlayerUnitID);
+	trMutateSelected(kbGetProtoUnitID("Transport Ship Greek"));
+	trSetUnitOrientation(dir, vector(0,1,0), true);
+
+	dir = vector(9,0,0);
+	for(i=trQuestVarGet("p"+p+"hawkWarnStart"); < trQuestVarGet("p"+p+"hawkWarnEnd")) {
+		pos = xGetVector(dPlayerData, xPlayerCastPos) + dir - vector(31,0,31);
+		trUnitSelectClear();
+		trUnitSelect(""+i);
+		trSetSelectedUpVector(xsVectorGetX(pos), -0.8, xsVectorGetZ(pos));
+		dir = rotationMatrix(dir, 0.92388, 0.382683);
+	}
+
+	trUnitSelectClear();
+	trUnitSelectByQV("p"+p+"floater");
+	trMutateSelected(kbGetProtoUnitID("Dwarf"));
+	trImmediateUnitGarrison(""+xGetInt(dPlayerData, xPlayerUnit));
+	trUnitChangeProtoUnit("Stymphalian Bird");
+
+	trUnitSelectClear();
+	trUnitSelectByQV("p"+p+"hawk");
+	trUnitChangeProtoUnit("Stymphalian Bird");
+
+	trUnitSelectClear();
+	trUnitSelectByQV("p"+p+"floater");
+	trMutateSelected(kbGetProtoUnitID("Hero Greek Achilles"));
+
+	xUnitSelectByID(dPlayerData, xPlayerUnitID);
+	trMutateSelected(kbGetProtoUnitID("Relic"));
+	trImmediateUnitGarrison(""+1*trQuestVarGet("p"+p+"floater"));
+	trMutateSelected(kbGetProtoUnitID("Hero Greek Odysseus"));
+
+	trUnitSelectClear();
+	trUnitSelectByQV("p"+p+"hawk");
+	trMutateSelected(kbGetProtoUnitID("Relic"));
+	trImmediateUnitGarrison(""+1*trQuestVarGet("p"+p+"floater"));
+	trMutateSelected(kbGetProtoUnitID("Stymphalian Bird"));
+
+	trUnitSelectClear();
+	trUnitSelectByQV("p"+p+"floater");
+	trMutateSelected(kbGetProtoUnitID("Wadjet Spit"));
+
+	trQuestVarSet("p"+p+"hawkActive", 20);
+	trQuestVarSet("p"+p+"hawkNext", trTimeMS());
+
+	xSetBool(dPlayerData, xPlayerCanCast, false);
+
+	trSoundPlayFN("attackwarning.wav");
+	trSoundPlayFN("birdtitanbirth.wav");
+}
+
+void nickHawkBomb(int p = 0, vector pos = vector(0,0,0)) {
+	vector dir = getUnitVector(xGetVector(dPlayerData, xPlayerPos), trVectorQuestVarGet("p"+p+"hawkPos"));
+	pos = closestAvailablePos(p, pos);
+	xAddDatabaseBlock(dHawkBombs, true);
+	
+	xSetInt(dHawkBombs, xOwner, p);
+	xSetInt(dHawkBombs, xHawkBombTimeout, trTimeMS() + 500);
+	xSetVector(dHawkBombs, xHawkBombPos, pos);
+
+	trQuestVarSetFromRand("rand", 1, 3, true);
+	trSoundPlayFN("rainofarrows"+1*trQuestVarGet("rand")+".wav");
+
+	int next = trGetNextUnitScenarioNameNumber();
+	deployAtVector(p, "Dwarf", 1, pos);
+	trUnitSelectClear();
+	trUnitSelect(""+next, true);
+	trSetUnitOrientation(dir, vector(0,1,0), true);
+	trUnitChangeProtoUnit("Barrage");
+
+	trUnitSelectClear();
+	trUnitSelectByQV("p"+p+"floater");
+	trSetUnitOrientation(dir, vector(0,1,0), true);
 }
 
 void nickSingularity(int p = 0) {

@@ -357,6 +357,49 @@ highFrequency
 			}
 		}
 
+		if (trQuestVarGet("p"+p+"hawkActive") > 0) {
+			dir = getUnitVector(trVectorQuestVarGet("p"+p+"hawkPos"), xGetVector(dPlayerData, xPlayerPos, 3 - p));
+			trVectorQuestVarSet("p"+p+"hawkPos", trVectorQuestVarGet("p"+p+"hawkPos") + dir * timediff * 3.0);
+			// update the circle
+			dir = vector(9,0,0);
+			for(i=trQuestVarGet("p"+p+"hawkWarnStart"); < trQuestVarGet("p"+p+"hawkWarnEnd")) {
+				pos = trVectorQuestVarGet("p"+p+"hawkPos") + dir - vector(31,0,31);
+				trUnitSelectClear();
+				trUnitSelect(""+i);
+				trSetSelectedUpVector(xsVectorGetX(pos), -0.8, xsVectorGetZ(pos));
+				dir = rotationMatrix(dir, 0.92388, 0.382683);
+			}
+			if (trTimeMS() > trQuestVarGet("p"+p+"hawkNext")) {
+				trQuestVarSet("p"+p+"hawkNext", trQuestVarGet("p"+p+"hawkNext") + 200);
+				trQuestVarSet("p"+p+"hawkActive", trQuestVarGet("p"+p+"hawkActive") - 1);
+
+				trQuestVarSetFromRand("randx", -9, 9, true);
+				scale = xsSqrt(81.0 - xsPow(trQuestVarGet("randx"), 2));
+				trQuestVarSetFromRand("randz", 0.0 - scale, scale, true);
+				nickHawkBomb(p, closestAvailablePos(p, trVectorQuestVarGet("p"+p+"hawkPos") + xsVectorSet(trQuestVarGet("randx"),0,trQuestVarGet("randz"))));
+				
+				if (trQuestVarGet("p"+p+"hawkActive") == 0) {
+					xSetPointer(dPlayerData, p);
+					xSetBool(dPlayerData, xPlayerCanCast, true);
+					xUnitSelectByID(dPlayerData, xPlayerUnitID);
+					trUnitChangeProtoUnit("Dwarf");
+					xUnitSelectByID(dPlayerData, xPlayerUnitID);
+					trMutateSelected(kbGetProtoUnitID("Hero Greek Odysseus"));
+					for(i=trQuestVarGet("p"+p+"hawkWarnStart"); < trQuestVarGet("p"+p+"hawkWarnEnd")) {
+						trUnitSelectClear();
+						trUnitSelect(""+i);
+						trSetSelectedUpVector(0,-10,0);
+					}
+					trUnitSelectClear();
+					trUnitSelectByQV("p"+p+"hawk");
+					trMutateSelected(kbGetProtoUnitID("Cinematic Block"));
+					trUnitSelectClear();
+					trUnitSelectByQV("p"+p+"floater");
+					trMutateSelected(kbGetProtoUnitID("Cinematic Block"));
+				}
+			}
+		}
+
 		// basic attacks
 		id = xGetInt(dPlayerData, xPlayerUnitID);
 		// gather information
@@ -470,10 +513,10 @@ highFrequency
 			for(i=xGetDatabaseCount(dMissiles); >0) {
 				xDatabaseNext(dMissiles);
 				pos = xGetVector(dMissiles, xMissilePos);
-				if (distanceBetweenVectors(pos, center) < 81.0) {
+				if (distanceBetweenVectors(pos, center) < 49.0) {
 					dir = xsVectorNormalize(xGetVector(dMissiles, xMissileDir));
 					next = pos + dir;
-					if (distanceBetweenVectors(next, center) >= 81.0) {
+					if (distanceBetweenVectors(next, center) >= 49.0) {
 						firstDir = rotationMatrix(getUnitVector(pos, center), 0.0, 1.0);
 						nextDir = xGetVector(dMissiles, xMissileDir);
 						dir = firstDir * dotProduct(firstDir, nextDir);
@@ -619,18 +662,35 @@ highFrequency
 		*/
 
 		if (trTimeMS() > xGetInt(dTurrets, xTurretCooldown)) {
-			dir = getUnitVector(xGetVector(dTurrets, xTurretPos), xGetVector(dPlayerData, xPlayerPos, 3 - p));
-			xSetInt(dTurrets, xTurretCooldown, xGetInt(dTurrets, xTurretCooldown) + 5000);
-			if (xGetInt(dTurrets, xTurretType) == ZENO_ABILITIES) {
-				shootLaser(p, xGetInt(dTurrets, xUnitName), dir);
-				xUnitSelectByID(dTurrets, xUnitID);
-				trUnitChangeProtoUnit("Spy Eye");
-				xUnitSelectByID(dTurrets, xUnitID);
-				trMutateSelected(kbGetProtoUnitID("Tower Mirror"));
-				trSetSelectedScale(0, 0.1, 0);
-			} else if (xGetInt(dTurrets, xTurretType) == NICK_ABILITIES) {
-				shootMissile(p, xGetVector(dTurrets, xTurretPos), dir);
+			if (xGetBool(dPlayerData, xPlayerAlive, 3 - p)) {
+				xSetInt(dTurrets, xTurretCooldown, xGetInt(dTurrets, xTurretCooldown) + 5000);
+				dir = getUnitVector(xGetVector(dTurrets, xTurretPos), xGetVector(dPlayerData, xPlayerPos, 3 - p));
+				if (xGetInt(dTurrets, xTurretType) == ZENO_ABILITIES) {
+					shootLaser(p, xGetInt(dTurrets, xUnitName), dir);
+					xUnitSelectByID(dTurrets, xUnitID);
+					trUnitChangeProtoUnit("Spy Eye");
+					xUnitSelectByID(dTurrets, xUnitID);
+					trMutateSelected(kbGetProtoUnitID("Tower Mirror"));
+					trSetSelectedScale(0, 0.1, 0);
+				} else if (xGetInt(dTurrets, xTurretType) == NICK_ABILITIES) {
+					shootMissile(p, xGetVector(dTurrets, xTurretPos), dir);
+				}
+			} else {
+				xSetInt(dTurrets, xTurretCooldown, trTimeMS());
 			}
+		}
+	}
+
+	// hawk bombs
+	if (xGetDatabaseCount(dHawkBombs) > 0) {
+		xDatabaseNext(dHawkBombs);
+		if (trTimeMS() > xGetInt(dHawkBombs, xHawkBombTimeout)) {
+			p = xGetInt(dHawkBombs, xOwner);
+			pos = xGetVector(dHawkBombs, xHawkBombPos);
+			if (distanceBetweenVectors(xGetVector(dPlayerData, xPlayerPos, 3 - p), pos) < 9.0) {
+				damagePlayer(3 - p, 5.0);
+			}
+			xFreeDatabaseBlock(dHawkBombs);
 		}
 	}
 
