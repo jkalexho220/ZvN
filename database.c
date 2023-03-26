@@ -20,6 +20,11 @@ int xPlayerAttackDir = 0;
 int xPlayerSphinx = 0;
 int xPlayerWorldSplitterLava = 0;
 
+int xPlayerLives = 0;
+int xPlayerAttack = 0;
+int xPlayerTurretSpeed = 0;
+int xPlayerBulletSpeed = 0;
+
 int xAbilityCooldown = 0;
 int xAbilityType = 0;
 
@@ -135,6 +140,12 @@ highFrequency
 	xPlayerAttackNext = xInitAddInt(dPlayerData, "attackNext");
 	xPlayerAttackDir = xInitAddVector(dPlayerData, "attackDir");
 
+	// upgraded stats
+	xPlayerLives = xInitAddInt(dPlayerData, "lives", 5);
+	xPlayerAttack = xInitAddFloat(dPlayerData, "attack", 2);
+	xPlayerTurretSpeed = xInitAddFloat(dPlayerData, "turretSpeed", 1.0);
+	xPlayerBulletSpeed = xInitAddFloat(dPlayerData, "bulletSpeed", 1.0);
+
 	// spy eyes
 	dSpyRequests = xInitDatabase("Spy Requests");
 	xSpyRequestProto = xInitAddInt(dSpyRequests, "proto");
@@ -211,6 +222,6 @@ highFrequency
 		xSetInt(dPlayerData, xPlayerAbilities, db);
 	}
 
-	setupZeno(2);
-	setupNick(1);
+	setupZeno(1);
+	setupNick(2);
 }

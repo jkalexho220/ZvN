@@ -113,10 +113,32 @@ highFrequency
 	vector dir = vector(0,0,0);
 	vector firstDir = vector(0,0,0);
 	vector nextDir = vector(0,0,0);
-	for(p=1; <= 2) {
-		xDatabaseNext(dPlayerData);
+	for(i=1; <= 2) {
+		p = xDatabaseNext(dPlayerData);
 		// update player pos vector
-		xSetVector(dPlayerData, xPlayerPos, kbGetBlockPosition(""+xGetInt(dPlayerData, xPlayerUnit)));
+		if (xGetBool(dPlayerData, xPlayerAlive)) {
+			xUnitSelectByID(dPlayerData, xPlayerUnitID);
+			if (trUnitAlive()) {
+				xSetVector(dPlayerData, xPlayerPos, kbGetBlockPosition(""+xGetInt(dPlayerData, xPlayerUnit)));
+			} else {
+				death(p);
+			}
+		} else if ((xGetInt(dPlayerData, xPlayerButton) != BUTTON_NONE) || (trTime() > trQuestVarGet("p"+p+"respawnTime"))) {
+			if (trCurrentPlayer() == p) {
+				trCounterAbort("respawn");
+			}
+			if (xGetInt(dPlayerData, xPlayerButton) == BUTTON_NONE) {
+				xSetInt(dPlayerData, xPlayerButton, EVENT_BUILD_HOUSE);
+			}
+			trUnitSelectClear();
+			trUnitSelectByQV("p"+p+"dwarf");
+			trUnitDestroy();
+			getUpgrade(p, 1*trQuestVarGet("p"+p+"upgrade"+xGetInt(dPlayerData, xPlayerButton)));
+			trSoundPlayFN("herorevived.wav");
+			pos = vector(32, 0, 32) * 2 - xGetVector(dPlayerData, xPlayerPos, 3 - p);
+			spawnPlayer(p, pos);
+			xSetInt(dPlayerData, xPlayerButton, BUTTON_NONE);
+		}
 	}
 	for(p=1; <= 2) {
 		xSetPointer(dPlayerData, p);
@@ -224,10 +246,10 @@ highFrequency
 		// barrage
 		if (trQuestVarGet("p"+p+"barrage") > 0) {
 			if (trTimeMS() > trQuestVarGet("p"+p+"barrageNext")) {
-				trQuestVarSet("p"+p+"barrageNext", trTimeMS() + 100);
+				trQuestVarSet("p"+p+"barrageNext", trTimeMS() + 300);
 				dir = rotationMatrix(trVectorQuestVarGet("p"+p+"barrageDir"), 0.965926, 0.258819);
 				shootLaser(p, xGetInt(dPlayerData, xPlayerSpawner), dir, 40.0, 1000);
-				trVectorQuestVarSet("p"+p+"barrageDir", dir);
+				//trVectorQuestVarSet("p"+p+"barrageDir", dir);
 				trQuestVarSet("p"+p+"barrage", trQuestVarGet("p"+p+"barrage") - 1);
 				if (trQuestVarGet("p"+p+"barrage") == 0) {
 					xUnitSelect(dPlayerData, xPlayerSphinx);
@@ -354,6 +376,12 @@ highFrequency
 				dir = rotationMatrix(trVectorQuestVarGet("p"+p+"nickMissilesDir"), -0.740544, -0.672008);
 				trVectorQuestVarSet("p"+p+"nickMissilesDir", dir);
 				shootMissile(p, xGetVector(dPlayerData, xPlayerPos), dir, 15.0, true);
+
+				if (trQuestVarGet("p"+p+"nickMissiles") == 0) {
+					xUnitSelect(dPlayerData, xPlayerSphinx);
+					trUnitOverrideAnimation(-1, 0, false, true, -1);
+					trMutateSelected(kbGetProtoUnitID("Cinematic Block"));
+				}
 			}
 		}
 
@@ -361,7 +389,7 @@ highFrequency
 			dir = getUnitVector(trVectorQuestVarGet("p"+p+"hawkPos"), xGetVector(dPlayerData, xPlayerPos, 3 - p));
 			trVectorQuestVarSet("p"+p+"hawkPos", trVectorQuestVarGet("p"+p+"hawkPos") + dir * timediff * 3.0);
 			// update the circle
-			dir = vector(9,0,0);
+			dir = vector(8,0,0);
 			for(i=trQuestVarGet("p"+p+"hawkWarnStart"); < trQuestVarGet("p"+p+"hawkWarnEnd")) {
 				pos = trVectorQuestVarGet("p"+p+"hawkPos") + dir - vector(31,0,31);
 				trUnitSelectClear();
@@ -373,9 +401,9 @@ highFrequency
 				trQuestVarSet("p"+p+"hawkNext", trQuestVarGet("p"+p+"hawkNext") + 200);
 				trQuestVarSet("p"+p+"hawkActive", trQuestVarGet("p"+p+"hawkActive") - 1);
 
-				trQuestVarSetFromRand("randx", -9, 9, true);
-				scale = xsSqrt(81.0 - xsPow(trQuestVarGet("randx"), 2));
-				trQuestVarSetFromRand("randz", 0.0 - scale, scale, true);
+				trQuestVarSetFromRand("randx", -6, 6, false);
+				scale = xsSqrt(36.0 - xsPow(trQuestVarGet("randx"), 2));
+				trQuestVarSetFromRand("randz", 0.0 - scale, scale, false);
 				nickHawkBomb(p, closestAvailablePos(p, trVectorQuestVarGet("p"+p+"hawkPos") + xsVectorSet(trQuestVarGet("randx"),0,trQuestVarGet("randz"))));
 				
 				if (trQuestVarGet("p"+p+"hawkActive") == 0) {
@@ -424,11 +452,10 @@ highFrequency
 			}
 		case ATTACK_WINDUP:
 			{
-				if (action == 11) {
+				if ((action == 11) || (action == 3)) {
 					xSetInt(dPlayerData, xPlayerAttackStep, ATTACK_NONE);
 					xUnitSelectByID(dPlayerData, xPlayerUnitID);
 					trUnitOverrideAnimation(-1, 0, false, true, -1);
-					debugLog("interrupt windup!");
 				} else if (trTimeMS() >= xGetInt(dPlayerData, xPlayerAttackNext)) {
 					xSetInt(dPlayerData, xPlayerAttackStep, ATTACK_WINDDOWN);
 					xSetInt(dPlayerData, xPlayerAttackNext, xGetInt(dPlayerData, xPlayerEndDelay) + trTimeMS());
@@ -471,7 +498,7 @@ highFrequency
 					trQuestVarSet("laserSound", 1);
 					if (rayCollision(xGetVector(dPlayerData, xPlayerPos, 3 - p), xGetVector(dLasers, xLaserPos), 
 						xGetVector(dLasers, xLaserDir), xGetFloat(dLasers, xLaserLength), 1.0)) {
-						damagePlayer(3 - p, xGetInt(dLasers, xLaserDamage));
+						damagePlayer(3 - p, xGetFloat(dPlayerData, xPlayerAttack, p));
 					}
 					xSetInt(dLasers, xLaserTimeout, trTimeMS() + 300 + 100 * xGetInt(dLasers, xLaserDamage));
 					xSetInt(dLasers, xLaserStep, LASER_FIRED);
@@ -515,7 +542,7 @@ highFrequency
 				pos = xGetVector(dMissiles, xMissilePos);
 				if (distanceBetweenVectors(pos, center) < 49.0) {
 					dir = xsVectorNormalize(xGetVector(dMissiles, xMissileDir));
-					next = pos + dir;
+					next = pos + dir * 2.0;
 					if (distanceBetweenVectors(next, center) >= 49.0) {
 						firstDir = rotationMatrix(getUnitVector(pos, center), 0.0, 1.0);
 						nextDir = xGetVector(dMissiles, xMissileDir);
@@ -540,7 +567,7 @@ highFrequency
 			xDatabaseNext(dMissiles);
 			pos = xGetVector(dMissiles, xMissilePos);
 			dir = xsVectorNormalize(xGetVector(dMissiles, xMissileDir));
-			next = pos + dir;
+			next = pos + dir * 2.0;
 			if (distanceBetweenVectors(pos, center) < 64.0 || distanceBetweenVectors(next, center) < 64.0) {
 				firstDir = getUnitVector(center, pos);
 				nextDir = getUnitVector(center, next);
@@ -609,8 +636,8 @@ highFrequency
 		xDatabaseNext(dMissiles);
 		p = xGetInt(dMissiles, xOwner);
 		if (xGetBool(dMissiles, xMissileHoming)) {
-			dir = xGetVector(dMissiles, xMissileDir) / (1.0 + timediff);
-			scale = timediff * 20.0;
+			dir = xGetVector(dMissiles, xMissileDir) / (1.0 + timediff * xGetFloat(dPlayerData, xPlayerBulletSpeed, p));
+			scale = timediff * 20.0 * xGetFloat(dPlayerData, xPlayerBulletSpeed, p);
 			xSetVector(dMissiles, xMissileDir, dir + getUnitVector(xGetVector(dMissiles, xMissilePos), xGetVector(dPlayerData, xPlayerPos, 3 - p), scale));
 		}
 		pos = xGetVector(dMissiles, xMissilePos) + xGetVector(dMissiles, xMissileDir) * timediff;
@@ -630,7 +657,7 @@ highFrequency
 				}
 			}
 			if (rayCollision(xGetVector(dPlayerData, xPlayerPos, 3 - p), pos, xsVectorNormalize(xGetVector(dMissiles, xMissileDir)), dist + 1.0, 1.0)) {
-				if (damagePlayer(3 - p, 2)) {
+				if (damagePlayer(3 - p, xGetFloat(dPlayerData, xPlayerAttack, p))) {
 					xUnitSelectByID(dMissiles, xUnitID);
 					trUnitDestroy();
 					xFreeDatabaseBlock(dMissiles);
@@ -663,7 +690,7 @@ highFrequency
 
 		if (trTimeMS() > xGetInt(dTurrets, xTurretCooldown)) {
 			if (xGetBool(dPlayerData, xPlayerAlive, 3 - p)) {
-				xSetInt(dTurrets, xTurretCooldown, xGetInt(dTurrets, xTurretCooldown) + 5000);
+				xSetInt(dTurrets, xTurretCooldown, xGetInt(dTurrets, xTurretCooldown) + 5000 / xGetFloat(dPlayerData, xPlayerTurretSpeed, p));
 				dir = getUnitVector(xGetVector(dTurrets, xTurretPos), xGetVector(dPlayerData, xPlayerPos, 3 - p));
 				if (xGetInt(dTurrets, xTurretType) == ZENO_ABILITIES) {
 					shootLaser(p, xGetInt(dTurrets, xUnitName), dir);
@@ -688,7 +715,7 @@ highFrequency
 			p = xGetInt(dHawkBombs, xOwner);
 			pos = xGetVector(dHawkBombs, xHawkBombPos);
 			if (distanceBetweenVectors(xGetVector(dPlayerData, xPlayerPos, 3 - p), pos) < 9.0) {
-				damagePlayer(3 - p, 5.0);
+				damagePlayer(3 - p, 2.0 * xGetFloat(dPlayerData, xPlayerAttack, p));
 			}
 			xFreeDatabaseBlock(dHawkBombs);
 		}
@@ -744,7 +771,7 @@ highFrequency
 				db = db + 1;
 				pos = xGetVector(dCarousels, xCarouselPos) - dir * 40.0;
 				if (rayCollision(xGetVector(dPlayerData, xPlayerPos, 3 - p), pos, dir, 80.0, 2.0)) {
-					damagePlayer(3 - p, timediff * 3.0);
+					damagePlayer(3 - p, timediff * xGetFloat(dPlayerData, xPlayerAttack, p));
 					db = 100; // no need to check the rest
 				}
 			}

@@ -79,7 +79,8 @@ void nickSplit(int p = 0) {
 		if (xGetInt(dMissiles, xOwner) == p) {
 			dir = xGetVector(dMissiles, xMissileDir);
 			xSetVector(dMissiles, xMissileDir, rotationMatrix(dir, 0.984808, 0.173648));
-			shootMissile(p, xGetVector(dMissiles, xMissilePos), rotationMatrix(dir, 0.984808, -0.173648), 1.0, xGetBool(dMissiles, xMissileHoming));
+			shootMissile(p, xGetVector(dMissiles, xMissilePos), rotationMatrix(dir, 0.984808, -0.173648), 
+				1.0 / xGetFloat(dPlayerData, xPlayerBulletSpeed, p), xGetBool(dMissiles, xMissileHoming));
 			xSetPointer(dMissiles, index);
 		}
 	}
@@ -113,6 +114,10 @@ void nickMissiles(int p = 0) {
 	if (trQuestVarGet("p"+p+"nickMissiles") == 0) {
 		trVectorQuestVarSet("p"+p+"nickMissilesDir", vector(1,0,0));
 		trQuestVarSet("p"+p+"nickMissilesNext", trTimeMS());
+		xUnitSelect(dPlayerData, xPlayerSphinx);
+		trMutateSelected(kbGetProtoUnitID("Arkantos God"));
+		trSetSelectedScale(0,0,0);
+		trUnitOverrideAnimation(26, 0, false, false, -1);
 	}
 	trQuestVarSet("p"+p+"nickMissiles", trQuestVarGet("p"+p+"nickMissiles") + 12);
 }
@@ -137,7 +142,7 @@ void nickOnHawk(int p = 0) {
 	trMutateSelected(kbGetProtoUnitID("Transport Ship Greek"));
 	trSetUnitOrientation(dir, vector(0,1,0), true);
 
-	dir = vector(9,0,0);
+	dir = vector(8,0,0);
 	for(i=trQuestVarGet("p"+p+"hawkWarnStart"); < trQuestVarGet("p"+p+"hawkWarnEnd")) {
 		pos = xGetVector(dPlayerData, xPlayerCastPos) + dir - vector(31,0,31);
 		trUnitSelectClear();

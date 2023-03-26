@@ -95,9 +95,9 @@ void zenoBarrage(int p = 0) {
 	if (trQuestVarGet("p"+p+"barrage") == 0) {
 		trSoundPlayFN("lapadesconvert.wav");
 		trQuestVarSet("p"+p+"barrageNext", trTimeMS() + 100);
-		trVectorQuestVarSet("p"+p+"barrageDir", getUnitVector(xGetVector(dPlayerData, xPlayerPos, 3 - p), xGetVector(dPlayerData, xPlayerPos)));
 	}
-	trQuestVarSet("p"+p+"barrage", trQuestVarGet("p"+p+"barrage") + 24);
+	trVectorQuestVarSet("p"+p+"barrageDir", getUnitVector(xGetVector(dPlayerData, xPlayerPos), xGetVector(dPlayerData, xPlayerCastPos)));
+	trQuestVarSet("p"+p+"barrage", trQuestVarGet("p"+p+"barrage") + 12);
 }
 
 void zenoCarousel(int p = 0) {
@@ -197,7 +197,7 @@ void zenoWorldSplitter(int p = 0) {
 	trVectorQuestVarSet("p"+p+"worldSplitterDir", dir);
 	trVectorQuestVarSet("p"+p+"worldSplitterPrev", xGetVector(dPlayerData, xPlayerPos));
 
-	trQuestVarSet("p"+p+"worldSplitterTimeout", trTimeMS() + 1000);
+	trQuestVarSet("p"+p+"worldSplitterTimeout", trTimeMS() + 1500 / xGetFloat(dPlayerData, xPlayerBulletSpeed, p));
 	trQuestVarSet("p"+p+"worldSplitterHit", 0);
 
 	trSoundPlayFN("phoenixselect2.wav");

@@ -26,11 +26,11 @@ void modifyPlayableProto(string proto = "", int p = 0) {
 	// hand attack hack
 	trModifyProtounit(proto, p, 27, 9999999999999999999.0);
 	trModifyProtounit(proto, p, 27, -9999999999999999999.0);
-	trModifyProtounit(proto, p, 27, 0.0);
+	trModifyProtounit(proto, p, 27, 2.0);
 	// ranged attack pierce
 	trModifyProtounit(proto, p, 31, 9999999999999999999.0);
 	trModifyProtounit(proto, p, 31, -9999999999999999999.0);
-	trModifyProtounit(proto, p, 31, 0.0);
+	trModifyProtounit(proto, p, 31, 2.0);
 }
 
 void modifyBuildableProto(string proto = "", int p = 0) {
@@ -62,6 +62,8 @@ runImmediately
 	} else {
 		xsEnableRule("gameplay_setup");
 	}
+
+	trObjectiveSetID(1,1);
 
 	gadgetUnreal("ScoreDisplay");
 	gadgetUnreal("GodPowers");
