@@ -125,7 +125,7 @@ void spawnPlayer(int p = 0, vector pos = vector(0,0,0)) {
 	xSetBool(dPlayerData, xPlayerCanCast, true);
 }
 
-void shootLaserGround(int p = 0, vector pos = vector(0,0,0), vector dir = vector(0,0,0), float length = 40.0, int delay = 1200) {
+void shootLaserGround(int p = 0, vector pos = vector(0,0,0), vector dir = vector(0,0,0), float length = 40.0, int delay = 1500) {
 	int next = trGetNextUnitScenarioNameNumber();
 	trArmyDispatch("0,0","Dwarf",1,xsVectorGetX(pos),0,xsVectorGetZ(pos),0,true);
 	// change spawner into transport ship
@@ -146,7 +146,7 @@ void shootLaserGround(int p = 0, vector pos = vector(0,0,0), vector dir = vector
 	xSetFloat(dLasers, xLaserLength, length);
 }
 
-void shootLaser(int p = 0, int spawner = 0, vector dir = vector(0,0,0), float length = 40.0, int delay = 1200) {
+void shootLaser(int p = 0, int spawner = 0, vector dir = vector(0,0,0), float length = 40.0, int delay = 1500) {
 	int next = trGetNextUnitScenarioNameNumber();
 	trArmyDispatch("0,0","Dwarf",1,1,0,1,0,true);
 	// change spawner into transport ship

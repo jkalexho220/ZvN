@@ -198,7 +198,7 @@ void zenoWorldSplitter(int p = 0) {
 	trVectorQuestVarSet("p"+p+"worldSplitterDir", dir);
 	trVectorQuestVarSet("p"+p+"worldSplitterPrev", xGetVector(dPlayerData, xPlayerPos));
 
-	trQuestVarSet("p"+p+"worldSplitterTimeout", trTimeMS() + 1200 / xGetFloat(dPlayerData, xPlayerBulletSpeed, p));
+	trQuestVarSet("p"+p+"worldSplitterTimeout", trTimeMS() + 1500 / xGetFloat(dPlayerData, xPlayerBulletSpeed, p));
 	trQuestVarSet("p"+p+"worldSplitterHit", 0);
 
 	trSoundPlayFN("phoenixselect2.wav");
