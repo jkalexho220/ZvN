@@ -116,8 +116,13 @@ void spawnPlayer(int p = 0, vector pos = vector(0,0,0)) {
 	vector dir = getUnitVector(pos, xsVectorSet(mapSize, 0, mapSize), 1.0);
 	trSetUnitOrientation(dir, vector(0,1,0), true);
 	trUnitChangeProtoUnit(xGetString(dPlayerData, xPlayerProto));
+
+	xUnitSelectByID(dPlayerData, xPlayerUnitID);
+	trUnitChangeName(xGetString(dPlayerData, xPlayerCharName));
 	
 	xSetVector(dPlayerData, xPlayerPos, pos);
+	xSetBool(dPlayerData, xPlayerAlive, true);
+	xSetBool(dPlayerData, xPlayerCanCast, true);
 }
 
 void shootLaserGround(int p = 0, vector pos = vector(0,0,0), vector dir = vector(0,0,0), float length = 40.0, int delay = 1500) {
@@ -137,7 +142,7 @@ void shootLaserGround(int p = 0, vector pos = vector(0,0,0), vector dir = vector
 	xSetInt(dLasers, xUnitID, kbGetBlockID(""+next, true));
 	xSetVector(dLasers, xLaserPos, kbGetBlockPosition(""+next, true));
 	xSetVector(dLasers, xLaserDir, dir);
-	xSetInt(dLasers, xLaserTimeout, trTimeMS() + delay);
+	xSetInt(dLasers, xLaserTimeout, trTimeMS() + delay / xGetFloat(dPlayerData, xPlayerBulletSpeed, p));
 	xSetFloat(dLasers, xLaserLength, length);
 }
 
@@ -170,11 +175,11 @@ void shootLaser(int p = 0, int spawner = 0, vector dir = vector(0,0,0), float le
 	xSetInt(dLasers, xUnitID, kbGetBlockID(""+next, true));
 	xSetVector(dLasers, xLaserPos, kbGetBlockPosition(""+next, true));
 	xSetVector(dLasers, xLaserDir, dir);
-	xSetInt(dLasers, xLaserTimeout, trTimeMS() + delay);
+	xSetInt(dLasers, xLaserTimeout, trTimeMS() + delay / xGetFloat(dPlayerData, xPlayerBulletSpeed, p));
 	xSetFloat(dLasers, xLaserLength, length);
 }
 
-void shootMissile(int p = 0, vector pos = vector(0,0,0), vector dir = vector(0,0,0), float velocity = 12.0, bool homing = false) {
+void shootMissile(int p = 0, vector pos = vector(0,0,0), vector dir = vector(0,0,0), float velocity = 10.0, bool homing = false) {
 	int next = trGetNextUnitScenarioNameNumber();
 	trArmyDispatch("0,0", "Dwarf", 1, 31, 0, 31, 0, true);
 	// change the dwarf into a spy eye
@@ -193,7 +198,7 @@ void shootMissile(int p = 0, vector pos = vector(0,0,0), vector dir = vector(0,0
 	xSetInt(dMissiles, xUnitID, kbGetBlockID(""+next, true));
 	xSetVector(dMissiles, xMissilePos, pos);
 	xSetVector(dMissiles, xMissilePrev, pos);
-	xSetVector(dMissiles, xMissileDir, dir * velocity);
+	xSetVector(dMissiles, xMissileDir, dir * velocity * xGetFloat(dPlayerData, xPlayerBulletSpeed, p));
 	xSetBool(dMissiles, xMissileHoming, homing);
 }
 

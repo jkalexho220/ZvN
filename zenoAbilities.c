@@ -61,6 +61,7 @@ void zenoShield(int p = 0) {
 	vector dir = getUnitVector(start, pos);
 
 	xAddDatabaseBlock(dDeflectorShields, true);
+	xSetInt(dDeflectorShields, xOwner, p);
 	xSetInt(dDeflectorShields, xDeflectorShieldLeft, trGetNextUnitScenarioNameNumber());
 	trArmyDispatch("0,0", "Dwarf", 1, xsVectorGetX(pos), 0, xsVectorGetZ(pos), 0, true);
 	xSetInt(dDeflectorShields, xDeflectorShieldRight, trGetNextUnitScenarioNameNumber());
@@ -94,10 +95,10 @@ void zenoBarrage(int p = 0) {
 	trUnitOverrideAnimation(39, 0, false, false, -1);
 	if (trQuestVarGet("p"+p+"barrage") == 0) {
 		trSoundPlayFN("lapadesconvert.wav");
-		trQuestVarSet("p"+p+"barrageNext", trTimeMS() + 100);
-		trVectorQuestVarSet("p"+p+"barrageDir", getUnitVector(xGetVector(dPlayerData, xPlayerPos, 3 - p), xGetVector(dPlayerData, xPlayerPos)));
+		trQuestVarSet("p"+p+"barrageNext", trTimeMS());
 	}
-	trQuestVarSet("p"+p+"barrage", trQuestVarGet("p"+p+"barrage") + 24);
+	trVectorQuestVarSet("p"+p+"barrageDir", getUnitVector(xGetVector(dPlayerData, xPlayerPos, p), xGetVector(dPlayerData, xPlayerCastPos, p)));
+	trQuestVarSet("p"+p+"barrage", trQuestVarGet("p"+p+"barrage") + 10);
 }
 
 void zenoCarousel(int p = 0) {
@@ -197,7 +198,7 @@ void zenoWorldSplitter(int p = 0) {
 	trVectorQuestVarSet("p"+p+"worldSplitterDir", dir);
 	trVectorQuestVarSet("p"+p+"worldSplitterPrev", xGetVector(dPlayerData, xPlayerPos));
 
-	trQuestVarSet("p"+p+"worldSplitterTimeout", trTimeMS() + 1000);
+	trQuestVarSet("p"+p+"worldSplitterTimeout", trTimeMS() + 1500 / xGetFloat(dPlayerData, xPlayerBulletSpeed, p));
 	trQuestVarSet("p"+p+"worldSplitterHit", 0);
 
 	trSoundPlayFN("phoenixselect2.wav");

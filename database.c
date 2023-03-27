@@ -3,7 +3,9 @@ int xPlayerUnit = 0;
 int xPlayerUnitID = 0;
 int xPlayerCastPos = 0;
 int xPlayerProto = 0;
+int xPlayerCharName = 0;
 int xPlayerCanCast = 0;
+int xPlayerAlive = 0;
 int xPlayerSpawner = 0;
 int xPlayerPos = 0;
 int xPlayerButton = 0;
@@ -18,6 +20,11 @@ int xPlayerAttackDir = 0;
 
 int xPlayerSphinx = 0;
 int xPlayerWorldSplitterLava = 0;
+
+int xPlayerLives = 0;
+int xPlayerAttack = 0;
+int xPlayerTurretSpeed = 0;
+int xPlayerBulletSpeed = 0;
 
 int xAbilityCooldown = 0;
 int xAbilityType = 0;
@@ -67,15 +74,31 @@ int xCarouselDir = 0;
 int xCarouselTimeout = 0;
 int xCarouselStep = 0;
 
+int dHawkBarrages = 0;
+int xHawkBarragePos = 0;
+int xHawkBarrageTimeout = 0;
+
+int dHawkBombs = 0;
+int xHawkBombPos = 0;
+int xHawkBombStep = 0;
+int xHawkBombTimeout = 0;
+
 int dBubbles = 0;
 int xBubbleStart = 0;
 int xBubbleEnd = 0;
 int xBubbleCenter = 0;
 int xBubbleTimeout = 0;
 
+int dCinematicSteps = 0;
+int xCinematicSpeaker = 0;
+int xCinematicAnim = 0;
+int xCinematicText = 0;
+int xCinematicDuration = 0;
+
 void setupZeno(int p = 0) {
 	xSetPointer(dPlayerData, p);
 	xSetString(dPlayerData, xPlayerProto, "Hoplite", p);
+	xSetString(dPlayerData, xPlayerCharName, "Zenophobia");
 	xSetInt(dPlayerData, xPlayerAbilitiesStart, ZENO_ABILITIES, p);
 	xSetInt(dPlayerData, xPlayerAttackAnimation, 1);
 	xSetInt(dPlayerData, xPlayerStartDelay, 563);
@@ -85,6 +108,7 @@ void setupZeno(int p = 0) {
 void setupNick(int p = 0) {
 	xSetPointer(dPlayerData, p);
 	xSetString(dPlayerData, xPlayerProto, "Hero Greek Odysseus", p);
+	xSetString(dPlayerData, xPlayerCharName, "Nickonhawk");
 	xSetInt(dPlayerData, xPlayerAbilitiesStart, NICK_ABILITIES, p);
 	xSetInt(dPlayerData, xPlayerAttackAnimation, 12);
 	xSetInt(dPlayerData, xPlayerStartDelay, 480);
@@ -108,8 +132,10 @@ highFrequency
 	xPlayerUnitID = xInitAddInt(dPlayerData, "unitID");
 	xPlayerProto = xInitAddString(dPlayerData, "proto");
 	xPlayerCastPos = xInitAddVector(dPlayerData, "Cast Pos");
+	xPlayerAlive = xInitAddBool(dPlayerData, "alive", false);
 	xPlayerCanCast = xInitAddBool(dPlayerData, "can cast", true);
 	xPlayerPos = xInitAddVector(dPlayerData, "position");
+	xPlayerCharName = xInitAddString(dPlayerData, "name");
 
 	xPlayerSphinx = xInitAddInt(dPlayerData, "sphinxSFX");
 	xPlayerSpawner = xInitAddInt(dPlayerData, "spawner");
@@ -127,6 +153,12 @@ highFrequency
 	xPlayerAttackStep = xInitAddInt(dPlayerData, "attackStep");
 	xPlayerAttackNext = xInitAddInt(dPlayerData, "attackNext");
 	xPlayerAttackDir = xInitAddVector(dPlayerData, "attackDir");
+
+	// upgraded stats
+	xPlayerLives = xInitAddInt(dPlayerData, "lives", 5);
+	xPlayerAttack = xInitAddFloat(dPlayerData, "attack", 2);
+	xPlayerTurretSpeed = xInitAddFloat(dPlayerData, "turretSpeed", 1.0);
+	xPlayerBulletSpeed = xInitAddFloat(dPlayerData, "bulletSpeed", 1.0);
 
 	// spy eyes
 	dSpyRequests = xInitDatabase("Spy Requests");
@@ -185,6 +217,23 @@ highFrequency
 	xBubbleCenter = xInitAddVector(dBubbles, "center");
 	xBubbleTimeout = xInitAddInt(dBubbles, "timeout");
 
+	dHawkBarrages = xInitDatabase("hawk barrages");
+	xInitAddInt(dHawkBarrages, "owner");
+	xHawkBarrageTimeout = xInitAddInt(dHawkBarrages, "timeout");
+	xHawkBarragePos = xInitAddVector(dHawkBarrages, "pos");
+
+	dHawkBombs = xInitDatabase("hawk bombs");
+	OwnerNameID(dHawkBombs);
+	xHawkBombPos = xInitAddVector(dHawkBombs, "pos");
+	xHawkBombStep = xInitAddInt(dHawkBombs, "step", 0);
+	xHawkBombTimeout = xInitAddInt(dHawkBombs, "timeout");
+
+	dCinematicSteps = xInitDatabase("Cinematic Steps");
+	xCinematicSpeaker = xInitAddInt(dCinematicSteps, "speaker");
+	xCinematicAnim = xInitAddString(dCinematicSteps, "anim");
+	xCinematicText = xInitAddString(dCinematicSteps, "text");
+	xCinematicDuration = xInitAddInt(dCinematicSteps, "duration");
+
 	int db = 0;
 	for(p=1; <= 2) {
 		xAddDatabaseBlock(dPlayerData, true);
@@ -198,6 +247,6 @@ highFrequency
 		xSetInt(dPlayerData, xPlayerAbilities, db);
 	}
 
-	setupZeno(2);
-	setupNick(1);
+	setupZeno(1);
+	setupNick(2);
 }

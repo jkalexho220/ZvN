@@ -5,6 +5,10 @@ const int EVENT_BUILD_STOREHOUSE = 3;
 const int EVENT_REMOVE_CAM_TRACKS = 4;
 const int EVENT_BUILD_AT_CURSOR = 5;
 
+const int EVENT_CHOOSE_FIRST_UPGRADE = 6;
+const int EVENT_CHOOSE_SECOND_UPGRADE = 7;
+
+
 const int BUTTON_NONE = 0;
 const int BUTTON_Q = 1;
 const int BUTTON_W = 2;

@@ -2,6 +2,8 @@ int mapSize = 32;
 float timediff = 0;
 int prevTime = 0;
 
+bool customContent = false;
+
 void modifyPlayableProto(string proto = "", int p = 0) {
 	// HP
 	trModifyProtounit(proto, p, 0, 9999999999999999999.0);
@@ -26,11 +28,11 @@ void modifyPlayableProto(string proto = "", int p = 0) {
 	// hand attack hack
 	trModifyProtounit(proto, p, 27, 9999999999999999999.0);
 	trModifyProtounit(proto, p, 27, -9999999999999999999.0);
-	trModifyProtounit(proto, p, 27, 0.0);
+	trModifyProtounit(proto, p, 27, 2.0);
 	// ranged attack pierce
 	trModifyProtounit(proto, p, 31, 9999999999999999999.0);
 	trModifyProtounit(proto, p, 31, -9999999999999999999.0);
-	trModifyProtounit(proto, p, 31, 0.0);
+	trModifyProtounit(proto, p, 31, 2.0);
 }
 
 void modifyBuildableProto(string proto = "", int p = 0) {
@@ -58,10 +60,15 @@ runImmediately
 	trSetFogAndBlackmap(false, false);
 	trUIFadeToColor(0,0,0,0,0,true);
 	if (aiIsMultiplayer() == false) {
-		uiMessageBox("This map can only be played in multiplayer.","leaveGame()");
+		uiMessageBox("This map can only be played in multiplayer. Invite a friend for an epic duel!","leaveGame()");
 	} else {
 		xsEnableRule("gameplay_setup");
+		xsEnableRule("intro_cinematic_start");
 	}
+
+	trSetUnitIdleProcessing(false);
+
+	trObjectiveSetID(1,1);
 
 	gadgetUnreal("ScoreDisplay");
 	gadgetUnreal("GodPowers");
@@ -94,6 +101,10 @@ runImmediately
 		trTechSetStatus(p, 476, 4);
 
 		zInitProtoUnitStat("Meteorite", p, 1, 100.0); // who knew meteorites were so fast?
+
+		trModifyProtounit("Kronny Flying", p, 1, 9999999999999999999.0);
+		trModifyProtounit("Kronny Flying", p, 1, -9999999999999999999.0);
+		trModifyProtounit("Kronny Flying", p, 1, 0.00001);
 
 		trModifyProtounit("Hero Greek Achilles", p, 5, 99); // you can fit a lot of things on this horse
 
