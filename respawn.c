@@ -41,9 +41,9 @@ string upgradeName(int upgrade = -1) {
 			name = "+10 Health";
 			break;
 		}
-	case UPGRADE_TURRETS:
+	case UPGRADE_BASIC_ATTACK:
 		{
-			name = "+0.3x Turret Attack Speed";
+			name = "Basic attack fires more bullets/lasers";
 			break;
 		}
 	}
@@ -76,9 +76,9 @@ void getUpgrade(int p = 0, int upgrade = -1) {
 			trModifyProtounit(xGetString(dPlayerData, xPlayerProto, p), p, 0, 10);
 			break;
 		}
-	case UPGRADE_TURRETS:
+	case UPGRADE_BASIC_ATTACK:
 		{
-			xSetFloat(dPlayerData, xPlayerTurretSpeed, xGetFloat(dPlayerData, xPlayerTurretSpeed) + 0.3);
+			xSetInt(dPlayerData, xPlayerAttackLevel, xGetInt(dPlayerData, xPlayerAttackLevel) + 1);
 			break;
 		}
 	}

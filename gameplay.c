@@ -137,6 +137,21 @@ highFrequency
 	xsEnableRule("music");
 }
 
+// depends on who the character is
+void charShootAtDir(int p = 0, vector dir = vector(0,0,0)) {
+	switch(xGetInt(dPlayerData, xPlayerAttackAnimation))
+	{
+	case 1: // zenophobia
+		{
+			shootLaser(p, xGetInt(dPlayerData, xPlayerSpawner), dir);
+		}
+	case 12: // nickonhawk
+		{
+			shootMissile(p, xGetVector(dPlayerData, xPlayerPos), dir);
+		}
+	}
+}
+
 rule the_game
 inactive
 highFrequency
@@ -546,28 +561,15 @@ highFrequency
 					xSetInt(dPlayerData, xPlayerAttackStep, ATTACK_WINDDOWN);
 					xSetInt(dPlayerData, xPlayerAttackNext, xGetInt(dPlayerData, xPlayerEndDelay) + trTimeMS());
 					dir = xGetVector(dPlayerData, xPlayerAttackDir);
-					switch(xGetInt(dPlayerData, xPlayerAttackAnimation))
-					{
-					case 1: // zenophobia
-						{
-							shootLaser(p, xGetInt(dPlayerData, xPlayerSpawner), dir);
-							/*
-							if (trQuestVarGet("p"+p+"barrage") > 0) {
-								trQuestVarSet("p"+p+"barrage", trQuestVarGet("p"+p+"barrage") - 1);
-								shootLaser(p, xGetInt(dPlayerData, xPlayerSpawner), rotationMatrix(dir, 0.984808, 0.173648));
-								shootLaser(p, xGetInt(dPlayerData, xPlayerSpawner), rotationMatrix(dir, 0.984808, -0.173648));
-								if (trQuestVarGet("p"+p+"barrage") == 0) {
-									xUnitSelect(dPlayerData, xPlayerSphinx);
-									trUnitOverrideAnimation(-1, 0, false, true, -1);
-									trMutateSelected(kbGetProtoUnitID("Cinematic Block"));
-								}
-							}
-							*/
-						}
-					case 12: // nickonhawk
-						{
-							shootMissile(p, xGetVector(dPlayerData, xPlayerPos), dir);
-						}
+					charShootAtDir(p, dir);
+					vector right = dir;
+					vector left = dir;
+					// 10 degrees
+					for(i=xGetInt(dPlayerData, xPlayerAttackLevel); >0) {
+						right = rotationMatrix(right, 0.984808, -0.173648);
+						left = rotationMatrix(left, 0.984808, 0.173648);
+						charShootAtDir(p, right);
+						charShootAtDir(p, left);
 					}
 				}
 				break;
@@ -788,7 +790,7 @@ highFrequency
 
 		if (trTimeMS() > xGetInt(dTurrets, xTurretCooldown)) {
 			if (xGetBool(dPlayerData, xPlayerAlive, 3 - p)) {
-				xSetInt(dTurrets, xTurretCooldown, xGetInt(dTurrets, xTurretCooldown) + 5000 / xGetFloat(dPlayerData, xPlayerTurretSpeed, p));
+				xSetInt(dTurrets, xTurretCooldown, xGetInt(dTurrets, xTurretCooldown) + 5000);
 				dir = getUnitVector(xGetVector(dTurrets, xTurretPos), xGetVector(dPlayerData, xPlayerPos, 3 - p));
 				if (xGetInt(dTurrets, xTurretType) == ZENO_ABILITIES) {
 					shootLaser(p, xGetInt(dTurrets, xUnitName), dir);
@@ -847,7 +849,7 @@ highFrequency
 					p = xGetInt(dHawkBombs, xOwner);
 					pos = xGetVector(dHawkBombs, xHawkBombPos);
 					if (distanceBetweenVectors(xGetVector(dPlayerData, xPlayerPos, 3 - p), pos) < 9.0) {
-						damagePlayer(3 - p, 3.0 * xGetFloat(dPlayerData, xPlayerAttack, p));
+						damagePlayer(3 - p, 2.0 * xGetFloat(dPlayerData, xPlayerAttack, p));
 					}
 					dir = vector(1,0,0);
 					for(i=16; >0) {
@@ -916,7 +918,7 @@ highFrequency
 				db = db + 1;
 				pos = xGetVector(dCarousels, xCarouselPos) - dir * 40.0;
 				if (rayCollision(xGetVector(dPlayerData, xPlayerPos, 3 - p), pos, dir, 80.0, 2.0)) {
-					damagePlayer(3 - p, timediff * xGetFloat(dPlayerData, xPlayerAttack, p) * 3.0);
+					damagePlayer(3 - p, timediff * xGetFloat(dPlayerData, xPlayerAttack, p) * 4.0);
 					db = 100; // no need to check the rest
 				}
 			}

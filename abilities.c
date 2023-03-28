@@ -11,14 +11,13 @@ const int ZENO_WORLD_SPLITTER = 7;
 const int ZENO_DANCE = 8;
 
 const int NICK_ABILITIES = 8;
-const int NICK_VOLLEY = 9;
+const int NICK_BOMB = 9;
 const int NICK_TELEPORT = 10;
-const int NICK_BOMB = 11;
+const int NICK_MIRROR = 11;
 const int NICK_TURRET = 12;
-const int NICK_MIRROR = 13;
+const int NICK_SPLIT = 13;
 const int NICK_MISSILES = 14;
-//const int NICK_SPLIT = 13;
 const int NICK_ON_HAWK = 15;
 const int NICK_SINGULARITY = 16;
 
-const int NICK_SPLIT = 14000;
+const int NICK_VOLLEY = 99999;
