@@ -178,4 +178,5 @@ void death(int p = 0) {
 			trCounterAddTime("respawn", 10, 1, "Respawning...");
 		}
 	}
+	trSetCounterDisplay("Zeno: " + xGetInt(dPlayerData, xPlayerLives, 1) + " | Nick: " + xGetInt(dPlayerData, xPlayerLives, 2));
 }

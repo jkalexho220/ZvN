@@ -249,7 +249,7 @@ void nickSingularity(int p = 0) {
 
 	trQuestVarSet("singularityTimeout", trTimeMS() + 12000);
 	trQuestVarSet("singularityNext", trTimeMS() + 1000);
-	trQuestVarSet("singularityDelay", 7);
+	trQuestVarSet("singularityDelay", 8);
 	trQuestVarSet("singularityPlayer", p);
 
 	xsEnableRule("singularity_active");
@@ -261,7 +261,7 @@ highFrequency
 {
 	int p = trQuestVarGet("singularityPlayer");
 	if (trTimeMS() > trQuestVarGet("singularityNext")) {
-		trQuestVarSet("singularityNext", trQuestVarGet("singularityNext") + 7000 / trQuestVarGet("singularityDelay"));
+		trQuestVarSet("singularityNext", trQuestVarGet("singularityNext") + 8000 / trQuestVarGet("singularityDelay"));
 		trQuestVarSet("singularityDelay", trQuestVarGet("singularityDelay") + 1);
 		trQuestVarSetFromRand("randx", -16, 16, false);
 		float scale = xsSqrt(256.0 - xsPow(trQuestVarGet("randx"), 2));

@@ -131,6 +131,8 @@ highFrequency
 	trQuestVarSet("p1cooldowns", 15000);
 	trQuestVarSet("p2cooldowns", 15000);
 
+	trSetCounterDisplay("Zeno: " + xGetInt(dPlayerData, xPlayerLives, 1) + " | Nick: " + xGetInt(dPlayerData, xPlayerLives, 2));
+
 	xsEnableRule("the_game");
 	xsEnableRule("music");
 }
