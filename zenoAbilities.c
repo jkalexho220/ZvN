@@ -206,5 +206,49 @@ void zenoWorldSplitter(int p = 0) {
 }
 
 void zenoFinale(int p = 0) {
+	xSetBool(dPlayerData, xPlayerCanCast, false);
+	trSoundPlayFN("cinematics\15_in\gong.wav");
+	trSoundPlayFN("godpower.wav");
+	trSetLighting("night", 1.0);
+	trOverlayText("Zeno's Dance Floor", 3.0);
 
+	trQuestVarSet("danceFloorTimeout", trTimeMS() + 12000);
+	trQuestVarSet("danceFloorNext", trTimeMS() + 1000);
+	trQuestVarSet("danceFloorDelay", 1000);
+	trVectorQuestVarSet("danceFloorDir", vector(1,0,0));
+	trQuestVarSet("danceFloorPlayer", p);
+
+	xUnitSelectByID(dPlayerData, xPlayerUnitID);
+	trUnitChangeProtoUnit("Cinematic Block");
+	xsEnableRule("zeno_dance_floor");
+}
+
+void danceFloorLaser(int p = 0, vector dir = vector(1,0,0)) {
+	vector pos = vectorSetAsTargetVector(xGetVector(dPlayerData, xPlayerPos, 3 - p), dir, 50.0);
+	pos = closestAvailablePos(3 - p, pos);
+	dir = getUnitVector(pos, xGetVector(dPlayerData, xPlayerPos, 3 - p));
+	shootLaserGround(p, pos, dir);
+	trSoundPlayFN("skypassagein.wav");
+}
+
+rule zeno_dance_floor
+inactive
+highFrequency
+{
+	int p = trQuestVarGet("danceFloorPlayer");
+	if (trTimeMS() > trQuestVarGet("danceFloorNext")) {
+		trQuestVarSet("danceFloorNext", trQuestVarGet("danceFloorNext") + trQuestVarGet("danceFloorDelay"));
+		trQuestVarSet("danceFloorDelay", xsMax(100, trQuestVarGet("danceFloorDelay") * 0.9));
+		trVectorQuestVarSet("danceFloorDir", rotationMatrix(trVectorQuestVarGet("danceFloorDir"), -0.740544, -0.672008));
+		danceFloorLaser(p, trVectorQuestVarGet("danceFloorDir"));
+	}
+	if (trTimeMS() > trQuestVarGet("danceFloorTimeout")) {
+		xsDisableSelf();
+		ultimate = false;
+		trSetLighting("default", 1.0);
+		trSoundPlayFN("godpowerfailed.wav");
+		xSetPointer(dPlayerData, p);
+		xUnitSelectByID(dPlayerData, xPlayerUnitID);
+		trUnitChangeProtoUnit("Hoplite");
+	}
 }

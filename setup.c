@@ -2,6 +2,7 @@ int mapSize = 32;
 float timediff = 0;
 int prevTime = 0;
 
+bool ultimate = false;
 bool customContent = false;
 
 void modifyPlayableProto(string proto = "", int p = 0) {

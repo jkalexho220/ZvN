@@ -192,6 +192,7 @@ highFrequency
 				db = xGetInt(dPlayerData, xPlayerAbilities);
 				xSetPointer(db, xGetInt(dPlayerData, xPlayerButton));
 				if (xGetInt(db, xAbilityType) != ABILITY_ON_COOLDOWN) {
+					bool abilityUsed = true;
 					switch(xGetInt(db, xAbilityType))
 					{
 					case ZENO_GRID:
@@ -269,12 +270,39 @@ highFrequency
 							nickOnHawk(p);
 							break;
 						}
+					case ZENO_DANCE:
+						{
+							if (ultimate == false) {
+								zenoFinale(p);
+								ultimate = true;
+							} else {
+								// opponent's ultimate active
+								abilityUsed = false;
+							}
+							break;
+						}
+					case NICK_SINGULARITY:
+						{
+							if (ultimate == false) {
+								nickSingularity(p);
+								ultimate = true;
+							} else {
+								// opponent's ultimate active
+								abilityUsed = false;
+							}
+							break;
+						}
 					}
-					xSetInt(db, xAbilityType, ABILITY_ON_COOLDOWN);
-					xSetInt(db, xAbilityCooldown, trTimeMS() + trQuestVarGet("p"+p+"cooldowns"));
-					trQuestVarSet("p1cooldowns", trQuestVarGet("p1cooldowns") * 0.99);
-					trQuestVarSet("p2cooldowns", trQuestVarGet("p2cooldowns") * 0.99);
-					updateAbilities(p, true);
+					if (abilityUsed) {
+						xSetInt(db, xAbilityType, ABILITY_ON_COOLDOWN);
+						xSetInt(db, xAbilityCooldown, trTimeMS() + trQuestVarGet("p"+p+"cooldowns"));
+						trQuestVarSet("p1cooldowns", trQuestVarGet("p1cooldowns") * 0.99);
+						trQuestVarSet("p2cooldowns", trQuestVarGet("p2cooldowns") * 0.99);
+						updateAbilities(p, true);
+					} else if (trCurrentPlayer() == p) {
+						trSoundPlayFN("cantdothat.wav");
+						trChatSend(0, "Opponent's ultimate is active.");
+					}
 				} else if (trCurrentPlayer() == p) {
 					trSoundPlayFN("cantdothat.wav");
 					trChatSend(0, "Your " + hotkeyName(xGetInt(dPlayerData, xPlayerButton)) + " is on cooldown!");

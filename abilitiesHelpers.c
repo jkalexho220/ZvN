@@ -6,7 +6,10 @@ int randomAbility(int p = 0) {
 	if (trQuestVarGet("temp2") < trQuestVarGet("temp")) {
 		trQuestVarSet("temp", trQuestVarGet("temp2"));
 	}
+	// testing, please delete
+	trQuestVarSet("temp", 8);
 	if (trQuestVarGet("temp") == NICK_ABILITIES) {
+		// ultimate is ready
 		if (trCurrentPlayer() == p) {
 			trSoundPlayFN("ui\thunder5.wav");
 		}
