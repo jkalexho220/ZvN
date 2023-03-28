@@ -817,7 +817,7 @@ highFrequency
 		}
 	}
 
-	if (xGetDatabaseCount(dHawkBombs) > 0) {
+	for (j = xGetDatabaseCount(dHawkBombs); > 0) {
 		xDatabaseNext(dHawkBombs);
 		switch(xGetInt(dHawkBombs, xHawkBombStep))
 		{

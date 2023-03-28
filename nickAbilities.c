@@ -217,8 +217,7 @@ void nickHawkBarrage(int p = 0, vector pos = vector(0,0,0)) {
 	trSetUnitOrientation(dir, vector(0,1,0), true);
 }
 
-void nickBomb(int p = 0) {
-	vector pos = closestAvailablePos(p, xGetVector(dPlayerData, xPlayerCastPos));
+void nickBombAtPos(int p = 0, vector pos = vector(0,0,0)) {
 	xAddDatabaseBlock(dHawkBombs, true);
 	xSetInt(dHawkBombs, xOwner, p);
 	xSetInt(dHawkBombs, xUnitName, trGetNextUnitScenarioNameNumber());
@@ -229,10 +228,55 @@ void nickBomb(int p = 0) {
 
 	xUnitSelectByID(dHawkBombs, xUnitID);
 	trMutateSelected(kbGetProtoUnitID("UI Range Indicator Norse SFX"));
+}
+
+void nickBomb(int p = 0) {
+	vector pos = closestAvailablePos(p, xGetVector(dPlayerData, xPlayerCastPos));
+	nickBombAtPos(p, pos);
 
 	trSoundPlayFN("catapultattack.wav");
 }
 
 void nickSingularity(int p = 0) {
+	xSetBool(dPlayerData, xPlayerCanCast, false);
+	xUnitSelectByID(dPlayerData, xPlayerUnitID);
+	trUnitChangeProtoUnit("Cinematic Block");
 
+	trSoundPlayFN("cinematics\15_in\gong.wav");
+	trSoundPlayFN("godpower.wav");
+	trSetLighting("night", 1.0);
+	trOverlayText("Random Number Generator", 3.0);
+
+	trQuestVarSet("singularityTimeout", trTimeMS() + 12000);
+	trQuestVarSet("singularityNext", trTimeMS() + 1000);
+	trQuestVarSet("singularityDelay", 7);
+	trQuestVarSet("singularityPlayer", p);
+
+	xsEnableRule("singularity_active");
+}
+
+rule singularity_active
+inactive
+highFrequency
+{
+	int p = trQuestVarGet("singularityPlayer");
+	if (trTimeMS() > trQuestVarGet("singularityNext")) {
+		trQuestVarSet("singularityNext", trQuestVarGet("singularityNext") + 7000 / trQuestVarGet("singularityDelay"));
+		trQuestVarSet("singularityDelay", trQuestVarGet("singularityDelay") + 1);
+		trQuestVarSetFromRand("randx", -16, 16, false);
+		float scale = xsSqrt(256.0 - xsPow(trQuestVarGet("randx"), 2));
+		trQuestVarSetFromRand("randz", 0.0 - scale, scale, false);
+		nickBombAtPos(p, xsVectorSet(33 + trQuestVarGet("randx"), 0, 33 + trQuestVarGet("randz")));
+	}
+
+	if (trTimeMS() > trQuestVarGet("singularityTimeout")) {
+		xsDisableSelf();
+		ultimate = false;
+		trSetLighting("default", 1.0);
+		trSoundPlayFN("godpowerfailed.wav");
+		xSetPointer(dPlayerData, p);
+		xUnitSelectByID(dPlayerData, xPlayerUnitID);
+		xSetBool(dPlayerData, xPlayerCanCast, true);
+		trUnitChangeProtoUnit("Hero Greek Odysseus");
+	}
 }

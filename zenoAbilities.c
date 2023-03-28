@@ -249,6 +249,7 @@ highFrequency
 		trSoundPlayFN("godpowerfailed.wav");
 		xSetPointer(dPlayerData, p);
 		xUnitSelectByID(dPlayerData, xPlayerUnitID);
+		xSetBool(dPlayerData, xPlayerCanCast, true);
 		trUnitChangeProtoUnit("Hoplite");
 	}
 }

@@ -7,7 +7,7 @@ int randomAbility(int p = 0) {
 		trQuestVarSet("temp", trQuestVarGet("temp2"));
 	}
 	// testing, please delete
-	trQuestVarSet("temp", 8);
+	//trQuestVarSet("temp", 8);
 	if (trQuestVarGet("temp") == NICK_ABILITIES) {
 		// ultimate is ready
 		if (trCurrentPlayer() == p) {
@@ -108,7 +108,7 @@ string abilityName(int ability = 0) {
 		}
 	case NICK_SINGULARITY:
 		{
-			name = "Singularity (Ultimate)";
+			name = "Random Number Generator (Ultimate)";
 			break;
 		}
 	}
