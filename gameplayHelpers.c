@@ -179,7 +179,7 @@ void shootLaser(int p = 0, int spawner = 0, vector dir = vector(0,0,0), float le
 	xSetFloat(dLasers, xLaserLength, length);
 }
 
-void shootMissile(int p = 0, vector pos = vector(0,0,0), vector dir = vector(0,0,0), float velocity = 10.0, bool homing = false) {
+void shootMissile(int p = 0, vector pos = vector(0,0,0), vector dir = vector(0,0,0), float velocity = 12.0, bool homing = false) {
 	int next = trGetNextUnitScenarioNameNumber();
 	trArmyDispatch("0,0", "Dwarf", 1, 31, 0, 31, 0, true);
 	// change the dwarf into a spy eye

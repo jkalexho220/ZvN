@@ -488,7 +488,7 @@ highFrequency
 
 		if (trQuestVarGet("p"+p+"hawkActive") > 0) {
 			dir = getUnitVector(trVectorQuestVarGet("p"+p+"hawkPos"), xGetVector(dPlayerData, xPlayerPos, 3 - p));
-			trVectorQuestVarSet("p"+p+"hawkPos", trVectorQuestVarGet("p"+p+"hawkPos") + dir * timediff * 2.0);
+			trVectorQuestVarSet("p"+p+"hawkPos", trVectorQuestVarGet("p"+p+"hawkPos") + dir * timediff * 3.0);
 			// update the circle
 			dir = vector(8,0,0);
 			for(i=trQuestVarGet("p"+p+"hawkWarnStart"); < trQuestVarGet("p"+p+"hawkWarnEnd")) {
